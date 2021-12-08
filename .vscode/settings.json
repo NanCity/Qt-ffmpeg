@@ -1,0 +1,183 @@
+{
+	//clangd 路径
+	// "clangd.path": "C:\\clangd_13.0.0\\bin\\clangd.exe",
+	// 禁用VSC远程报告（推荐!）
+	// "telemetry.enableTelemetry": false,
+	// 删除文件确认
+	"explorer.confirmDelete": false,
+	// 控制是否显示缩略图
+	"editor.minimap.enabled": true,
+	// 设置编辑区字体大小
+	"editor.fontSize": 16,
+	//设置编辑区字体
+	// "editor.fontFamily": "Fira Code",
+	"editor.fontLigatures": true,
+	"editor.formatOnPaste": true,
+	"editor.formatOnSave": true,
+	"editor.formatOnType": true,
+	"editor.tabSize": 4,
+	"editor.insertSpaces": true,
+	"editor.semanticHighlighting.enabled": true,
+	"terminal.integrated.fontSize": 14,
+	// 设置文件自动保存为afterDelay (默认1000ms)
+	"files.autoSave": "afterDelay",
+	"workbench.settings.editor": "json",
+	"[log]": {
+		"editor.fontSize": 15
+	},
+	"extensions.ignoreRecommendations": true,
+	"explorer.confirmDragAndDrop": false,
+	// code runner
+	"code-runner.runInTerminal": true, // 设置成false会在“输出”中输出，无法输入
+	"code-runner.saveFileBeforeRun": true, // run code前保存
+	"code-runner.preserveFocus": false, // 若为false，run code后光标会聚焦到终端上。如果需要频繁输入数据可设为false
+	"code-runner.clearPreviousOutput": true, // 每次run code前清空属于code runner的终端消息，默认false
+	"code-runner.ignoreSelection": true, // 默认为false，效果是鼠标选中一块代码后可以单独执行，但C是编译型语言，不适合这样用
+	"code-runner.fileDirectoryAsCwd": true, // 将code runner终端的工作目录切换到文件目录再运行，对依赖cwd的程序产生影响；如果为false，executorMap要加cd $dir
+	"code-runner.executorMap": {
+		"c": "clang $fileName -g -o $dir/bin/$fileNameWithoutExt.out -Wall -fcolor-diagnostics && $dir/bin/$fileNameWithoutExt.out",
+		// "cpp": "clang++ $fileName -g -o $dir/bin/$fileNameWithoutExt.out -Wall -fcolor-diagnostics && $dir/bin/$fileNameWithoutExt.out"
+		"cpp:": "clear $tout=-Join($dir, \"bin\\\", \"$fileNameWithoutExt.out\");echo $tout",
+	}, // 右键run code时运行的命令；未注释的仅适用于PowerShell（Win10默认）和pwsh，文件名中有空格也可以编译运行；注释掉的适用于cmd（win7默认）、PS和bash，但文件名中有空格时无法运行
+	"fileheader.configObj": { //快速添加文件头部注释和函数注释
+		"createFileTime": true, // 设置为true则为文件新建时候作为date，否则注释生成时间为date
+		"autoAdd": true, // 自动生成注释
+		"annotationStr": {
+			"head": "/*",
+			"middle": " * @",
+			"end": " */",
+			"use": true // 设置自定义注释可用
+		},
+	},
+	"fileheader.cursorMode": { // 快速注释函数 ctrl+alt+t
+		"description": "", // 函数描述
+		"param ": "", // 函数参数
+		"return": "", // 函数输出
+		"Author": "爱酱丶", // 作者
+		"Date": "Do not edit", // 创建时间
+		"LastEditTime": "Do not edit", // 最后一次修改的时间
+		"LastEditors": "爱酱丶" // 修改人员
+	},
+	"fileheader.customMade": { // 快速注释文件头部 ctrl+alt+i
+		"Description": "", // 文件描述
+		"Author": "爱酱丶", // 作者
+		"Date": "Do not edit", // 创建时间
+		"LastEditTime": "Do not edit", // 最后一次修改的时间
+		"LastEditors": "爱酱丶" // 修改人员
+	},
+	// C & C++
+	"clangd.arguments": [
+		// 在后台自动分析文件（基于complie_commands)
+		"--background-index",
+		// 标记compelie_commands.json文件的目录位置
+		// 关于complie_commands.json如何生成可见我上一篇文章的末尾
+		"--compile-commands-dir=build",
+		// 同时开启的任务数量
+		"-j=48",
+		// "--folding-ranges"
+		// 告诉clangd用那个clang进行编译，路径参考which clang++的路径
+		// "--query-driver=/usr/local/opt/llvm/bin/clang++",
+		"--query-driver=C:/Program Files/LLVM/bin/clang++",
+		// clang-tidy功能
+		"--clang-tidy",
+		"--clang-tidy-checks=performance-*,bugprone-*",
+		// 全局补全（会自动补充头文件）
+		"--all-scopes-completion",
+		// 更详细的补全内容
+		"--completion-style=detailed",
+		"--function-arg-placeholders",
+		// 补充头文件的形式
+		"--header-insertion=iwyu",
+		// pch优化的位置
+		"--pch-storage=memory",
+	],
+	// clangd路径，通过mac终端 which clangd 命令得到
+	// "clangd.path": "/usr/local/opt/llvm/bin/clangd",
+	"clangd.path": "C:\\clangd_13.0.0\\bin\\clangd.exe",
+	"editor.semanticTokenColorCustomizations": {
+		"enabled": true,
+		"rules": {
+			// // 函数参数
+			// "parameter": "#306b72",
+			// // // 类或者结构体
+			// "class": {
+			// 	"fontStyle": "bold",
+			// 	"foreground": "#729de3"
+			// },
+			// // 普通函数
+			// "function": {
+			// 	"foreground": "#e5b124"
+			// },
+			// // 临时变量
+			// "variable": "#26cdca",
+			// // enum的名字（enum的成员似乎并没有可以配置的）
+			// "enum": "#397797",
+			// // enum子项，需要clangd12以上
+			// "enumMember": "#397797",
+			// // 宏
+			// "macro": {
+			// 	"foreground": "#8f5daf",
+			// 	"fontStyle": "bold"
+			// },
+			// // 成员函数
+			// "method": {
+			// 	"foreground": "#e5b124",
+			// 	"fontStyle": "underline"
+			// },
+			// // clangd12之后会将宏关闭的部分标为comment
+			"comment": "#505050",
+			// // 命名空间
+			// "namespace": {
+			// 	"foreground": "#00d780",
+			// 	"fontStyle": "bold"
+			// },
+			// 只读量加粗
+			"*.readonly": {
+				"fontStyle": "bold"
+			},
+			// // 只读量等效为宏
+			// "variable.readonly": {
+			// 	"foreground": "#8f5daf",
+			// 	"fontStyle": "bold"
+			// },
+			// 静态量（静态变量，静态函数）
+			"*.static": {
+				"fontStyle": "italic"
+			},
+			// 成员变量，似乎需要clangd12以上
+			"property": {
+				// "foreground": "#85ee0d",
+				//可跳转下划线
+				// "fontStyle": "underline"
+			},
+		}
+	},
+	"files.associations": {
+		"typeinfo": "cpp",
+		"*.cpp": "cpp",
+		"qgraphicsdropshadoweffect": "cpp",
+		"*.tcc": "cpp",
+		"chrono": "cpp",
+		"cstdlib": "cpp",
+		"string": "cpp",
+		"exception": "cpp",
+		"cmath": "cpp",
+		"functional": "cpp",
+		"fstream": "cpp",
+		"istream": "cpp",
+		"mutex": "cpp",
+		"new": "cpp",
+		"ostream": "cpp",
+		"ratio": "cpp",
+		"sstream": "cpp",
+		"string_view": "cpp",
+		"tuple": "cpp",
+		"utility": "cpp",
+		"variant": "cpp",
+		"streambuf": "cpp",
+		"iosfwd": "cpp",
+		"array": "cpp",
+		"list": "cpp"
+	},
+	"C_Cpp.errorSquiggles": "Disabled"
+}
