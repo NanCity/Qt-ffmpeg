@@ -28,12 +28,10 @@
         <file>images/top/btn_min_h.png</file>
         <file>images/top/btn_min_n.png</file>
         <file>images/top/logo.png</file>
-        <file>images/bottom/btn_add.png</file>
         <file>images/bottom/btn_close.png</file>
         <file>images/bottom/btn_content.png</file>
         <file>images/bottom/btn_expand.png</file>
         <file>images/bottom/btn_history.png</file>
-        <file>images/bottom/btn_magnify .png</file>
         <file>images/bottom/btn_mute.png</file>
         <file>images/bottom/btn_next.png</file>
         <file>images/bottom/btn_open.png</file>
@@ -44,7 +42,8 @@
         <file>images/bottom/btn_random.png</file>
         <file>images/bottom/btn_shrink.png</file>
         <file>images/bottom/btn_single.png</file>
-        <file>images/bottom/btn_skin.png</file>
         <file>images/bottom/btn_volume.png</file>
+        <file>images/top/btn_skin.png</file>
+        <file>images/bottom/btn_magnify.png</file>
     </qresource>
 </RCC>

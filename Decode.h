@@ -104,7 +104,7 @@ public: //状态检查
         control_play,   //播放
         control_seek,   //滑动
     };
-    controlType type;
+  controlType type;
   QAudioOutput *audio;
   explicit AudioDeCode();
   ~AudioDeCode();

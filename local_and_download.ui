@@ -170,7 +170,7 @@
             <widget class="QLineEdit" name="line_search">
              <property name="minimumSize">
               <size>
-               <width>50</width>
+               <width>60</width>
                <height>29</height>
               </size>
              </property>
@@ -179,6 +179,9 @@
                <width>100</width>
                <height>29</height>
               </size>
+             </property>
+             <property name="placeholderText">
+              <string>搜索本地音乐</string>
              </property>
             </widget>
            </item>
@@ -197,7 +200,7 @@
               </size>
              </property>
              <property name="text">
-              <string>选择目录</string>
+              <string>打开目录</string>
              </property>
             </widget>
            </item>

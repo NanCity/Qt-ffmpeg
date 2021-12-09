@@ -29,7 +29,7 @@ using namespace AudioPlayer;
 
 // ffplay -ar 44100 -ac 2 -f s16le -i out.pcm 命令行播放
 Music::Music(QWidget* parent)
-	: QMainWindow(parent), ui(new Ui::Music), pcmdir(),
+	: QMainWindow(parent), ui(new Ui::Music),
 	CurrentPlayerListIndex(0) {
 	ui->setupUi(this);
 	this->setAcceptDrops(true);
@@ -53,8 +53,9 @@ Music::Music(QWidget* parent)
 	//双击播放
 	connect(localMusic->getTable(), &QTableWidget::cellDoubleClicked, this, [=] {
 		CurrentPlayerListIndex = localMusic->getTable()->currentRow();
-		qDebug() << "IterDoubleClicked: row = " << CurrentPlayerListIndex;
+		ui->btn_stop->setStyleSheet("border-image:url(:/images/bottom/btn_pause.png)");
 		Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
+		setBottomInformation(Decode->GetTag());
 		});
 
 	//播放进度条
@@ -62,7 +63,7 @@ Music::Music(QWidget* parent)
 	connect(Decode, &AudioDeCode::seekOk, this, &Music::onSeekOk);
 	Mode = PlayMode::Order;
 	//自动播放下一首
-	connect(Decode, &AudioDeCode::nextsong, this,&Music::PlayerMode);
+	connect(Decode, &AudioDeCode::nextsong, this, &Music::PlayerMode);
 }
 
 Music::~Music() {
@@ -214,18 +215,21 @@ bool Music::eventFilter(QObject* obj, QEvent* event) {
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* evn = static_cast<QKeyEvent*>(event);
 			if (evn->key() == Qt::Key_Right) {
-				++CurrentPlayerListIndex;
-				if (CurrentPlayerListIndex > localMusic->PlayerList().length()) {
+				if (!localMusic->PlayerList().isEmpty()) {
+					if (CurrentPlayerListIndex >= localMusic->PlayerList().length()) {
 #if DEBUG
-					qDebug() << tr("超出列表长度，将 CurrentPlayerListIndex 重置为0\n");
+						qDebug() << tr("超出列表长度，将 CurrentPlayerListIndex 重置为0\n");
 #endif
-					CurrentPlayerListIndex = 0;
-				}
-				else {
-					// play(CurrentPlayerListIndex);
+						CurrentPlayerListIndex = 0;
+					}
+					else {
+						++CurrentPlayerListIndex;
+					}
+					ui->btn_stop->setStyleSheet("border-image:url(:/images/bottom/btn_pause.png)");
 					Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
 					setBottomInformation(Decode->GetTag());
 				}
+				qDebug() << "Playerlist is empty\n";
 			}
 		}
 	}
@@ -235,17 +239,21 @@ bool Music::eventFilter(QObject* obj, QEvent* event) {
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* evn = static_cast<QKeyEvent*>(event);
 			if (evn->key() == Qt::Key_Left) {
-				--CurrentPlayerListIndex;
-				if (CurrentPlayerListIndex == 0) {
+				if (!localMusic->PlayerList().isEmpty()) {
+					if (CurrentPlayerListIndex == 0) {
 #if DEBUG
-					qDebug() << tr("已经在列表首位，重置到末尾\n");
+						qDebug() << tr("已经在列表首位，重置到末尾\n");
 #endif
-					CurrentPlayerListIndex = localMusic->PlayerList().length();
-				}
-				else {
+						CurrentPlayerListIndex = localMusic->PlayerList().length();
+					}
+					else {
+						--CurrentPlayerListIndex;
+					}
+					ui->btn_stop->setStyleSheet("border-image:url(:/images/bottom/btn_pause.png)");
 					Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
 					setBottomInformation(Decode->GetTag());
 				}
+				qDebug() << "Playerlist is empty\n";
 			}
 		}
 	}
@@ -311,18 +319,12 @@ void Music::onDuration(int currentMs, int destMs) {
 	currentMs1 = currentMs;
 	destMs1 = destMs;
 	// qDebug() << "onDuration：" << currentMs << destMs << sliderSeeking;
-
-	QString currentTime =
-		QString("%1:%2")
-		.arg((currentMs1 / 1000000) / 60, 2, 10, QChar('0'))
-		.arg((currentMs1 / 1000000) % 60, 2, 10, QChar('0'));
-	// QString destTime = QString("%1:%2:%3")
-	//                        .arg(destMs1 / 360000 % 60, 2, 10, QChar('0'))
-	//                        .arg(destMs1 / 6000 % 60, 2, 10, QChar('0'))
-	//                        .arg(destMs1 / 1000 % 60, 2, 10, QChar('0'));
-
-	ui->lab_time->setText(currentTime);
-
+	//计算秒
+	//static int  s = currentMs1 / 1000 % 60;
+	QString currentTime = QString("%1 : %2")
+		.arg(currentMs1 / 1000 / 60 % 60, 2, 10, QChar('0'))
+		.arg(currentMs1 / 1000 % 60, 2, 10, QChar('0'));
+	ui->lab_duration->setText(currentTime);
 	if (!sliderSeeking) //未滑动
 	{
 		ui->playslider->setMaximum(destMs);
@@ -351,8 +353,14 @@ void Music::on_Sli_volum_valueChanged(int value) {
 	if (Decode->audio) {
 		Decode->audio->setVolume(value / qreal(100.0));
 	}
-	ui->btn_volum->setStyleSheet(
-		"#btn_volum{border-image:url(:/images/Bottom/btn_volume_open.png)}");
+	if (ui->Sli_volum->value() == 0) {
+		ui->btn_volum->setStyleSheet(
+			"#btn_volum{border-image:url(:/images/bottom/btn_mute.png)}");
+	}
+	else {
+		ui->btn_volum->setStyleSheet(
+			"#btn_volum{border-image:url(:/images/bottom/btn_volume.png)}");
+	}
 }
 
 void Music::on_btn_volum_clicked() {
@@ -360,37 +368,43 @@ void Music::on_btn_volum_clicked() {
 		//恢复音量大小
 		ui->Sli_volum->setValue(CurrVolume);
 		ui->btn_volum->setStyleSheet(
-			"#btn_volum{border-image:url(:/images/Bottom/btn_volume_open.png)}");
+			"#btn_volum{border-image:url(:/images/bottom/btn_volume.png)}");
 	}
 	else {
 		CurrVolume = ui->Sli_volum->value(); //先记录当前音量
 		ui->Sli_volum->setValue(0);
 		ui->btn_volum->setStyleSheet(
-			"#btn_volum{border-image:url(:/images/Bottom/btn_volume_close.png)}");
+			"#btn_volum{border-image:url(:/images/bottom/btn_mute.png)}");
 	}
 }
 
 //检测当前播放状态
 void Music::on_btn_stop_clicked() {
+
 	switch (state) {
 	case State::resume: //恢复播放
 		state = State::pause;
 		Decode->resume();
 		ui->btn_stop->setStyleSheet(
-			"border-image:url(:/images/Bottom/btn_stop_h.png)");
+			"border-image:url(:/images/bottom/btn_pause.png)");
 		break;
 	case State::pause: //暂停
 		state = State::resume;
 		Decode->pause();
 		ui->btn_stop->setStyleSheet(
-			"border-image:url(:/images/Bottom/btn_stop_n.png)");
+			"border-image:url(:/images/bottom/btn_play.png)");
 		break;
 	default:
 		state = State::pause;
 		sliderSeeking = false;
+		if (localMusic->PlayerList().isEmpty()) {
+			qDebug() << "播放列表为空\n";
+			return;
+		}
 		CurrentPlayerListIndex = 0;
 		Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
 		setBottomInformation(Decode->GetTag());
+		ui->btn_stop->setStyleSheet("border-image:url(:/images/bottom/btn_pause.png)");
 		break;
 	}
 }
@@ -404,6 +418,7 @@ void Music::setBottomInformation(Mp3tag* tag) {
 	ui->btn_pictrue->setStyleSheet("");
 	ui->lab_message->setText(QString("%1\n%2").arg(tag->Artis).arg(tag->Title));
 	ui->lab_time->setText(tag->Duration);
+
 }
 
 //上一首
@@ -430,9 +445,20 @@ void Music::Next()
 	setBottomInformation(Decode->GetTag());
 }
 
-void Music::on_btn_prev_clicked() { Previous(); }
+void Music::on_btn_prev_clicked() {
+	if (CurrentPlayerListIndex == 0) {
+		qDebug() << "播放列表为空\n";
+		return;
+	}
+
+	Previous();
+}
 
 void Music::on_btn_next_clicked() {
+	if (localMusic->PlayerList().isEmpty()) {
+		qDebug() << "播放列表为空\n";
+		return;
+	}
 	++CurrentPlayerListIndex;
 	if (CurrentPlayerListIndex >= localMusic->PlayerList().length()) {
 		CurrentPlayerListIndex = 0;
@@ -470,44 +496,24 @@ void Music::on_playslider_sliderReleased() {
 }
 
 void Music::on_btn_mode_clicked() {
-	//static int Mode = 0;
-	//switch (Mode) {
-	//case static_cast<int>(PlayMode::Order):
-	//	//设置单曲循环
-	//	Mode = static_cast<int>(PlayMode::Single);
-	//	ui->btn_mode->setText(tr("Single"));
-	//	break;
-
-	//case static_cast<int>(PlayMode::Single):
-	//	//设置随机播放
-	//	Mode = static_cast<int>(PlayMode::Random);
-	//	ui->btn_mode->setText(tr("Random"));
-	//	break;
-
-	//case static_cast<int>(PlayMode::Random):
-	//	//设置顺序播放
-	//	Mode = static_cast<int>(PlayMode::Order);
-	//	ui->btn_mode->setText(tr("Order"));
-	//	break;
-	//}
 	setPlayMode(Mode);
 }
 
-void Music::setPlayMode(PlayMode &Mode)
+void Music::setPlayMode(PlayMode& Mode)
 {
 	switch (Mode)
 	{
 	case Music::PlayMode::Order:
-		Mode =PlayMode::Single;
-		ui->btn_mode->setStyleSheet("");
+		Mode = PlayMode::Single;
+		ui->btn_mode->setStyleSheet("border-image:url(:/images/bottom/btn_single.png)");
 		break;
 	case Music::PlayMode::Single:
 		Mode = PlayMode::Random;
-		ui->btn_mode->setStyleSheet("");
+		ui->btn_mode->setStyleSheet("border-image:url(:/images/bottom/btn_random.png)");
 		break;
 	case Music::PlayMode::Random:
 		Mode = PlayMode::Order;
-		ui->btn_mode->setStyleSheet("");
+		ui->btn_mode->setStyleSheet("border-image:url(:/images/bottom/btn_order.png)");
 		break;
 	default:
 		break;
@@ -515,26 +521,8 @@ void Music::setPlayMode(PlayMode &Mode)
 }
 
 void Music::PlayerMode() {
-	//static int Mode = 0;
-	//if (Mode == static_cast<int>(PlayMode::Order)) {
-	//	Next();
-	//}
-	//else if (Mode == static_cast<int>(PlayMode::Single)) {
-	//	qDebug() << "Single***********\n"; return;
-	//	//Decode->play()
-	//}
-	//else if (Mode == static_cast<int>(PlayMode::Random)) {
-	//	//设置随机种子，即随机数在种子值到32767之间
-	//	qsrand(QTime::currentTime().msec());
-	//	//随机生成0到播放列表的长度的随机数
-	//	CurrentPlayerListIndex = qrand() % localMusic->PlayerList().length();
-	//}
-	//else {
-	//	++Mode;
-	//}
-	
 	switch (Mode) {
-	//顺序播放
+		//顺序播放
 	case PlayMode::Order:
 		++CurrentPlayerListIndex;
 		if (CurrentPlayerListIndex >= localMusic->PlayerList().length()) {

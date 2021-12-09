@@ -21,16 +21,11 @@ class lyric;
 class Local_and_Download;
 using namespace AudioPlayer;
 
-
-
-
-
 class Music : public QMainWindow {
 	Q_OBJECT
 private:
 	Ui::Music* ui;
 	unsigned int CurrVolume{};
-	QString pcmdir{};
 	bool sliderSeeking = false;
 	AudioPlayer::Player* player;
 	int CurrentPlayerListIndex{};
@@ -105,7 +100,6 @@ private slots:
 	void on_btn_max_clicked();
 	void on_btn_prev_clicked();
 	void on_btn_volum_clicked();
-
 	void on_Sli_volum_valueChanged(int value);
 	//进度条按压处理
 	void on_playslider_sliderPressed();

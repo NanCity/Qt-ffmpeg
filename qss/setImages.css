@@ -1,62 +1,115 @@
+
 /*按钮透明*/
-QPushButton{
-background-color: transparent;
-border:none;
+QPushButton {
+    background-color: transparent;
+    border: none;
+    background: #00282a2e;
+    color: #828385;
 }
 
-/*顶部按钮*/
-QPushButton#btn_login{
-/*border-image: url(":/images/btn_mini_h.png");*/
+    QPushButton:disabled {
+        color: blue;
+        border-color: brown;
+        background-color: aqua;
+    }
+
+
+    /*按钮按下*/
+    QPushButton:pressed {
+        /*背景颜色*/
+        background-color: rgb(14, 135, 228);
+        /*左内边距为3像素，让按下时字向右移动3像素*/
+        padding-left: 3px;
+        /*上内边距为3像素，让按下时字向下移动3像素*/
+        padding-top: 3px;
+    }
+
+    QPushButton:hover {
+        border-color: green;
+        background-color: #f7f7f7;
+    }
+
+    /***************local_and_download***************/
+    QPushButton#btn_openFile {
+        border-radius: 8px !important;
+        color: #507daf;
+    }
+
+        QPushButton#btn_openFile:!hover {
+            border-radius: 8px !important;
+            color: #0b58b0;
+        }
+
+
+/*标题输入框*/
+QLineEdit#lineEdit_search, #line_search {
+    border: 3px solid #f7f7f7;
+    color: black;
+    background: rgba(108, 114, 129, 0);
+    font-size: 14;
+    /* font-family: "微软雅黑"; */
+    font-weight: bold;
+    border-width: 1;
+    border-color: #f7f7f7;
+    background-color: #f7f7f7;
+    border-style: solid;
+    border-radius: 10px;
+}
+
+QPushButton#btn_login {
+    /*border-image: url(":/images/btn_mini_h.png");*/
 }
 
 
 /*左上角logo*/
 QLabel#title_logo {
-    background-image: url(":/images/logo.ico");
+    /*    background-image: url(":/images/logo.ico");*/
 }
 
-QTextEdit#lab_search{
-color : white;
-font  : 10pt;
-border: 3px solid pink;/*设置边框的粗细，以及颜色*/
-border-radius: 10px;/*设置圆角的大小*/
-padding: 0 11px;/*如果没有内容光标在开始往后移动0.8像素点*/
-selection-background-color: darkgray;
-
+QTextEdit#lab_search {
+    color: white;
+    font: 10pt;
+    border: 3px solid pink; /*设置边框的粗细，以及颜色*/
+    border-radius: 10px; /*设置圆角的大小*/
+    padding: 0 11px; /*如果没有内容光标在开始往后移动0.8像素点*/
+    selection-background-color: darkgray;
 }
 
 /*皮肤*/
-QPushButton#btn_skin{
-border-image: url(":/images/btn_skin_h.png");
+QPushButton#btn_skin {
+    border-image: url(":/images/top/btn_skin.png");
 }
 /*设置*/
-QPushButton#btn_setting{
-border-image: url(":/images/Top/btn_set_h.png");
+QPushButton#btn_setting {
+    border-image: url(":/images/top/btn_set_h.png");
 }
 
 /*最小化*/
-QPushButton#btn_mini{
-border-image: url(":/images/Top/btn_min_h.png");
+QPushButton#btn_mini {
+    border-image: url(":/images/top/btn_min_h.png");
 }
-PushButton#btn_mini:!hover{
-border-image: url(":/images/Top/btn_min_n.png");
+
+PushButton#btn_mini:!hover {
+    border-image: url(":/images/top/btn_min_n.png");
 }
 
 /*最大化*/
-QPushButton#btn_max{
-border-image: url(":/images/Top/btn_max_n.png");
-}
-QPushButton#btn_max:!hover{
-border-image: url(":/images/Top/btn_max_h.png");
+QPushButton#btn_max {
+    border-image: url(":/images/top/btn_max_n.png");
 }
 
+    QPushButton#btn_max:!hover {
+        border-image: url(":/images/top/btn_max_h.png");
+    }
+
 /*关闭*/
-QPushButton#btn_close{
-border-image: url(":/images/Top/btn_close_n.png");
+QPushButton#btn_close {
+    border-image: url(":/images/top/btn_close_n.png");
 }
-QPushButton#btn_close:!hover{
-border-image: url(":/images/Top/btn_close_h.png");
-}
+
+    QPushButton#btn_close:!hover {
+        border-image: url(":/images/top/btn_close_h.png");
+    }
 
 
 /*歌词
@@ -65,138 +118,124 @@ border-image: url(":/images/lyric.png");
 }*/
 
 /************底部美化******************/
-/*上一首*/
-QPushButton#btn_prev{
-border-image: url(":/images/Bottom/btn_prev_h.png");
-}
 
-QPushButton#btn_prev:!hover{
-border-image: url(":/images/Bottom/btn_prev_n.png");
+QPushButton#btn_mode {
+    border-image: url(":/images/bottom/btn_order.png");
 }
+/*上一首*/
+QPushButton#btn_prev {
+    border-image: url(":/images/bottom/btn_prev.png");
+}
+/*
+    QPushButton#btn_prev:!hover {
+        border-image: url(":/images/bottom/btn_prev.png");
+    }
+*/
 
 /*下一首*/
-QPushButton#btn_next{
-border-image: url(":/images/Bottom/btn_next_h.png");
+QPushButton#btn_next {
+    border-image: url(":/images/bottom/btn_next.png");
 }
-QPushButton#btn_next:!hover{
-border-image: url(":/images/Bottom/btn_next_n.png");
-}
+/*QPushButton#btn_next:!hover{
+border-image: url(":/images/bottom/btn_next_n.png");
+}*/
 
 /*暂停 or 播放*/
-QPushButton#btn_stop{
-border-image: url(":/images/Bottom/btn_stop_n.png");
-/*background-color: aquamarine;*/
+QPushButton#btn_stop {
+    border-image: url(":/images/bottom/btn_play.png");
+    /*background-color: aquamarine;*/
 }
-QPushButton#btn_stop:!hover{
-border-image: url(":/images/Bottom/btn_stop_h.png");
+/*QPushButton#btn_stop:!hover{
+border-image: url(":/images/bottom/btn_stop_h.png");
 }
-
+*/
 /*音量*/
-QPushButton#btn_volum{
-border-image: url(":/images/Bottom/btn_volume_open.png");
+QPushButton#btn_volum {
+    border-image: url(":/images/bottom/btn_volume.png");
 }
 
 /*QPushButton#btn_lyric{
 border-image: url(":/images/lyric.png");
 }*/
 
-QPushButton#btn_pictrue:hover{
-border-image: url(":/images/Bottom/magnify.png");
-}
-/*设置圆角,去掉边框*/
-QPushButton#btn_prev,#btn_next,#btn_stop,#btn_volum,#btn_lyric {
-border-radius: 8px !important; /*边界半径(越大，圆角越大)， important 强制 */
-}
-
 /*鼠标悬停时的状态*/
-QPushButton#btn_pictrue:hover{
-border-radius: 8px !important;
-background-color:rgb(103, 103, 230);
-border-image:url(":/images/Bottom/magnify .png")
+QPushButton#btn_pictrue:hover {
+    background-color: transparent;
+    border: none;
+    border-radius: 8px !important;
+    background-color: #f7f7f7;
+    border-image: url(":/images/bottom/btn_magnify.png")
 }
 
-QPushButton:disabled{
-color: blue;
-border-color: brown;
-background-color: aqua;
-}
-/*按钮按下*/
-QPushButton:pressed{
-/*背景颜色*/
-background-color:rgb(14 , 135 , 228);
-/*左内边距为3像素，让按下时字向右移动3像素*/
-padding-left:3px;
-/*上内边距为3像素，让按下时字向下移动3像素*/
-padding-top:3px;
-}
 
-QPushButton:hover{
-border-color: green;
-background-color: hsl(192, 91%, 46%);
+/*设置圆角,去掉边框*/
+QPushButton#btn_prev, #btn_next, #btn_stop, #btn_volum, #btn_lyric {
+    border-radius: 8px !important; /*边界半径(越大，圆角越大)， important 强制 */
 }
 
 
 /*滑动条槽（整体）的美化 */
-QSlider::groove:horizontal{
-/*滑块的高度*/
-height: 7px;
-left: 0px;
-right: 0px;
-border:0px;              /*指定无边框*/
-border-radius:6px;       /*指定圆角*/
-background:rgba(0,0,0,50);
+QSlider::groove:horizontal {
+    /*滑块的高度*/
+    height: 7px;
+    left: 0px;
+    right: 0px;
+    border: 0px; /*指定无边框*/
+    border-radius: 6px; /*指定圆角*/
+    background: #cdcdcd;
 }
 /*滑块的美化*/
-QSlider::handle:horizontal{
-/*图片的高，宽*/
-width:  11px;
-height: 10px;
-margin-top: -20px;
-margin-left: 0px;
-margin-bottom: -20px;
-margin-right: 0px;
-border-image:url(:images/setting_slider_handle.png);
+QSlider::handle:horizontal {
+    /*图片的高，宽*/
+    width: 11px;
+    height: 10px;
+    margin-top: -20px;
+    margin-left: 0px;
+    margin-bottom: -20px;
+    margin-right: 0px;
+    border-image: url(:images/setting_slider_handle.png);
 }
+
+
 /*已滑过的进度美化*/
-QSlider::sub-page:horizontal{
-background:green;
+QSlider::sub-page:horizontal {
+    background: red;
 }
 
 /*侧边栏美化*/
-QListWidget{
-/* font-weight: bold ;bold-加粗 */
-font-size: 13px;
-color:#e7f5f5;
-/* background-color:white; */
-border:0px solid #ffffff;
-}
-QListWidget::Item{
-height: 30px;;
-color: black; /* 字体颜色 */
-padding-left:60;/* item 的左右边距 */
-border:0px solid rgb(7, 218, 147);
-
-}
-/* 鼠标悬停状态 */
-QListWidget::Item:hover{
-color:rgba(9, 15, 2, 0.808);
-background:transparent;
-/*border:15px solid #e7f5f5;*/
-border:15px solid hsl(180, 41%, 93%)
-}
-/* 悬着 Item 之后的状态 */
-QListWidget::Item:selected{
-/* border-image:url(":/images/stop.png"); */
-background-color: aquamarine;
-color:#f74417;
-/*         border:15px solid #e7f5f5;*/
-border:15px solid hsl(180, 41%, 93%);
-}
-QListWidget::Item:selected:active{
-background-color:#e7f5f5;
-color:#050105;
-border: width 20px;;
+QListWidget {
+    /* font-weight: bold ;bold-加粗 */
+    font-size: 13px;
+    color: #e7f5f5;
+    /* background-color:white; */
+    border: 0px solid #ffffff;
 }
 
+    QListWidget::Item {
+        height: 30px;
+        ;
+        color: black; /* 字体颜色 */
+        padding-left: 60; /* item 的左右边距 */
+        border: 0px solid rgb(7, 218, 147);
+    }
+        /* 鼠标悬停状态 */
+        QListWidget::Item:hover {
+            color: rgba(9, 15, 2, 0.808);
+            background: transparent;
+            /*border:15px solid #e7f5f5;*/
+            border: 15px solid hsl(180, 41%, 93%)
+        }
+        /* 悬着 Item 之后的状态 */
+        QListWidget::Item:selected {
+            /* border-image:url(":/images/stop.png"); */
+            background-color: aquamarine;
+            color: #f74417;
+            /*         border:15px solid #e7f5f5;*/
+            border: 15px solid hsl(180, 41%, 93%);
+        }
 
-
+            QListWidget::Item:selected:active {
+                background-color: #e7f5f5;
+                color: #050105;
+                border: width 20px;
+            }
