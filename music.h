@@ -19,7 +19,6 @@ enum status { STATE_VOLUME };
 class Base;
 class lyric;
 class Local_and_Download;
-using namespace AudioPlayer;
 
 class Music : public QMainWindow {
 	Q_OBJECT
@@ -27,9 +26,9 @@ private:
 	Ui::Music* ui;
 	unsigned int CurrVolume{};
 	bool sliderSeeking = false;
-	AudioPlayer::Player* player;
-	int CurrentPlayerListIndex{};
-	Base* base{};
+
+	int CurrentPlayerListIndex{0};
+	Base* base;
 	lyric* lyr{};
 
 	//解码器
@@ -73,8 +72,8 @@ public:
 	//播放歌曲
 	void setBottomInformation(Mp3tag* tag);
 	void PlayerMode();
-	void Previous();
-	void Next();
+	void Previous(QStringList &playerlist);
+	void Next(QStringList& playerlist);
 protected:
 	//重写键盘事件
 	// void keyPressEvent(QKeyEvent *event);
@@ -105,6 +104,6 @@ private slots:
 	void on_playslider_sliderPressed();
 	//进度条释放处理
 	void on_playslider_sliderReleased();
+    void on_btn_skin_clicked();
 };
-
 #endif // MUSIC_H

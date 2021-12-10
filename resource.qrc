@@ -1,6 +1,12 @@
 <RCC>
     <qresource prefix="/style">
         <file>qss/setImages.css</file>
+        <file>skin/black.qss</file>
+        <file>skin/blue.qss</file>
+        <file>skin/gold.qss</file>
+        <file>skin/green.qss</file>
+        <file>skin/pink.qss</file>
+        <file>skin/red.qss</file>
     </qresource>
     <qresource prefix="/">
         <file>images/btn_delete_h.png</file>

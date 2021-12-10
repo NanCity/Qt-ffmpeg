@@ -220,6 +220,8 @@ void AudioDeCode::runPlay() {
 		if (ret != 0) {
 			debugErr("av_read_frame", ret);
 			emit duration(destMs, destMs);
+			//自动播放一下一首
+			emit nextsong();
 			break;
 		}
 
@@ -266,10 +268,10 @@ void AudioDeCode::runPlay() {
 	swr_free(&swrctx);
 	avcodec_free_context(&acodecCtx);
 	avformat_close_input(&pFmtCtx);
-	//防止线程进入wait（）是一直发送信号
-	if ((destMs - currentMs) < 500) {
-		emit nextsong();
-	}
+	//改善
+	//if ((destMs - currentMs) < 500) {
+	//		emit nextsong();
+	//}
 }
 
 QStringList AudioDeCode::DeCodeTag(const char* filename) {

@@ -3,7 +3,6 @@
 #pragma execution_character_set("utf-8")
 #endif
 
-#include "base.h"
 #include <QMimeData>
 #include <qevent.h>
 #include <qicon.h>
@@ -25,7 +24,6 @@
 #include <QTime>
 //随机数
 #include <QtGlobal>
-using namespace AudioPlayer;
 
 // ffplay -ar 44100 -ac 2 -f s16le -i out.pcm 命令行播放
 Music::Music(QWidget* parent)
@@ -64,6 +62,21 @@ Music::Music(QWidget* parent)
 	Mode = PlayMode::Order;
 	//自动播放下一首
 	connect(Decode, &AudioDeCode::nextsong, this, &Music::PlayerMode);
+
+	//接收鼠标右键菜单的信号
+	connect(localMusic, &Local_and_Download::t_play, this, [this](const int index) {
+		Decode->play(localMusic->PlayerList().at(index));
+		setBottomInformation(Decode->GetTag());
+		});
+
+	//下一首播放
+	connect(localMusic, &Local_and_Download::t_nextplay, this, [=](const int index) {
+		if (Decode->isFinished())
+		{
+			Decode->play(localMusic->PlayerList().at(index));
+			setBottomInformation(Decode->GetTag());
+		}
+		});
 }
 
 Music::~Music() {
@@ -74,8 +87,6 @@ Music::~Music() {
 
 void Music::init() {
 	lyr = new lyric{};
-	base = new Base(this);
-	player = new Player{};
 	Decode = new AudioDeCode{};
 	// Decode->setParent(this);
 	localMusic = new Local_and_Download{};
@@ -161,7 +172,6 @@ void Music::mouseReleaseEvent(QMouseEvent*) {
 
 //快捷键
 void Music::Presskey(QKeyEvent* event) {
-	//   Ctrl+键盘右键
 	switch (event->key()) {
 	case Qt::Key_M:
 		setWindowState(Qt::WindowMaximized);
@@ -173,16 +183,10 @@ void Music::Presskey(QKeyEvent* event) {
 		close();
 		break;
 	case Qt::Key_Left:
-		++CurrVolume;
-		//        MyPlay->Playlist->previous();
-		//        MyPlay->Play->play();
+		Previous(localMusic->PlayerList());
 		break;
 	case Qt::Key_Right:
-		//        MyPlay->Playlist->next();
-		//        MyPlay->Play->play();
-		break;
-	case Qt::Key_O:
-
+		Next(localMusic->PlayerList());
 		break;
 	case Qt::Key_Up:
 		ui->Sli_volum->setValue(++CurrVolume);
@@ -215,21 +219,8 @@ bool Music::eventFilter(QObject* obj, QEvent* event) {
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* evn = static_cast<QKeyEvent*>(event);
 			if (evn->key() == Qt::Key_Right) {
-				if (!localMusic->PlayerList().isEmpty()) {
-					if (CurrentPlayerListIndex >= localMusic->PlayerList().length()) {
-#if DEBUG
-						qDebug() << tr("超出列表长度，将 CurrentPlayerListIndex 重置为0\n");
-#endif
-						CurrentPlayerListIndex = 0;
-					}
-					else {
-						++CurrentPlayerListIndex;
-					}
-					ui->btn_stop->setStyleSheet("border-image:url(:/images/bottom/btn_pause.png)");
-					Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
-					setBottomInformation(Decode->GetTag());
-				}
-				qDebug() << "Playerlist is empty\n";
+				//更好的做法是发送一个信号，可以获得更多兼容性
+				Next(localMusic->PlayerList());
 			}
 		}
 	}
@@ -239,21 +230,7 @@ bool Music::eventFilter(QObject* obj, QEvent* event) {
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* evn = static_cast<QKeyEvent*>(event);
 			if (evn->key() == Qt::Key_Left) {
-				if (!localMusic->PlayerList().isEmpty()) {
-					if (CurrentPlayerListIndex == 0) {
-#if DEBUG
-						qDebug() << tr("已经在列表首位，重置到末尾\n");
-#endif
-						CurrentPlayerListIndex = localMusic->PlayerList().length();
-					}
-					else {
-						--CurrentPlayerListIndex;
-					}
-					ui->btn_stop->setStyleSheet("border-image:url(:/images/bottom/btn_pause.png)");
-					Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
-					setBottomInformation(Decode->GetTag());
-				}
-				qDebug() << "Playerlist is empty\n";
+				Previous(localMusic->PlayerList());
 			}
 		}
 	}
@@ -411,6 +388,9 @@ void Music::on_btn_stop_clicked() {
 
 void Music::setBottomInformation(Mp3tag* tag) {
 	QPixmap pixmap = QPixmap::fromImage(tag->Picture);
+	pixmap.scaled(ui->btn_pictrue->size(), Qt::KeepAspectRatio);
+    //自适应缩放图片
+	ui->btn_pictrue->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	int width = ui->btn_pictrue->width();
 	int height = ui->btn_pictrue->height();
 	ui->btn_pictrue->setIconSize(QSize(width + 5, height));
@@ -418,40 +398,42 @@ void Music::setBottomInformation(Mp3tag* tag) {
 	ui->btn_pictrue->setStyleSheet("");
 	ui->lab_message->setText(QString("%1\n%2").arg(tag->Artis).arg(tag->Title));
 	ui->lab_time->setText(tag->Duration);
-
+	lyr->setMessage(tag->Picture,tag->Artis +QString("--%0").arg(tag->Ablue), tag->Title);
 }
 
 //上一首
-void Music::Previous()
+void Music::Previous(QStringList& playerlist)
 {
-	if (CurrentPlayerListIndex == 0) {
-		CurrentPlayerListIndex = localMusic->PlayerList().length() - 1;
+	if (!playerlist.isEmpty()) {
+		--CurrentPlayerListIndex;
+		if (CurrentPlayerListIndex == -1) {
+			CurrentPlayerListIndex = playerlist.length() - 1;
+		}
+		Decode->play(playerlist.at(CurrentPlayerListIndex));
+		setBottomInformation(Decode->GetTag());
 	}
 	else {
-		--CurrentPlayerListIndex;
+		QMessageBox::information(this, tr("Error"), tr("播放列表为空!!!!"), QMessageBox::Yes);
 	}
-	Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
-	setBottomInformation(Decode->GetTag());
 }
-
 //下一首
-void Music::Next()
+void Music::Next(QStringList& playerlist)
 {
-	++CurrentPlayerListIndex;
-	if (CurrentPlayerListIndex >= localMusic->PlayerList().length()) {
-		CurrentPlayerListIndex = 0;
+	if (!playerlist.isEmpty()) {
+		++CurrentPlayerListIndex;
+		if (CurrentPlayerListIndex == playerlist.length()) {
+			CurrentPlayerListIndex = 0;
+		}
+		Decode->play(playerlist.at(CurrentPlayerListIndex));
+		setBottomInformation(Decode->GetTag());
 	}
-	Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
-	setBottomInformation(Decode->GetTag());
+	else {
+		QMessageBox::information(this, tr("Error"), tr("播放列表为空!!!!"), QMessageBox::Yes);
+	}
 }
 
 void Music::on_btn_prev_clicked() {
-	if (CurrentPlayerListIndex == 0) {
-		qDebug() << "播放列表为空\n";
-		return;
-	}
-
-	Previous();
+	Previous(localMusic->PlayerList());
 }
 
 void Music::on_btn_next_clicked() {
@@ -524,10 +506,7 @@ void Music::PlayerMode() {
 	switch (Mode) {
 		//顺序播放
 	case PlayMode::Order:
-		++CurrentPlayerListIndex;
-		if (CurrentPlayerListIndex >= localMusic->PlayerList().length()) {
-			CurrentPlayerListIndex = 0;
-		}
+		Next(localMusic->PlayerList());
 		break;
 		//单曲循环
 	case PlayMode::Single:
@@ -544,3 +523,8 @@ void Music::PlayerMode() {
 }
 
 
+
+void Music::on_btn_skin_clicked()
+{
+
+}

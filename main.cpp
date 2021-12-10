@@ -1,11 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2021-09-20 12:09:20
- * @LastEditTime: 2021-10-12 00:19:03
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: \Music\main.cpp
- */
 #include "music.h"
 #include <QApplication>
 #include <QFile>

@@ -2,10 +2,13 @@
 #define LYRIC_H
 
 #include <QWidget>
-#include "base.h"
+#include <QMouseEvent>
 namespace Ui {
 class lyric;
 }
+
+class QLabel;
+class QMenu;
 
 class lyric : public QWidget
 {
@@ -13,7 +16,7 @@ class lyric : public QWidget
 public:
     explicit lyric(QWidget *parent = nullptr);
     ~lyric();
-
+    void setMessage(QImage &img, QString Art, QString& title);
 private:
     Ui::lyric *ui;
 };
