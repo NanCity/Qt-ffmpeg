@@ -27,10 +27,9 @@ SET(CMAKE_BUILD_TYPE "Debug")
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 ENDIF()
 
-
 #设置执行文件输出目录
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-
+message("*********************** begin **************************")
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/ffmpeg/include)
 file(GLOB libs_path ${PROJECT_SOURCE_DIR}/ffmpeg/lib/*.lib)
 
@@ -47,7 +46,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ADD_COMPILE_OPTIONS(-Wall -std=c++11 -g )
 
 #set Qt PATH  windows下无法调试，解决方案：将qt的的qmake配置成环境变量
-set (CMAKE_PREFIX_PATH F:/Qt5.14.2/5.14.2/msvc2017_64)
+set (CMAKE_PREFIX_PATH D:/Qt5.14.2/5.14.2/msvc2017_64)
 
 # 搜索当前目录下的源文件
 aux_source_directory(. DIR_SRCS)

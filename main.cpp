@@ -1,4 +1,4 @@
-#include "music.h"
+﻿#include "music.h"
 #include <QApplication>
 #include <QFile>
 #include <QStyleFactory>
@@ -8,8 +8,6 @@ int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
   a.setWindowIcon(QIcon(":/images/logo.ico"));    // Application icon
   a.setStyle(QStyleFactory::create("macintosh")); //设置窗口风格
-  //设置中文字体
-  a.setFont(QFont("Microsoft Yahei", 9));
   //设置中文编码
 #if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
 #if _MSC_VER

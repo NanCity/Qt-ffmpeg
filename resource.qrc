@@ -1,32 +1,22 @@
 <RCC>
     <qresource prefix="/style">
         <file>qss/setImages.css</file>
-        <file>skin/black.qss</file>
-        <file>skin/blue.qss</file>
-        <file>skin/gold.qss</file>
-        <file>skin/green.qss</file>
-        <file>skin/pink.qss</file>
-        <file>skin/red.qss</file>
+        <file>skin/black.css</file>
+        <file>skin/blue.css</file>
+        <file>skin/gold.css</file>
+        <file>skin/green.css</file>
+        <file>skin/pink.css</file>
+        <file>skin/red.css</file>
     </qresource>
     <qresource prefix="/">
+        <file>images/btn_cloud_h.png</file>
+        <file>images/btn_cloud_n.png</file>
         <file>images/btn_delete_h.png</file>
         <file>images/btn_delete_n.png</file>
-        <file>images/btn_like_h.png</file>
-        <file>images/btn_like_n.png</file>
-        <file>images/btn_right_h.png</file>
-        <file>images/btn_right_n.png</file>
-        <file>images/btn_shoucang_h.png</file>
-        <file>images/btn_shoucang_n.png</file>
-        <file>images/btn_tiandao_h.png</file>
-        <file>images/btn_tiandao_n.png</file>
-        <file>images/btn_unlike_h.png</file>
-        <file>images/btn_unlike_n.png</file>
-        <file>images/download.png</file>
-        <file>images/horn.png</file>
+        <file>images/btn_openfile_h.png</file>
+        <file>images/btn_openfile_n.png</file>
         <file>images/logo.ico</file>
-        <file>images/yun.png</file>
-        <file>images/top/btn_add_h.png</file>
-        <file>images/top/btn_add_n.png</file>
+        <file>images/warning.png</file>
         <file>images/top/btn_close_h.png</file>
         <file>images/top/btn_close_n.png</file>
         <file>images/top/btn_max_h.png</file>
@@ -34,22 +24,25 @@
         <file>images/top/btn_min_h.png</file>
         <file>images/top/btn_min_n.png</file>
         <file>images/top/logo.png</file>
-        <file>images/bottom/btn_close.png</file>
-        <file>images/bottom/btn_content.png</file>
-        <file>images/bottom/btn_expand.png</file>
-        <file>images/bottom/btn_history.png</file>
         <file>images/bottom/btn_mute.png</file>
-        <file>images/bottom/btn_next.png</file>
-        <file>images/bottom/btn_open.png</file>
-        <file>images/bottom/btn_order.png</file>
-        <file>images/bottom/btn_pause.png</file>
-        <file>images/bottom/btn_play.png</file>
-        <file>images/bottom/btn_prev.png</file>
-        <file>images/bottom/btn_random.png</file>
-        <file>images/bottom/btn_shrink.png</file>
-        <file>images/bottom/btn_single.png</file>
+        <file>images/bottom/btn_next_h.png</file>
+        <file>images/bottom/btn_next_n.png</file>
+        <file>images/bottom/btn_order_h.png</file>
+        <file>images/bottom/btn_order_n.png</file>
+        <file>images/bottom/btn_pause_h.png</file>
+        <file>images/bottom/btn_pause_n.png</file>
+        <file>images/bottom/btn_play_h.png</file>
+        <file>images/bottom/btn_play_n.png</file>
+        <file>images/bottom/btn_prev_h.png</file>
+        <file>images/bottom/btn_prev_n.png</file>
+        <file>images/bottom/btn_random_h.png</file>
+        <file>images/bottom/btn_random_n.png</file>
+        <file>images/bottom/btn_single_h.png</file>
+        <file>images/bottom/btn_single_n.png</file>
         <file>images/bottom/btn_volume.png</file>
-        <file>images/top/btn_skin.png</file>
-        <file>images/bottom/btn_magnify.png</file>
+        <file>images/top/btn_setting_h.png</file>
+        <file>images/top/btn_setting_n.png</file>
+        <file>images/top/btn_skin_h.png</file>
+        <file>images/top/btn_skin_n.png</file>
     </qresource>
 </RCC>

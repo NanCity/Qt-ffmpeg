@@ -72,8 +72,6 @@ public:
   }
 };
 
-
-
 //音频解码
 class AudioDeCode : public QThread {
   Q_OBJECT
@@ -86,9 +84,9 @@ private:
   AVDictionaryEntry *Tag = NULL;
   //查询是音频流还是视频流
   int audioindex{-1};
-signals:
-  void duration(int, int);
+signals:  
   void ERROR(QString str);
+  void duration(int, int);
   void seekOk();   //处理控制,判断是否需要停止
   void nextsong(); //自动播放下一首
 

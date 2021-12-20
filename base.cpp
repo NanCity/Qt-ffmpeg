@@ -1,99 +1,82 @@
 #include "base.h"
 #include <QDebug>
 #include <QHeaderView>
-#include <QTableWidget>
-#include <qtablewidget.h>
 #include <QLabel>
 #include <QList>
-Base::Base(QTableWidget* parent) :tab{ parent } {
-	//允许QTableWidget接收QWidget::customContextMenuRequested()信号。
-	this->setContextMenuPolicy(Qt::CustomContextMenu);
-	this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
-	InitTableWidget();
+#include <QTableWidget>
+#include <qtablewidget.h>
+Base::Base(QTableWidget *parent) : tab{parent} {
+  //允许QTableWidget接收QWidget::customContextMenuRequested()信号。
+  this->setContextMenuPolicy(Qt::CustomContextMenu);
+  this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
+  InitTableWidget();
 }
 
-Base::~Base() {  }
-
+Base::~Base() {}
 
 //初始化TableWidget
 void Base::InitTableWidget() {
-	//设置无边框
-	// ui->tableWidget->setFrameShape(QFrame::NoFrame);
-	//设置触发条件：不可编辑
-	tab->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	tab->setSortingEnabled(false); //启动排序
-  // item 水平表头自适应大小
+  //设置无边框
+  // ui->tableWidget->setFrameShape(QFrame::NoFrame);
+  //设置触发条件：不可编辑
+  tab->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  tab->setSortingEnabled(false); //启动排序
+                                 // item 水平表头自适应大小
 
-	tab->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	tab->horizontalHeader()->setDefaultSectionSize(35);
-	// item 垂直表头自适应大小
-	// ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	QStringList HorizontalHeaderItem{ QObject::tr("音乐标题"), QObject::tr("歌手"),
-									 QObject::tr("专辑"), QObject::tr("时长"),
-									 QObject::tr("大小") };
-	//获取列数
-	int column = HorizontalHeaderItem.count();
-	tab->setColumnCount(column);
-	//设置行高
-	tab->setLineWidth(10);
-	for (int x = 0; x != column; ++x) {
-		tab->setHorizontalHeaderItem(
-			x, new QTableWidgetItem(HorizontalHeaderItem.at(x)));
-	}
-	tab->setAlternatingRowColors(true);
-	tab->setSelectionBehavior(
-		QAbstractItemView::SelectRows); //设置选择行为时每次选择一行
+  tab->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  tab->horizontalHeader()->setDefaultSectionSize(35);
+  // item 垂直表头自适应大小
+  // ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  QStringList HorizontalHeaderItem{QObject::tr("音乐标题"), QObject::tr("歌手"),
+                                   QObject::tr("专辑"), QObject::tr("时长"),
+                                   QObject::tr("大小")};
+  //获取列数
+  int column = HorizontalHeaderItem.count();
+  tab->setColumnCount(column);
+  //设置行高
+  tab->setLineWidth(10);
+  for (int x = 0; x != column; ++x) {
+    tab->setHorizontalHeaderItem(
+        x, new QTableWidgetItem(HorizontalHeaderItem.at(x)));
+  }
+  tab->setAlternatingRowColors(true);
+  tab->setSelectionBehavior(
+      QAbstractItemView::SelectRows); //设置选择行为时每次选择一行
 }
 
 void Base::DelTableWidgetRow() {
-	for (int index = tab->rowCount(); index >= 0; --index) {
-		tab->removeRow(index);
-	}
+  for (int index = tab->rowCount(); index >= 0; --index) {
+    tab->removeRow(index);
+  }
 }
 
 void Base::SerachData(QString search_data) {
-	const int curRow = tab->rowCount();
-	if ("" == search_data) {
-		for (int i = 0; i != curRow; i++) {
-			tab->setRowHidden(i, false);
-		}
-	}
-	else {
-		//列出所有的条件的cell索引
-		QList<QTableWidgetItem*> item =
-			tab->findItems(search_data, Qt::MatchContains);
-		for (int i = 0; i != curRow; i++) {
-			//隐藏所有行
-			tab->setRowHidden(i, true);
-		}
-		if (!item.isEmpty()) {
-			//打印查询到的结果
-			for (int i = 0; i != item.count(); i++) {
-				tab->setRowHidden(item.at(i)->row(), false);
-			}
-		}
-	}
+  const int curRow = tab->rowCount();
+  if ("" == search_data) {
+    for (int i = 0; i != curRow; i++) {
+      tab->setRowHidden(i, false);
+    }
+  } else {
+    //列出所有的条件的cell索引
+    QList<QTableWidgetItem *> item =
+        tab->findItems(search_data, Qt::MatchContains);
+    for (int i = 0; i != curRow; i++) {
+      //隐藏所有行
+      tab->setRowHidden(i, true);
+    }
+    if (!item.isEmpty()) {
+      //打印查询到的结果
+      for (int i = 0; i != item.count(); i++) {
+        tab->setRowHidden(item.at(i)->row(), false);
+      }
+    }
+  }
 }
 
-//void Base::RightClickMouse(const QPoint& pos)
-//{
-//	QMenu* menu = new QMenu(tab);
-//	QList<QAction*> Acts;
-//	 play = new QAction(QIcon(":/images/bottom/btn_play.png"), tr("play"), menu);
-//	Acts.push_back(play);
-//
-//	NextPlay = new QAction(QIcon(":/images/bottom/btn_play.png"),tr("Next_Play"), menu);
-//	Acts.push_back(NextPlay);
-//	/*不加这一句，显示位置父控件里面
-//	* exec(QCursor::pos()) 当前鼠标的位置
-//	*/
-//	menu->addActions(Acts);
-//	//connect(play, &QAction::triggered, this, [this]() { emit t_play(); });
-//	menu->exec(QCursor::pos());
-//}
+
 
 /*******************初始化QAudioOutPut***********************/
-//Player::Player() : data_pcm(0) {
+// Player::Player() : data_pcm(0) {
 //  this->open(QIODevice::ReadOnly); // 为了解决QIODevice::read (QIODevice):
 //                                   // device not open.
 //  initAudio();
@@ -103,7 +86,7 @@ void Base::SerachData(QString search_data) {
 //          &Player::handleStateChanged);
 //}
 //
-//void Player::handleStateChanged(QAudio::State state) {
+// void Player::handleStateChanged(QAudio::State state) {
 //  switch (state) {
 //  case QAudio::ActiveState:
 //    qDebug() << "playing....... \n";
@@ -128,7 +111,7 @@ void Base::SerachData(QString search_data) {
 //  }
 //}
 //
-//qint64 Player::readData(char *data, qint64 maxlen) {
+// qint64 Player::readData(char *data, qint64 maxlen) {
 //  if (len_written >= data_pcm.size())
 //    return 0;
 //  int len = 0;
@@ -143,7 +126,7 @@ void Base::SerachData(QString search_data) {
 //  return len;
 //}
 //
-//QAudioFormat format() {
+// QAudioFormat format() {
 //  QAudioFormat fmt;
 //  fmt.setSampleRate(44100);
 //  fmt.setChannelCount(2);
@@ -160,7 +143,7 @@ void Base::SerachData(QString search_data) {
 //  return fmt;
 //}
 //
-//QAudioFormat Player::initAudio() {
+// QAudioFormat Player::initAudio() {
 //  QAudioFormat fmt{};
 //  fmt.setSampleRate(44100);
 //  fmt.setChannelCount(2);

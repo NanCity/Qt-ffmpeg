@@ -1,0 +1,6 @@
+/*QWidget:TopWidget {
+    background-color: yellow;
+}
+QPushButton#btn_skin {
+    border-image: url(":/images/top/btn_add.png");
+}*/

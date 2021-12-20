@@ -34,7 +34,7 @@ Thumbs.db
 *.rc
 /.qmake.cache
 /.qmake.stash
-
+Json/
 # qtcreator generated files
 *.pro.user*
 
@@ -73,6 +73,7 @@ build
 *.Debug
 *.Release
 *.cache
+
 
 # Python byte code
 *.pyc
