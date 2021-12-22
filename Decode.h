@@ -1,4 +1,4 @@
-
+﻿
 #ifndef DECODE_H_
 #define DECODE_H_
 
@@ -79,7 +79,11 @@ private:
   int seekMs{};
   QString url{};
   Mp3tag *tag = Mp3tag::init();
+  /*AVFormatContext 结构体中有一个属性是metadata,
+  我们在读取一个多媒体文件的时候，可以通过AVDictionaryEntry访问这个属性的数据
+  */ 
   AVFormatContext *M_Format = NULL;
+  AVFormatContext *pFmtCtx = NULL;
   //保存mp3-tag标签
   AVDictionaryEntry *Tag = NULL;
   //查询是音频流还是视频流
@@ -107,7 +111,8 @@ public: //状态检查
   explicit AudioDeCode();
   ~AudioDeCode();
   QStringList DeCodeTag(const char *filename);
-  QImage Image(const char *filename);
+  //QStringList DeCodeTag(const AVDictionaryEntry *tag);
+  QImage Image();
   Mp3tag *GetTag() { return tag; };
   //获取mp3进度
   QString Duration();

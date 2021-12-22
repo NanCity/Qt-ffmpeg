@@ -16,10 +16,9 @@ public:
   explicit Local_and_Download(QWidget *parent = nullptr);
   virtual ~Local_and_Download();
   QStringList &PlayerList() { return lists; };
-  // QStringList &getMusicPath();
-  void InsertDataInfoTableWidget(const QStringList &value, const int index);
   QTableWidget *getTable();
   void Menu();
+  void InitTableHeader();
 
 private slots:
   void on_btn_openFile_clicked();

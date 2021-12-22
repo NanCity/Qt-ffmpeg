@@ -103,7 +103,6 @@ void Login::WriteJson() const
 	}
 }
 
-
 bool Login::ParseJson(QJsonValue& profile)
 {
 	//判断这个profile对象是否是object

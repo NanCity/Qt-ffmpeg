@@ -1,12 +1,12 @@
 ﻿#if _MSC_VER >= 1600 // MSVC2015>1899,对于MSVC2010以上版本都可以使用
 #pragma execution_character_set("utf-8")
 #endif
-
 #include "music.h"
 #include "./ui_music.h"
 #include "local_and_download.h"
 #include "login.h"
 #include "lyric.h"
+#include "networkutil.h"
 #include "personform.h"
 #include "search.h"
 #include "skin.h"
@@ -18,10 +18,12 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QPixmap>
 #include <QScrollArea>
 #include <QTableWidget>
-
 #include <QTime>
 //随机数
 #include <QtGlobal>
@@ -53,7 +55,7 @@ Music::Music(QWidget *parent)
     ui->btn_stop->setStyleSheet(
         "border-image:url(:/images/bottom/btn_pause_h.png)");
     Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
-    setBottomInformation(Decode->GetTag());
+    SetBottonInformation(Decode->GetTag());
   });
 
   //播放进度条
@@ -67,7 +69,7 @@ Music::Music(QWidget *parent)
   connect(localMusic, &Local_and_Download::t_play, this,
           [this](const int index) {
             Decode->play(localMusic->PlayerList().at(index));
-            setBottomInformation(Decode->GetTag());
+            SetBottonInformation(Decode->GetTag());
           });
 
   //播放下一首
@@ -75,7 +77,7 @@ Music::Music(QWidget *parent)
           [=](const int index) {
             if (Decode->isFinished()) {
               Decode->play(localMusic->PlayerList().at(index));
-              setBottomInformation(Decode->GetTag());
+              SetBottonInformation(Decode->GetTag());
             }
           });
 
@@ -87,6 +89,9 @@ Music::Music(QWidget *parent)
   //删除播放列表
   connect(localMusic->getTable(), &QTableWidget::removeRow, this,
           [&](int row) { --CurrentPlayerListIndex; });
+
+  //播放搜索到的歌曲
+  connect(search, &Search::play, this, &Music::on_playSearchMusic);
 }
 
 Music::~Music() {
@@ -141,7 +146,10 @@ void Music::initWidget() {
 
   ui->listWidget->setItemWidget(item, box);
   //点击了其中某一个Item
-  connect(ui->listWidget, &QListWidget::itemClicked, this, [&]() {search->hide();ui->stackedWidget->show();});
+  connect(ui->listWidget, &QListWidget::itemClicked, this, [&]() {
+    search->hide();
+    ui->stackedWidget->show();
+  });
   //  connect(box,&QComboBox::activated,ui->listWidget ,[this](){/*
   //  项被点击时发出该信号 */});
   box->setStyleSheet(
@@ -371,14 +379,14 @@ void Music::on_btn_stop_clicked() {
     }
     CurrentPlayerListIndex = 0;
     Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
-    setBottomInformation(Decode->GetTag());
+    SetBottonInformation(Decode->GetTag());
     ui->btn_stop->setStyleSheet(
         "border-image:url(:/images/bottom/btn_pause_h.png)");
     break;
   }
 }
 
-void Music::setBottomInformation(Mp3tag *tag) {
+void Music::SetBottonInformation(Mp3tag *tag) {
   QPixmap pixmap = QPixmap::fromImage(tag->Picture);
   pixmap.scaled(ui->btn_pictrue->size(), Qt::KeepAspectRatio);
   //自适应缩放图片
@@ -395,6 +403,16 @@ void Music::setBottomInformation(Mp3tag *tag) {
                   tag->Title);
 }
 
+void Music::setBottomInformation() {
+  int n = search->CurInex();
+  QString artist = search->getSearchResults().at(n).singer_name;
+  QString title = search->getSearchResults().at(n).song_name;
+  QPixmap map = search->getAlbumArt();
+  ui->btn_pictrue->setIcon(map);
+  ui->lab_message->setText(QString("%1\n%2").arg(artist).arg(title));
+  lyr->setMessage(map.toImage(), artist, title);
+}
+
 //上一首
 void Music::Previous(QStringList &playerlist) {
   if (!playerlist.isEmpty()) {
@@ -403,7 +421,7 @@ void Music::Previous(QStringList &playerlist) {
       CurrentPlayerListIndex = playerlist.length() - 1;
     }
     Decode->play(playerlist.at(CurrentPlayerListIndex));
-    setBottomInformation(Decode->GetTag());
+    SetBottonInformation(Decode->GetTag());
   } else {
     QMessageBox::information(this, tr("Error"), tr("播放列表为空!!!!"),
                              QMessageBox::Yes);
@@ -417,7 +435,7 @@ void Music::Next(QStringList &playerlist) {
       CurrentPlayerListIndex = 0;
     }
     Decode->play(playerlist.at(CurrentPlayerListIndex));
-    setBottomInformation(Decode->GetTag());
+    SetBottonInformation(Decode->GetTag());
   } else {
     QMessageBox::information(this, tr("Error"), tr("播放列表为空!!!!"),
                              QMessageBox::Yes);
@@ -436,7 +454,7 @@ void Music::on_btn_next_clicked() {
     CurrentPlayerListIndex = 0;
   }
   Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
-  setBottomInformation(Decode->GetTag());
+  SetBottonInformation(Decode->GetTag());
 }
 
 //最大化与还原
@@ -510,7 +528,7 @@ void Music::PlayerMode() {
     break;
   }
   Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
-  setBottomInformation(Decode->GetTag());
+  SetBottonInformation(Decode->GetTag());
 }
 
 void Music::on_btn_pictrue_clicked() {
@@ -519,6 +537,8 @@ void Music::on_btn_pictrue_clicked() {
     ui->listWidget->hide();
     ui->stackedWidget->hide();
     ui->horizontalLayout_11->addWidget(lyr);
+
+    search->close();
     lyr->show();
   } else {
     lyr->close();
@@ -551,12 +571,17 @@ void Music::on_btn_personmessage_clicked() {
 }
 
 void Music::on_lineEdit_search_returnPressed() {
+  search->GetSearchText(ui->lineEdit_search->text());
   if (search->isHidden()) {
     ui->stackedWidget->hide();
     ui->horizontalLayout_11->addWidget(search);
     search->show();
-  } else {
-    search->hide();
-    ui->stackedWidget->show();
   }
+}
+
+void Music::on_playSearchMusic(QString str) {
+  QString url =
+      QString("https://music.163.com/song/media/outer/url?id=%1.mp3").arg(str);
+  setBottomInformation();
+  Decode->play(url);
 }

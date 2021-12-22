@@ -1,14 +1,8 @@
-﻿
-
-#include <qtablewidget.h>
-#if _MSC_VER >= 1600 // MSVC2015>1899,对于MSVC2010以上版本都可以使用
-#pragma execution_character_set("utf-8")
-#endif
+﻿#include <QTableWidget>
 #include "local_and_download.h"
 #include "ui_local_and_download.h"
 #include <QAction>
 #include <QDebug>
-#include <QDir>
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -17,7 +11,7 @@ Local_and_Download::Local_and_Download(QWidget *parent)
     : QWidget(parent), ui(new Ui::Local_and_Download) {
   ui->setupUi(this);
   base = new Base(ui->tableWidget);
-
+  InitTableHeader();
   ui->tab_Widget->setTabText(0, tr("本地音乐"));
   ui->tab_Widget->setTabText(1, tr("下载与管理"));
   ui->tableWidget->setWindowFlags(Qt::CustomizeWindowHint |
@@ -78,18 +72,10 @@ void Local_and_Download::on_btn_openFile_clicked() {
   for (int index = 0; index != lists.length(); ++index) {
     //获取MP3 Tag 标签
     QStringList val = code.DeCodeTag(lists.at(index).toStdString().c_str());
-    ui->tableWidget->insertRow(index);
-    InsertDataInfoTableWidget(val, index);
+    base->InsertDataInfoTableWidget(val, index);
   }
   ui->lab_MusicSum->setText(tr("本地共有 %1 首歌曲").arg(lists.length()));
   //播放
-}
-
-void Local_and_Download::InsertDataInfoTableWidget(const QStringList &value,
-                                                   const int index) {
-  for (int row = 0; row != 5; ++row) {
-    ui->tableWidget->setItem(index, row, new QTableWidgetItem(value.at(row)));
-  }
 }
 
 void Local_and_Download::on_tableWidget_customContextMenuRequested(
@@ -116,6 +102,21 @@ void Local_and_Download::Menu() {
   listAct.push_back(nextplay);
   listAct.push_back(menu->addSeparator()); //设置间隔期)
   listAct.push_back(Del);
+}
+
+void Local_and_Download::InitTableHeader() {
+  QStringList HorizontalHeaderItem{QObject::tr("音乐标题"), QObject::tr("歌手"),
+                                   QObject::tr("专辑"), QObject::tr("时长"),
+                                   QObject::tr("大小")};
+  //获取列数
+  int column = HorizontalHeaderItem.count();
+  ui->tableWidget->setColumnCount(column);
+  //设置行高
+  ui->tableWidget->setLineWidth(10);
+  for (int x = 0; x != column; ++x) {
+    ui->tableWidget->setHorizontalHeaderItem(
+        x, new QTableWidgetItem(HorizontalHeaderItem.at(x)));
+  }
 }
 
 QTableWidget *Local_and_Download::getTable() { return ui->tableWidget; }

@@ -65,7 +65,7 @@ set(QRC_SOURCE_FILES resource.qrc)
 qt5_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
 
 #设置可执行文件
-add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_FILES}  ${USER_UI_PATH})
+add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_FILES}  ${USER_UI_PATH}  )
 
 # 链接Qt5的库
 target_link_libraries(${PRO_NAME} PRIVATE Qt5::Multimedia Qt5::Sql  Qt5::Widgets Qt5::Network  ${libs_path})

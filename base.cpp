@@ -1,4 +1,4 @@
-#include "base.h"
+﻿#include "base.h"
 #include <QDebug>
 #include <QHeaderView>
 #include <QLabel>
@@ -6,8 +6,6 @@
 #include <QTableWidget>
 #include <qtablewidget.h>
 Base::Base(QTableWidget *parent) : tab{parent} {
-  //允许QTableWidget接收QWidget::customContextMenuRequested()信号。
-  this->setContextMenuPolicy(Qt::CustomContextMenu);
   this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
   InitTableWidget();
 }
@@ -20,25 +18,14 @@ void Base::InitTableWidget() {
   // ui->tableWidget->setFrameShape(QFrame::NoFrame);
   //设置触发条件：不可编辑
   tab->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  tab->setSortingEnabled(false); //启动排序
-                                 // item 水平表头自适应大小
-
+  tab->setSortingEnabled(false); //启动排序           
+  // item 水平表头自适应大小
   tab->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
   tab->horizontalHeader()->setDefaultSectionSize(35);
   // item 垂直表头自适应大小
   // ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-  QStringList HorizontalHeaderItem{QObject::tr("音乐标题"), QObject::tr("歌手"),
-                                   QObject::tr("专辑"), QObject::tr("时长"),
-                                   QObject::tr("大小")};
-  //获取列数
-  int column = HorizontalHeaderItem.count();
-  tab->setColumnCount(column);
-  //设置行高
-  tab->setLineWidth(10);
-  for (int x = 0; x != column; ++x) {
-    tab->setHorizontalHeaderItem(
-        x, new QTableWidgetItem(HorizontalHeaderItem.at(x)));
-  }
+ 
+  //是否使用交替的颜色绘制背景
   tab->setAlternatingRowColors(true);
   tab->setSelectionBehavior(
       QAbstractItemView::SelectRows); //设置选择行为时每次选择一行
@@ -70,6 +57,14 @@ void Base::SerachData(QString search_data) {
         tab->setRowHidden(item.at(i)->row(), false);
       }
     }
+  }
+}
+
+void Base::InsertDataInfoTableWidget(const QStringList value,
+                                     const int index) {
+  tab->insertRow(index); //插入新的一行
+  for (int row = 0; row != column; ++row) {
+    tab->setItem(index, row, new QTableWidgetItem(value.at(row)));
   }
 }
 

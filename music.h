@@ -23,6 +23,7 @@ class Mp3tag;
 class Search;
 class PersonForm;
 class AudioDeCode;
+class QNetworkReply;
 class Local_and_Download;
 
 class Music : public QMainWindow {
@@ -77,7 +78,8 @@ public:
   //悬停提示
   void HoverTip();
   //播放歌曲
-  void setBottomInformation(Mp3tag *tag);
+  void SetBottonInformation(Mp3tag *tag);
+  void setBottomInformation();
   void PlayerMode();
   void Previous(QStringList &playerlist);
   void Next(QStringList &playerlist);
@@ -115,5 +117,7 @@ private slots:
   void on_btn_skin_clicked();
   void on_btn_personmessage_clicked();
   void on_lineEdit_search_returnPressed();
+  /***************播放搜索到的歌曲*****************/
+  void on_playSearchMusic(QString str);
 };
 #endif // MUSIC_H
