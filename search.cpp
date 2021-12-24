@@ -31,9 +31,23 @@ Search::Search(QWidget *parent) : QWidget(parent), ui(new Ui::Search) {
   ui->table_playlist->setWindowFlags(Qt::CustomizeWindowHint |
                                      Qt::FramelessWindowHint);
 
-  NetManager = new QNetworkAccessManager(this);
   connect(NetWorkUtil::instance(), &NetWorkUtil::finished, this,
           &Search::on_replyFinished);
+
+  NetManager = new QNetworkAccessManager(this);
+
+  connect(NetManager, &QNetworkAccessManager::finished, this,
+          [=](QNetworkReply *reply) {
+            if (reply->error() == QNetworkReply::NoError) {
+              QByteArray byte = reply->readAll();
+              AlbumArt.loadFromData(byte);
+              emit play(taglist.at(curindex).song_id);
+            }
+            reply->deleteLater();
+          });
+
+  qDebug() << QSslSocket::supportsSsl();                  //是否支持ssl
+  qDebug() << QSslSocket::sslLibraryBuildVersionString(); //依赖的ssl版本
 }
 
 Search::~Search() { delete ui; }
@@ -53,7 +67,7 @@ void Search::GetSearchText(QString &str) {
 
 void Search::Parsejson(QJsonObject &root) {
   //解析请求到的json文件
-  SearchResults.clear();
+  taglist.clear();
   // QJsonParseError eeor_t{};
   // QJsonDocument deocument = QJsonDocument::fromJson(byte, &eeor_t);
   // if (eeor_t.error == QJsonParseError::NoError) {
@@ -69,44 +83,47 @@ void Search::Parsejson(QJsonObject &root) {
         //获得第一层的json对象的value
         if (songs.isObject()) {
           QJsonObject songsobj = songs.toObject();
-          s_results.song_id = songsobj.value("id").toInt();
-          s_results.song_name = songsobj.value("name").toString();
-          s_results.duration = songsobj.value("duration").toInt();
-          s_results.mvid = songsobj.value("mvid").toInt();
+          tag.song_id = songsobj.value("id").toInt();
+          tag.song_name = songsobj.value("name").toString();
+          tag.duration = songsobj.value("duration").toInt();
+          tag.mvid = songsobj.value("mvid").toInt();
           auto artists = songsobj.value("artists");
           if (artists.isArray()) {
             auto artits_ary = artists.toArray();
             auto artits = artits_ary.at(0);
             if (artits.isObject()) {
               auto artitsobj = artits.toObject();
-              s_results.singer_id = artitsobj.value("id").toInt();
-              s_results.singer_name = artitsobj.value("name").toString();
+              tag.singer_id = artitsobj.value("id").toInt();
+              tag.singer_name = artitsobj.value("name").toString();
             }
           }
           //解析专辑这个json对象
           auto album = songsobj.value("album");
           if (album.isObject()) {
             auto albumobj = album.toObject();
-            s_results.album_id = albumobj.value("id").toInt();
-            s_results.album = albumobj.value("name").toString();
+            tag.album_id = albumobj.value("id").toInt();
+            tag.album = albumobj.value("name").toString();
             //将其加入list<SearchResults>
-            SearchResults.push_back(s_results);
+            taglist.push_back(tag);
           }
         }
       }
     }
   }
   base->DelTableWidgetRow();
-  for (int i = 0; i != SearchResults.count(); ++i) {
-    QString song_name = SearchResults.at(i).song_name;
-    QString singer_name = SearchResults.at(i).singer_name;
-    QString album = SearchResults.at(i).album;
+  for (int i = 0; i != taglist.count(); ++i) {
+    QString song_name = taglist.at(i).song_name;
+    QString singer_name = taglist.at(i).singer_name;
+    QString album = taglist.at(i).album;
     //将时间转换为分钟和秒钟
     QString duration =
         QString("%1 : %2")
-            .arg(SearchResults.at(i).duration / 1000 / 60, 2, 10, QChar('0'))
-            .arg((int)SearchResults.at(i).duration % 60, 2, 10, QChar('0'));
+            .arg(taglist.at(i).duration / 1000 / 60, 2, 10, QChar('0'))
+            .arg((int)taglist.at(i).duration % 60, 2, 10, QChar('0'));
     QStringList _list{song_name, singer_name, album, duration};
+    playlistID.push_back(
+        QString("https://music.163.com/song/media/outer/url?id=%1.mp3")
+            .arg(taglist.at(i).song_id));
     base->InsertDataInfoTableWidget(_list, i);
   }
 }
@@ -131,6 +148,7 @@ void Search::InitTableHeader() {
   }
 }
 
+//检查歌曲是否有版权
 void Search::ParseSongState(QJsonObject &root) {
   QJsonValue _obj = root;
   if (_obj.isObject()) {
@@ -164,33 +182,24 @@ void Search::NetWorkState(QNetworkReply *reply) {
   }
 }
 
+//歌曲详情
 void Search::ParseSongDetails(QJsonObject &root) {
   QJsonValue value = root.value("songs");
   if (value.isArray()) {
     auto songary = value.toArray();
-    if (songary.at(0).isObject()) {
-      auto songobj = songary.at(0).toObject();
+    QJsonValue s = songary.at(0);
+    if (s.isObject()) {
+      auto songobj = s.toObject();
       auto alVule = songobj.value("al");
       if (alVule.isObject()) {
         auto alobj = alVule.toObject();
-        picUrl = alobj.value("picUrl").toString();
-        //获取歌曲专辑封面
-        NetManager->get(QNetworkRequest(picUrl));
+        picUrl = alobj.value("picUrl").toString().toLocal8Bit();
         //获取专辑封面
-        // connect(NetManager, &QNetworkAccessManager::finished, this,
-        //        [&](QNetworkReply *reply) { //获取专辑封面
-        //          if (reply->error() == QNetworkReply::NoError) {
-        //            AlbumArt.loadFromData(reply->readAll());
-        //          }
-        //        });
-        return;
+        NetManager->get(QNetworkRequest(QString(picUrl)));
       }
     }
   }
 }
-
-
-
 
 void Search::on_replyFinished(QNetworkReply *reply) {
   if (reply->error() != QNetworkReply::NoError) {
@@ -198,7 +207,6 @@ void Search::on_replyFinished(QNetworkReply *reply) {
     NetWorkState(reply);
     return;
   }
-
   QByteArray byte{reply->readAll()};
   QJsonParseError eeor_t{};
   QJsonObject root{};
@@ -213,24 +221,30 @@ void Search::on_replyFinished(QNetworkReply *reply) {
   }
 
   RequestType reType = typeMap.value(reply);
+
   switch (reType) {
   case RequestType::songType:
     Parsejson(root);
     ui->btn_details->setText(
-        QString("歌手：%1").arg(SearchResults.at(0).singer_name));
+        QString("歌手：%1").arg(taglist.at(0).singer_name));
     break;
   case RequestType::stateType:
     ParseSongState(root);
     if (state.success == true) {
       qDebug() << "song success\n";
-
+      GetDetailsOfSong(curindex);
+      ParseSongDetails(root);
     } else {
       qDebug() << state.message << '\n';
+      QMessageBox::warning(this, tr("tip"), QString("%1").arg(state.message),
+                           QMessageBox::Yes);
     }
   case RequestType::Song_Details:
     //获取mp3的封面url地址
     ParseSongDetails(root);
+
     break;
+
   default:
     break;
   }
@@ -239,48 +253,32 @@ void Search::on_replyFinished(QNetworkReply *reply) {
 }
 
 void Search::on_btn_playall_clicked() {
-  playlistID.clear();
-  for (int i = 0; i != SearchResults.count(); ++i) {
-    playlistID.push_back(QString("%1").arg(SearchResults.at(i).song_id));
-  }
-  QString MusicID = playlistID.at(0);
-  qDebug() << "ID =" << MusicID << '\n';
- 
+  GetDetailsOfSong(0);
   curindex = 0;
-  
-  emit play(playlistID.at(0));
   //
 }
 
-void Search::getAlbumPic(const int i) { //获取歌曲详情，取得imageurl地址
-  //QNetworkReply *reply = NetWorkUtil::instance()->get(
-      //QString("http://cloud-music.pl-fe.cn/song/detail?ids=%1").arg(SearchResults.ser));
+void Search::GetDetailsOfSong(const int i) {
+  //获取歌曲详情
+  QNetworkReply *reply = NetWorkUtil::instance()->get(
+      QString("http://cloud-music.pl-fe.cn/song/detail?ids=%1")
+          .arg(taglist.at(i).song_id));
+  qDebug() << "ID = " << taglist.at(i).song_id << '\n';
 
-  //typeMap.insert(reply, RequestType::Song_Details);
+  typeMap.insert(reply, RequestType::Song_Details);
 }
 
-void Search::ParseAlbumPic(const int n) {
-
-}
-
+QPixmap Search::getAlbumArt() { return AlbumArt; }
 
 void Search::on_table_playlist_cellDoubleClicked(int row, int column) {
   Q_UNUSED(column);
-  int id = SearchResults.at(row).song_id;
+  curindex = row;
+  int id = taglist.at(row).song_id;
   QNetworkReply *Reply = NetWorkUtil::instance()->get(
       QString("http://cloud-music.pl-fe.cn/check/music?id=%1").arg(id));
+
   typeMap.insert(Reply, RequestType::stateType);
 }
 
 //下载全部
 void Search::on_btn_downloadall_clicked() {}
-
-// size == 0
-void Search::on_parsepci(QNetworkReply *reply) {
-  qDebug() << " reply->size(): " << reply->size() << "\n";
-  if (reply->error() == QNetworkReply::NoError) {
-    AlbumArt.loadFromData(reply->readAll());
-
-    return;
-  }
-}

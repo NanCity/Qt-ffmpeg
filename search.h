@@ -15,7 +15,7 @@ class Search;
 }
 
 //保存解析json得到的数据
-struct SearchResults {
+struct NetSongTag {
   int mvid;
   int song_id;
   int singer_id;
@@ -24,10 +24,10 @@ struct SearchResults {
   QString song_name;
   QString singer_name;
   QString album;
-  SearchResults()
+  NetSongTag()
       : song_id{}, singer_id{}, mvid{}, duration{}, song_name{}, album{},
         singer_name{}, album_id{} {};
-  ~SearchResults(){};
+  ~NetSongTag(){};
 };
 
 //歌曲是否可以播放
@@ -38,14 +38,14 @@ struct StateOfSong {
 };
 
 //由于不止一次用于请求数据，所以用一个枚举类型来区分
-enum class RequestType { songType, stateType, Song_Details, play_all };
+enum class RequestType { songType, stateType, Song_Details, play_all};
 class Search : public QWidget {
   Q_OBJECT
 
 public:
   explicit Search(QWidget *parent = nullptr);
   virtual ~Search();
-  int CurInex() { return curindex; }
+
   void InitPlayListTabWiget();
   void GetSearchText(QString &str);
   void Parsejson(QJsonObject &root);
@@ -53,33 +53,34 @@ public:
   void ParseSongState(QJsonObject &root);
   void NetWorkState(QNetworkReply *reply);
   void ParseSongDetails(QJsonObject &root);
-  void getAlbumPic(const int n);
-  void ParseAlbumPic(const int n);
+  void GetDetailsOfSong(const int n);
+  int CurInex() { return curindex; }
+  QStringList GetPlaylistID() { return playlistID; }
 
-  QList<SearchResults> getSearchResults() { return SearchResults; }
-  QPixmap getAlbumArt() { return AlbumArt; };
+
+  QList<NetSongTag> getSearchResults() { return taglist; }
+  QPixmap getAlbumArt();
 private slots:
   void on_btn_playall_clicked();
   void on_replyFinished(QNetworkReply *);
   void on_table_playlist_cellDoubleClicked(int row, int column);
   void on_btn_downloadall_clicked();
-  void on_parsepci(QNetworkReply *reply);
 signals:
-  void play(QString str);
-
+  void play(int songid);
+  void songID();
 private:
   Ui::Search *ui;
   int curindex{};
   QPixmap AlbumArt{};
   Base *base;
   QString picUrl{};
-  SearchResults s_results{};
+  NetSongTag tag{};
   StateOfSong state;
   QStringList playlistID{};
-  QList<SearchResults> SearchResults{};
+  QList<NetSongTag> taglist{};
+
   QNetworkRequest *NetRequest;
   QNetworkAccessManager *NetManager;
-
   //区分每次请求的类型
   QMap<QNetworkReply *, RequestType> typeMap;
 };

@@ -32,9 +32,9 @@ private:
   Ui::Music *ui;
   unsigned int CurrVolume{};
   bool sliderSeeking = false;
-
   int CurrentPlayerListIndex{0};
-
+  QStringList playlist{};
+  QMutex mutex{};
   Base *base;
   Login *login;
   lyric *lyr{};
@@ -100,6 +100,7 @@ protected:
 private slots:
   void onSeekOk();
   void onDuration(int, int);
+  void on_setPlatList(QStringList list);
   void setPlayMode(PlayMode &Mode);
   void on_btn_login_clicked();
   void on_btn_pictrue_clicked();
@@ -118,6 +119,6 @@ private slots:
   void on_btn_personmessage_clicked();
   void on_lineEdit_search_returnPressed();
   /***************播放搜索到的歌曲*****************/
-  void on_playSearchMusic(QString str);
+  void on_playSearchMusic(const int songid);
 };
 #endif // MUSIC_H

@@ -18,13 +18,13 @@ void Base::InitTableWidget() {
   // ui->tableWidget->setFrameShape(QFrame::NoFrame);
   //设置触发条件：不可编辑
   tab->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  tab->setSortingEnabled(false); //启动排序           
+  tab->setSortingEnabled(false); //启动排序
   // item 水平表头自适应大小
   tab->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
   tab->horizontalHeader()->setDefaultSectionSize(35);
   // item 垂直表头自适应大小
   // ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
- 
+
   //是否使用交替的颜色绘制背景
   tab->setAlternatingRowColors(true);
   tab->setSelectionBehavior(
@@ -60,15 +60,12 @@ void Base::SerachData(QString search_data) {
   }
 }
 
-void Base::InsertDataInfoTableWidget(const QStringList value,
-                                     const int index) {
+void Base::InsertDataInfoTableWidget(const QStringList value, const int index) {
   tab->insertRow(index); //插入新的一行
   for (int row = 0; row != column; ++row) {
     tab->setItem(index, row, new QTableWidgetItem(value.at(row)));
   }
 }
-
-
 
 /*******************初始化QAudioOutPut***********************/
 // Player::Player() : data_pcm(0) {

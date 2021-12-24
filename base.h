@@ -17,7 +17,7 @@ class Base : public QTableWidget {
 public:
   unsigned int column{5};
   explicit Base(QTableWidget *paren = nullptr);
-  ~Base();
+  virtual ~Base();
   QTableWidget *tab;
   void InitTableWidget();
   void DelTableWidgetRow();

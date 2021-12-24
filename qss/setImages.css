@@ -73,7 +73,7 @@ QPushButton#btn_login {
 
 /*左上角logo*/
 QLabel#title_logo {
-    background-image: url(":/images/logo.png");
+    background-image: url(":/images/top/logo.png");
 }
 
 QTextEdit#lab_search {

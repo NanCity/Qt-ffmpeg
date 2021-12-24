@@ -21,11 +21,13 @@ public:
   void InitTableHeader();
 
 private slots:
+ 
   void on_btn_openFile_clicked();
   void on_tableWidget_customContextMenuRequested(const QPoint &pos);
 signals:
   void t_play(const int index);
   void t_nextplay(const int index);
+  void t_loaded(QStringList list);
 
 private:
   Base *base{};

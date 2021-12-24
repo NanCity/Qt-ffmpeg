@@ -109,7 +109,7 @@ public: //状态检查
   controlType type;
   QAudioOutput *audio;
   explicit AudioDeCode();
-  ~AudioDeCode();
+  virtual  ~AudioDeCode();
   QStringList DeCodeTag(const char *filename);
   //QStringList DeCodeTag(const AVDictionaryEntry *tag);
   QImage Image();

@@ -1,11 +1,11 @@
-﻿#include <QTableWidget>
-#include "local_and_download.h"
+﻿#include "local_and_download.h"
 #include "ui_local_and_download.h"
 #include <QAction>
 #include <QDebug>
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTableWidget>
 
 Local_and_Download::Local_and_Download(QWidget *parent)
     : QWidget(parent), ui(new Ui::Local_and_Download) {
@@ -75,6 +75,7 @@ void Local_and_Download::on_btn_openFile_clicked() {
     base->InsertDataInfoTableWidget(val, index);
   }
   ui->lab_MusicSum->setText(tr("本地共有 %1 首歌曲").arg(lists.length()));
+  emit t_loaded(lists);
   //播放
 }
 

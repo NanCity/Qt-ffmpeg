@@ -11,7 +11,7 @@ Mp3tag *Mp3tag::tag = nullptr;
 AudioDeCode::AudioDeCode() {
   audio = nullptr;
   //注册所有的解码器格式
-  av_register_all();
+  //av_register_all(); 已被弃用
   //初始化网络库 （可以打开rtsp rtmp http协议的流媒体视频）
   avformat_network_init();
   type = controlType::control_none;
@@ -22,6 +22,7 @@ bool AudioDeCode::initAudio(int SampleRate) {
   QAudioFormat format;
   if (audio != NULL)
     return true;
+
   format.setSampleRate(SampleRate);                //设置采样率
   format.setChannelCount(2);                       //设置通道数
   format.setSampleSize(16);                        //样本数据16位
@@ -148,13 +149,6 @@ void AudioDeCode::runPlay() {
     return;
   }
 
-  //读取metadata中所有的tag
-  AVDictionaryEntry *tag{};
-  while (
-      (tag = av_dict_get(pFmtCtx->metadata, "", tag, AV_DICT_IGNORE_SUFFIX))) {
-    qDebug() << "key: " << tag->key << " value: " << tag->value << '\n';
-  }
-
   ret = avformat_find_stream_info(pFmtCtx, NULL); //初始化流信息
   if (ret != 0) {
     debugErr("avformat_find_stream_info", ret);
@@ -279,15 +273,19 @@ void AudioDeCode::runPlay() {
 
 QStringList AudioDeCode::DeCodeTag(const char *filename) {
   QStringList list{};
-   M_Format = avformat_alloc_context();
+  qDebug() << "Curmp3: " << filename << '\n';
+  M_Format = avformat_alloc_context();
   if (avformat_open_input(&M_Format, filename, NULL, NULL) != 0) {
-    ERROR("Error\n");
+    ERROR("Can't open file.\n");
   }
 
-  while (Tag = av_dict_get(M_Format->metadata, "", Tag, AV_DICT_IGNORE_SUFFIX)) {
-    qDebug() << "key=" << Tag->key << " value= " << Tag->value << "\n";
+  // 查找流信息，把它存入AVFormatContext中
+  if (avformat_find_stream_info(M_Format, 0) < 0) {
+    ERROR("Failed to obtain audio stream\n");
+  }
 
-
+  while (
+      (Tag = av_dict_get(M_Format->metadata, "", Tag, AV_DICT_IGNORE_SUFFIX))) {
 #ifdef __LINUX__ // Linux 操作系统的API
     /*  #include <strings.h>  */
     if (!strcasecmp(Tag->key, "title") || !strcasecmp(Tag->key, "artist") ||
@@ -309,8 +307,6 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
     list.append(Tag->value);
   }
 #endif
-    //获取音频时长
-    list.append(Duration());
     //获取音频文件的大小
     QFile fp(filename);
     QString _size =
@@ -318,9 +314,10 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
         " MB";
     list.append(_size);
     fp.close();
-    tag->Duration = Duration();
     tag->Size = _size;
+    tag->Duration = Duration();
     tag->Picture = Image();
+    list.append(Duration()); //获取音频时长
 #ifdef _DEBUG
     qDebug() << "Artis = " << tag->Artis << " Title = " << tag->Title
              << " Ablue = " << tag->Ablue << " Size = " << tag->Size
@@ -328,7 +325,7 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
 #endif // _DEBUG
     avformat_close_input(&M_Format);
     avformat_free_context(M_Format);
-    M_Format = nullptr;
+    // M_Format = nullptr;
     return list;
   }
 

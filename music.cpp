@@ -48,13 +48,14 @@ Music::Music(QWidget *parent)
   //关联ListWidget和TableWidget
   connect(ui->listWidget, &QListWidget::currentRowChanged, ui->stackedWidget,
           &QStackedWidget::setCurrentIndex);
+  connect(localMusic, &Local_and_Download::t_loaded, this,&Music::on_setPlatList);
 
   //双击播放
   connect(localMusic->getTable(), &QTableWidget::cellDoubleClicked, this, [=] {
     CurrentPlayerListIndex = localMusic->getTable()->currentRow();
     ui->btn_stop->setStyleSheet(
         "border-image:url(:/images/bottom/btn_pause_h.png)");
-    Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
+    Decode->play(playlist.at(CurrentPlayerListIndex));
     SetBottonInformation(Decode->GetTag());
   });
 
@@ -68,7 +69,8 @@ Music::Music(QWidget *parent)
   //接收鼠标右键菜单的信号
   connect(localMusic, &Local_and_Download::t_play, this,
           [this](const int index) {
-            Decode->play(localMusic->PlayerList().at(index));
+            //Decode->play(localMusic->PlayerList().at(index));
+            Decode->play(playlist.at(index));
             SetBottonInformation(Decode->GetTag());
           });
 
@@ -76,7 +78,7 @@ Music::Music(QWidget *parent)
   connect(localMusic, &Local_and_Download::t_nextplay, this,
           [=](const int index) {
             if (Decode->isFinished()) {
-              Decode->play(localMusic->PlayerList().at(index));
+              Decode->play(playlist.at(index));
               SetBottonInformation(Decode->GetTag());
             }
           });
@@ -119,7 +121,7 @@ void Music::init() {
   ui->Sli_volum->setValue(50);
 
   QPixmap pixmap;
-  pixmap.load(":/images/logo.png");
+  pixmap.load(":/images/top/logo.png");
   //    ui->btn_lyric->setStyleSheet("QPushButton#btn_lyric:!hover{background-color:rgb(103,
   //    103, 230)};");
   ui->title_logo->setPixmap(pixmap);
@@ -325,6 +327,8 @@ void Music::onDuration(int currentMs, int destMs) {
   }
 }
 
+void Music::on_setPlatList(QStringList list) { playlist = list; }
+
 //滑动滑块
 void Music::on_Sli_volum_valueChanged(int value) {
   //设置播放音量
@@ -378,7 +382,7 @@ void Music::on_btn_stop_clicked() {
       return;
     }
     CurrentPlayerListIndex = 0;
-    Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
+    Decode->play(playlist.at(CurrentPlayerListIndex));
     SetBottonInformation(Decode->GetTag());
     ui->btn_stop->setStyleSheet(
         "border-image:url(:/images/bottom/btn_pause_h.png)");
@@ -408,7 +412,11 @@ void Music::setBottomInformation() {
   QString artist = search->getSearchResults().at(n).singer_name;
   QString title = search->getSearchResults().at(n).song_name;
   QPixmap map = search->getAlbumArt();
+  //自适应缩放图片
+  ui->btn_pictrue->setSizePolicy(QSizePolicy::Expanding,
+                                 QSizePolicy::Expanding);
   ui->btn_pictrue->setIcon(map);
+  ui->btn_pictrue->setIconSize(ui->btn_pictrue->size());
   ui->lab_message->setText(QString("%1\n%2").arg(artist).arg(title));
   lyr->setMessage(map.toImage(), artist, title);
 }
@@ -420,7 +428,7 @@ void Music::Previous(QStringList &playerlist) {
     if (CurrentPlayerListIndex == -1) {
       CurrentPlayerListIndex = playerlist.length() - 1;
     }
-    Decode->play(playerlist.at(CurrentPlayerListIndex));
+    Decode->play(playlist.at(CurrentPlayerListIndex));
     SetBottonInformation(Decode->GetTag());
   } else {
     QMessageBox::information(this, tr("Error"), tr("播放列表为空!!!!"),
@@ -434,7 +442,7 @@ void Music::Next(QStringList &playerlist) {
     if (CurrentPlayerListIndex == playerlist.length()) {
       CurrentPlayerListIndex = 0;
     }
-    Decode->play(playerlist.at(CurrentPlayerListIndex));
+    Decode->play(playlist.at(CurrentPlayerListIndex));
     SetBottonInformation(Decode->GetTag());
   } else {
     QMessageBox::information(this, tr("Error"), tr("播放列表为空!!!!"),
@@ -453,7 +461,7 @@ void Music::on_btn_next_clicked() {
   if (CurrentPlayerListIndex >= localMusic->PlayerList().length()) {
     CurrentPlayerListIndex = 0;
   }
-  Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
+  Decode->play(playlist.at(CurrentPlayerListIndex));
   SetBottonInformation(Decode->GetTag());
 }
 
@@ -527,7 +535,7 @@ void Music::PlayerMode() {
     CurrentPlayerListIndex = qrand() % localMusic->PlayerList().length();
     break;
   }
-  Decode->play(localMusic->PlayerList().at(CurrentPlayerListIndex));
+  Decode->play(playlist.at(CurrentPlayerListIndex));
   SetBottonInformation(Decode->GetTag());
 }
 
@@ -579,9 +587,17 @@ void Music::on_lineEdit_search_returnPressed() {
   }
 }
 
-void Music::on_playSearchMusic(QString str) {
-  QString url =
-      QString("https://music.163.com/song/media/outer/url?id=%1.mp3").arg(str);
+void Music::on_playSearchMusic(const int songid) {
+  mutex.lock();
   setBottomInformation();
+  mutex.unlock();
+
+  playlist.clear();
+  playlist = search->GetPlaylistID();
+
+  QString url = QString("https://music.163.com/song/media/outer/url?id=%1.mp3")
+                    .arg(songid);
   Decode->play(url);
+
+
 }

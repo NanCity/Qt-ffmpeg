@@ -6,10 +6,8 @@ class NetWorkUtil : public QObject {
   Q_OBJECT
 public:
   static NetWorkUtil *instance();
-
   QNetworkReply *get(const QString &url);
-
-  ~NetWorkUtil();
+  virtual ~NetWorkUtil();
 signals:
   void finished(QNetworkReply *reply);
 public slots:

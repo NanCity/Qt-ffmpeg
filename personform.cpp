@@ -1,39 +1,35 @@
-#include "personform.h"
+ï»¿#include "personform.h"
 #include "ui_personform.h"
 
-PersonForm::PersonForm(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::PersonForm)
-{
-    ui->setupUi(this);
-	//ÉèÖÃÎÞ±ß¿ò
-	setWindowFlags(Qt::Window | \
-		Qt::FramelessWindowHint | \
-		Qt::WindowSystemMenuHint | \
-		Qt::WindowMinMaxButtonsHint \
-	);
-    ui->listWidget->setStyleSheet("background-color:transparent;");
+PersonForm::PersonForm(QWidget *parent)
+    : QWidget(parent), ui(new Ui::PersonForm) {
+  ui->setupUi(this);
+  //è®¾ç½®æ— è¾¹æ¡†
+  setWindowFlags(Qt::Window | Qt::FramelessWindowHint |
+                 Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint);
+  ui->listWidget->setStyleSheet("background-color:transparent;");
 
-    this->setStyleSheet("background-color:pink");
-    initListWidget();
+  this->setStyleSheet("background-color:pink");
+  initListWidget();
 }
 
-PersonForm::~PersonForm()
-{
-    delete ui;
+PersonForm::~PersonForm() { delete ui; }
+
+void PersonForm::initListWidget() {
+
+  // ui->listWidget->item(0)->setIcon(QIcon("border-image:
+  // url(:/images/btn_openfile_n.png)"));
+  // ui->listWidget->item(2)->setIcon(QIcon("border-image:
+  // url(:/images/btn_openfile_n.png)"));
+  // ui->listWidget->item(3)->setIcon(QIcon("border-image:
+  // url(:/images/btn_openfile_n.png)"));
+  // ui->listWidget->item(5)->setIcon(QIcon("border-image:
+  // url(:/images/btn_openfile_n.png)"));
+  // ui->listWidget->item(6)->setIcon(QIcon("border-image:
+  // url(:/images/btn_openfile_n.png)"));
 }
 
-void PersonForm::initListWidget()
-{
-	
-	//ui->listWidget->item(0)->setIcon(QIcon("border-image: url(:/images/btn_openfile_n.png)"));
-	//ui->listWidget->item(2)->setIcon(QIcon("border-image: url(:/images/btn_openfile_n.png)"));
-	//ui->listWidget->item(3)->setIcon(QIcon("border-image: url(:/images/btn_openfile_n.png)"));
-	//ui->listWidget->item(5)->setIcon(QIcon("border-image: url(:/images/btn_openfile_n.png)"));
-	//ui->listWidget->item(6)->setIcon(QIcon("border-image: url(:/images/btn_openfile_n.png)"));
-}
-
-void PersonForm::leaveEvent(QEvent* event) {
-    Q_UNUSED(event);
-    this->close();
+void PersonForm::leaveEvent(QEvent *event) {
+  Q_UNUSED(event);
+  this->close();
 }

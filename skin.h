@@ -1,47 +1,48 @@
-#ifndef SKIN_H
+﻿#ifndef SKIN_H
 #define SKIN_H
 
+#include <QByteArray>
 #include <QDialog>
 #include <QFile>
-#include <QByteArray>
 class QDebug;
 
-#define  ERROR(rhs) qDebug()<<"FileName: "<<__FILE__\
-				<<" line: "<<__LINE__<<' '<<rhs<<endl;
+#define ERROR(rhs)                                                             \
+  qDebug() << "FileName: " << __FILE__ << " line: " << __LINE__ << ' ' << rhs  \
+           << endl;
 
 namespace Ui {
-	class skin;
+class skin;
 }
 
-class skin : public QDialog
-{
-	Q_OBJECT
+class skin : public QDialog {
+  Q_OBJECT
 
 public:
-	explicit skin(QWidget* parent = nullptr);
-	~skin();
-	void init();
-	void OpenQssFile(QString path);
+  explicit skin(QWidget *parent = nullptr);
+  virtual ~skin();
+  void init();
+  void OpenQssFile(QString path);
 signals:
-	void setThem(QByteArray aray);
+  void setThem(QByteArray aray);
+
 protected:
-	void leaveEvent(QEvent* event);
+  void leaveEvent(QEvent *event);
 private slots:
-	void on_btn_black_clicked();
+  void on_btn_black_clicked();
 
-	void on_btn_red_clicked();
+  void on_btn_red_clicked();
 
-	void on_btn_pin_clicked();
+  void on_btn_pin_clicked();
 
-	void on_btn_blue_clicked();
+  void on_btn_blue_clicked();
 
-	void on_btn_green_clicked();
+  void on_btn_green_clicked();
 
-	void on_btn_gold_clicked();
+  void on_btn_gold_clicked();
 
 private:
-	Ui::skin* ui;
-	QFile qssfile{};
+  Ui::skin *ui;
+  QFile qssfile{};
 };
 
 #endif // SKIN_H
