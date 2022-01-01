@@ -40,9 +40,10 @@ Local_and_Download::Local_and_Download(QWidget *parent)
   connect(Del, &QAction::triggered, this, [=]() {
     int currow = ui->tableWidget->currentRow();
     ui->tableWidget->removeRow(currow);
-    lists.removeAt(currow);
+    //lists.removeAt(currow);
     qDebug() << "currow: " << currow << '\n';
     ui->lab_MusicSum->setText(tr("本地共有 %1 首歌曲").arg(lists.length()));
+    emit t_delete(currow);
   });
 }
 
@@ -119,5 +120,6 @@ void Local_and_Download::InitTableHeader() {
         x, new QTableWidgetItem(HorizontalHeaderItem.at(x)));
   }
 }
+
 
 QTableWidget *Local_and_Download::getTable() { return ui->tableWidget; }

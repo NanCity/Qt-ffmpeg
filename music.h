@@ -1,12 +1,12 @@
 ﻿
 #ifndef MUSIC_H
 #define MUSIC_H
+#include "tag.h"
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include <QMainWindow>
 #include <QMutex>
 #include <QTableWidget>
-
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class Music;
@@ -23,13 +23,16 @@ class Mp3tag;
 class Search;
 class PersonForm;
 class AudioDeCode;
-class QNetworkReply;
+class DesktopLyrics;
+//class QNetworkReply;
 class Local_and_Download;
 
 class Music : public QMainWindow {
   Q_OBJECT
 private:
+  int sec{};
   Ui::Music *ui;
+  QString SongName{};
   unsigned int CurrVolume{};
   bool sliderSeeking = false;
   int CurrentPlayerListIndex{0};
@@ -40,8 +43,10 @@ private:
   lyric *lyr{};
   skin *Skin;
   Search *search;
+//  DesktopLyrics *dest;
   //解码器
   AudioDeCode *Decode;
+  M_Tag &tag = M_Tag::GetInstance();
   QTableWidget *tableWidget{};
   //检查鼠标是否移动
   bool mMoving = false;
@@ -68,6 +73,8 @@ private:
     Random
   };
   PlayMode Mode;
+  //判断当前播放列表
+  int curCoding{0};
 
 public:
   explicit Music(QWidget *parent = nullptr);
@@ -78,11 +85,15 @@ public:
   //悬停提示
   void HoverTip();
   //播放歌曲
-  void SetBottonInformation(Mp3tag *tag);
-  void setBottomInformation();
+  // void SetBottonInformation(Mp3tag *tag);
+  // void setBottomInformation();
   void PlayerMode();
   void Previous(QStringList &playerlist);
   void Next(QStringList &playerlist);
+  void NetCodec();
+  template <typename T> void SetBottonInformation(T &rhs = nullptr);
+signals:
+  void updateSongLrc(int sec);
 
 protected:
   //重写键盘事件
@@ -107,6 +118,7 @@ private slots:
   void on_btn_stop_clicked();
   void on_btn_mode_clicked();
   void on_btn_next_clicked();
+  void on_btn_lyric_clicked();
   void on_btn_max_clicked();
   void on_btn_prev_clicked();
   void on_btn_volum_clicked();
@@ -122,3 +134,20 @@ private slots:
   void on_playSearchMusic(const int songid);
 };
 #endif // MUSIC_H
+
+template <typename T> inline void Music::SetBottonInformation(T &rhs) {
+  if (0 == curCoding) {
+    Decode->DeCodeTag(playlist.at(CurrentPlayerListIndex).toLocal8Bit());
+  }
+
+  ui->btn_pictrue->setIcon(rhs.GetAblueArt());
+  ui->btn_pictrue->setIconSize(ui->btn_pictrue->size());
+  ui->lab_message->setText(
+      QString("%1\n%2").arg(rhs.GetArtist()).arg(rhs.GetTitle()));
+  ui->lab_time->setText(rhs.GetDuration());
+  lyr->setMessage(rhs.GetAblueArt().toImage(), rhs.GetArtist(), rhs.GetTitle());
+  SongName = rhs.GetTitle();
+  lyr->setpic(rhs.GetAblueArt());
+  //获取歌词
+  lyr->GetTheLyricsName(SongName);
+}

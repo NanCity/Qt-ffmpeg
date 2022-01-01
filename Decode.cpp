@@ -1,17 +1,14 @@
 ﻿#include "Decode.h"
-#include "libavcodec/packet.h"
-#include "libavutil/avutil.h"
+#include "tag.h"
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
-#include <cstring>
-#include <qobject.h>
-Mp3tag *Mp3tag::tag = nullptr;
+// Mp3tag *Mp3tag::tag = nullptr;
 
 AudioDeCode::AudioDeCode() {
   audio = nullptr;
   //注册所有的解码器格式
-  //av_register_all(); 已被弃用
+  // av_register_all(); 已被弃用
   //初始化网络库 （可以打开rtsp rtmp http协议的流媒体视频）
   avformat_network_init();
   type = controlType::control_none;
@@ -294,13 +291,16 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
       list.append(Tag->value);
     }
 #elif WIN32 // windows 操作系统的API
-    if (!stricmp(Tag->key, "title")) {
-      tag->Title = Tag->value;
-    } else if (!stricmp(Tag->key, "artist")) {
-      tag->Artis = Tag->value;
+    if (!_stricmp(Tag->key, "title")) {
+      // tag->Title = Tag->value;
+      tag.SetTitle(Tag->value);
+    } else if (!_stricmp(Tag->key, "artist")) {
+      // tag->Artis = Tag->value;
+      tag.SetArtist(Tag->value);
 
-    } else if (!stricmp(Tag->key, "album")) {
-      tag->Ablue = Tag->value;
+    } else if (!_stricmp(Tag->key, "album")) {
+      // tag->Ablue = Tag->value;
+      tag.SetAblue(Tag->value);
     } else {
       continue; //跳过一些无用tag信息
     }
@@ -314,14 +314,17 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
         " MB";
     list.append(_size);
     fp.close();
-    tag->Size = _size;
-    tag->Duration = Duration();
-    tag->Picture = Image();
+    // tag->Size = _size;
+    tag.SetSize(_size);
+    // tag->Duration = Duration();
+    tag.SetDuration(Duration());
+    // tag->Picture = Image();
+    tag.SetAblueArt(Image());
     list.append(Duration()); //获取音频时长
 #ifdef _DEBUG
-    qDebug() << "Artis = " << tag->Artis << " Title = " << tag->Title
-             << " Ablue = " << tag->Ablue << " Size = " << tag->Size
-             << " Duration = " << tag->Duration << "\n";
+    /*  qDebug() << "Artis = " << tag->Artis << " Title = " << tag->Title
+               << " Ablue = " << tag->Ablue << " Size = " << tag->Size
+               << " Duration = " << tag->Duration << "\n";*/
 #endif // _DEBUG
     avformat_close_input(&M_Format);
     avformat_free_context(M_Format);
@@ -329,20 +332,22 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
     return list;
   }
 
-  QImage AudioDeCode::Image() {
+  QPixmap AudioDeCode::Image() {
     if (M_Format->iformat->read_header(M_Format) < 0) {
       printf("No header format");
     }
-    for (int i = 0; i < M_Format->nb_streams; i++) {
+    for (unsigned int i = 0; i < M_Format->nb_streams; i++) {
       if (M_Format->streams[i]->disposition & AV_DISPOSITION_ATTACHED_PIC) {
         AVPacket pkt = M_Format->streams[i]->attached_pic;
         //使用QImage读取完整图片数据（注意，图片数据是为解析的文件数据，需要用QImage::fromdata来解析读取）
-        tag->Picture = QImage::fromData((uchar *)pkt.data, pkt.size);
-        // imageWidget->setPixmap(QPixmap::fromImage(img));
+        QImage image = QImage::fromData((uchar *)pkt.data, pkt.size);
+        // tag->Picture = QPixmap::fromImage(image);
+        tag.SetAblueArt(QPixmap::fromImage(image));
         break;
       }
     }
-    return tag->Picture;
+    // return tag->Picture;
+    return tag.GetAblueArt();
   }
 
   QString AudioDeCode::Duration() {

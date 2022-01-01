@@ -1,6 +1,6 @@
 ﻿#ifndef SEARCH_H
 #define SEARCH_H
-
+#include "tag.h"
 #include <QMap>
 #include <QWidget>
 class QNetworkAccessManager;
@@ -9,7 +9,6 @@ class QNetworkReply;
 class Base;
 #define ERROR(string)                                                          \
   qDebug() << __FILE__ << ' ' << __LINE__ << ' ' << string << '\n';
-
 namespace Ui {
 class Search;
 }
@@ -38,16 +37,16 @@ struct StateOfSong {
 };
 
 //由于不止一次用于请求数据，所以用一个枚举类型来区分
-enum class RequestType { songType, stateType, Song_Details, play_all};
+enum class RequestType { songType, stateType, Song_Details, play_all };
 class Search : public QWidget {
   Q_OBJECT
 
 public:
   explicit Search(QWidget *parent = nullptr);
   virtual ~Search();
-
+  int curindex{};
   void InitPlayListTabWiget();
-  void GetSearchText(QString &str);
+  void GetSearchText(QString str);
   void Parsejson(QJsonObject &root);
   void InitTableHeader();
   void ParseSongState(QJsonObject &root);
@@ -55,11 +54,10 @@ public:
   void ParseSongDetails(QJsonObject &root);
   void GetDetailsOfSong(const int n);
   int CurInex() { return curindex; }
+  QStringList SetPlayList() { return playlistID; }
   QStringList GetPlaylistID() { return playlistID; }
 
-
   QList<NetSongTag> getSearchResults() { return taglist; }
-  QPixmap getAlbumArt();
 private slots:
   void on_btn_playall_clicked();
   void on_replyFinished(QNetworkReply *);
@@ -68,17 +66,17 @@ private slots:
 signals:
   void play(int songid);
   void songID();
+
 private:
+   
   Ui::Search *ui;
-  int curindex{};
-  QPixmap AlbumArt{};
   Base *base;
   QString picUrl{};
+  M_Tag& tempTag = M_Tag::GetInstance();
   NetSongTag tag{};
   StateOfSong state;
   QStringList playlistID{};
   QList<NetSongTag> taglist{};
-
   QNetworkRequest *NetRequest;
   QNetworkAccessManager *NetManager;
   //区分每次请求的类型

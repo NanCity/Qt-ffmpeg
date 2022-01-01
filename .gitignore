@@ -61,6 +61,7 @@ Json/
 *.txt.*
 
 # MinGW generated files
+lyric
 out
 Debug
 build

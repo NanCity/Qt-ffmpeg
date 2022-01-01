@@ -14,7 +14,7 @@
    <string>Music</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QGridLayout" name="gridLayout_3">
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -25,7 +25,7 @@
      <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>8</number>
+     <number>0</number>
     </property>
     <property name="spacing">
      <number>0</number>
@@ -387,37 +387,194 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout_11">
-      <property name="spacing">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="horizontalSpacing">
        <number>0</number>
       </property>
-      <item>
-       <widget class="QListWidget" name="listWidget">
+      <item row="0" column="0">
+       <widget class="QScrollArea" name="scrollArea">
         <property name="minimumSize">
          <size>
-          <width>270</width>
+          <width>198</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>196</width>
+          <width>197</width>
           <height>16777215</height>
          </size>
         </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
+        <property name="widgetResizable">
+         <bool>true</bool>
         </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents_2">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>196</width>
+           <height>562</height>
+          </rect>
+         </property>
+         <widget class="QListWidget" name="listWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>196</width>
+            <height>262</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>196</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>196</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <item>
+           <property name="text">
+            <string>发现音乐</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>播客</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>视频</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>关注</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>直播</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>私人FM</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QLabel" name="label_4">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>266</y>
+            <width>196</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>196</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>196</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+            <italic>false</italic>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(108, 108, 108);</string>
+          </property>
+          <property name="text">
+           <string>我的音乐</string>
+          </property>
+          <property name="scaledContents">
+           <bool>false</bool>
+          </property>
+          <property name="wordWrap">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QListWidget" name="down_listWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>300</y>
+            <width>196</width>
+            <height>262</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>196</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>196</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <item>
+           <property name="text">
+            <string>本地与下载</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>最近播放</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>我的音乐云盘</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>我的博客</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>我的收藏</string>
+           </property>
+          </item>
+         </widget>
+        </widget>
        </widget>
       </item>
-      <item>
+      <item row="0" column="1">
        <widget class="QStackedWidget" name="stackedWidget">
-        <property name="currentIndex">
-         <number>0</number>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
-        <widget class="QWidget" name="page_9">
-         <layout class="QGridLayout" name="gridLayout_9"/>
-        </widget>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="page_9"/>
         <widget class="QWidget" name="page_10"/>
        </widget>
       </item>
@@ -852,6 +1009,8 @@
      </widget>
     </item>
    </layout>
+   <zorder>botton_widget</zorder>
+   <zorder>TopWidget</zorder>
   </widget>
  </widget>
  <resources/>

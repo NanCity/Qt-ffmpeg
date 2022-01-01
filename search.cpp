@@ -11,7 +11,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QPixmap>
 #include <QString>
 // http://cloud-music.pl-fe.cn/
 Search::Search(QWidget *parent) : QWidget(parent), ui(new Ui::Search) {
@@ -20,12 +19,10 @@ Search::Search(QWidget *parent) : QWidget(parent), ui(new Ui::Search) {
   InitTableHeader();
   this->setWindowFlags(Qt::X11BypassWindowManagerHint |
                        Qt::FramelessWindowHint);
-
   InitPlayListTabWiget();
   //初始化表头
 
-  ui->scrollArea->setWindowFlags(Qt::CustomizeWindowHint |
-                                 Qt::FramelessWindowHint);
+  ui->scrollArea->setFrameShape(QFrame::NoFrame);
   ui->tabWidget->setWindowFlags(Qt::CustomizeWindowHint |
                                 Qt::FramelessWindowHint);
   ui->table_playlist->setWindowFlags(Qt::CustomizeWindowHint |
@@ -40,9 +37,12 @@ Search::Search(QWidget *parent) : QWidget(parent), ui(new Ui::Search) {
           [=](QNetworkReply *reply) {
             if (reply->error() == QNetworkReply::NoError) {
               QByteArray byte = reply->readAll();
-              AlbumArt.loadFromData(byte);
+              QPixmap map;
+              map.loadFromData(byte);
+              tempTag.SetAblueArt(map);
               emit play(taglist.at(curindex).song_id);
             }
+            qDebug() << "temA" << tempTag.GetAblueArt();
             reply->deleteLater();
           });
 
@@ -56,11 +56,10 @@ void Search::InitPlayListTabWiget() {
   ui->tabWidget->setStyleSheet("QTabBar::tab{width:120px;height:30px;");
 }
 
-void Search::GetSearchText(QString &str) {
+void Search::GetSearchText(QString str) {
   ui->lab_song->setText(str);
   QString url =
-      QString("http://cloud-music.pl-fe.cn/search?keywords=%1?type=100")
-          .arg(str);
+      QString("http://cloud-music.pl-fe.cn/search?keywords=%1").arg(str);
   QNetworkReply *Reply = NetWorkUtil::instance()->get(url);
   typeMap.insert(Reply, RequestType::songType);
 }
@@ -72,6 +71,7 @@ void Search::Parsejson(QJsonObject &root) {
   // QJsonDocument deocument = QJsonDocument::fromJson(byte, &eeor_t);
   // if (eeor_t.error == QJsonParseError::NoError) {
   //  QJsonObject root = deocument.object();
+  QStringList list{};
   QJsonValue result = root.value("result");
   if (result.isObject()) {
     QJsonObject resultobj = result.toObject();
@@ -127,7 +127,6 @@ void Search::Parsejson(QJsonObject &root) {
     base->InsertDataInfoTableWidget(_list, i);
   }
 }
-//}
 
 void Search::InitTableHeader() {
   QStringList HorizontalHeaderItem{
@@ -190,10 +189,21 @@ void Search::ParseSongDetails(QJsonObject &root) {
     QJsonValue s = songary.at(0);
     if (s.isObject()) {
       auto songobj = s.toObject();
+      // tempTag.Title = songobj.value("name").toString();
+      tempTag.SetTitle(songobj.value("name").toString());
+      auto ar = songobj.value("ar");
+      if (ar.isArray()) {
+        auto arary = ar.toArray();
+        /* tempTag.Artist = arary.at(0).toObject().value("name").toString();*/
+        tempTag.SetArtist(arary.at(0).toObject().value("name").toString());
+      }
       auto alVule = songobj.value("al");
       if (alVule.isObject()) {
         auto alobj = alVule.toObject();
+        // tempTag.Ablue = alobj.value("name").toString();
+        tempTag.SetAblue(alobj.value("name").toString());
         picUrl = alobj.value("picUrl").toString().toLocal8Bit();
+        qDebug() << "pcicur" << picUrl << '\n';
         //获取专辑封面
         NetManager->get(QNetworkRequest(QString(picUrl)));
       }
@@ -268,15 +278,12 @@ void Search::GetDetailsOfSong(const int i) {
   typeMap.insert(reply, RequestType::Song_Details);
 }
 
-QPixmap Search::getAlbumArt() { return AlbumArt; }
-
 void Search::on_table_playlist_cellDoubleClicked(int row, int column) {
   Q_UNUSED(column);
   curindex = row;
   int id = taglist.at(row).song_id;
   QNetworkReply *Reply = NetWorkUtil::instance()->get(
       QString("http://cloud-music.pl-fe.cn/check/music?id=%1").arg(id));
-
   typeMap.insert(Reply, RequestType::stateType);
 }
 

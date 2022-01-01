@@ -6,8 +6,7 @@
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
-  a.setStyle(QStyleFactory::create("macintosh"));  //设置窗口风格
-                                                   //设置中文编码
+  a.setStyle(QStyleFactory::create("macintosh"));  //设置窗口风格     
   /* #if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
    #if _MSC_VER
      QTextCodec *codec = QTextCodec::codecForName("GBK");

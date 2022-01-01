@@ -16,8 +16,8 @@ void skin::leaveEvent(QEvent *event) {
 }
 
 void skin::init() {
-  ui->tabWidget->setTabText(0, tr("主题"));
-  ui->tabWidget->setTabText(1, tr("纯色"));
+  ui->tabWidget->setTabText(0, "主题");
+  ui->tabWidget->setTabText(1,"纯色");
 }
 
 void skin::OpenQssFile(QString path) {
@@ -26,7 +26,7 @@ void skin::OpenQssFile(QString path) {
     qssfile.readAll();
     emit setThem(qssfile.readAll());
   } else {
-    ERROR("error:can't open qss file\n");
+    perror(path.toStdString().data());
   }
   qssfile.close();
 }

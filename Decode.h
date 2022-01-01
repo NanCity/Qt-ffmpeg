@@ -4,11 +4,11 @@
 
 #include <QAudioFormat>
 #include <QAudioOutput>
-#include <QImage>
+#include <QPixmap>
 #include <QString>
 #include <QStringList>
 #include <QThread>
-#include <QUrl>
+#include "tag.h"
 /*
  * 导入外部 FFmpeg 库头文件
  */
@@ -23,11 +23,12 @@ extern "C" {
 #include <libavutil/mathematics.h>
 #include <libavutil/time.h>
 #include <libswresample/swresample.h>
+#include <libavcodec/packet.h>
+#include <libavutil/avutil.h>
 }
 
 //方便调试，不需要打印东西的时候设置为0
 #define DEBUG 1
-
 //打印key value的之4
 #define MESSAGE(Artis, value, format)                                          \
   qDebug() << "Key = " << key << " Value = " << value                          \
@@ -41,36 +42,41 @@ extern "C" {
  * Size       --- 大小
  * Duration   --- 时长
  */
-class Mp3tag {
-private:
-  Mp3tag() : Artis{}, Title{}, Ablue{}, Size{}, Duration{}, Picture{} {}
-
-public:
-  QString Artis;
-  QString Title;
-  QString Ablue;
-  QString Size;
-  QString Duration;
-  QImage Picture;
-  class cgMp3tag {
-  public:
-    ~cgMp3tag() {
-      delete Mp3tag::tag;
-      Mp3tag::tag = nullptr;
-    }
-  };
-  ~Mp3tag() {}
-  static Mp3tag *tag;
-  static Mp3tag *init() {
-    {
-      if (tag == nullptr) {
-        tag = new Mp3tag();
-        static cgMp3tag CG; //回收垃圾
-      }
-      return tag;
-    }
-  }
-};
+//class Mp3tag {
+//private:
+//  Mp3tag() : Artis{}, Title{}, Ablue{}, Size{}, Duration{}, Picture{} {}
+//
+//public:
+//  QString Artis;
+//  QString Title;
+//  QString Ablue;
+//  QString Size;
+//  QString Duration;
+//  QPixmap Picture;
+//
+//  class cgMp3tag {
+//  public:
+//    ~cgMp3tag() {
+//      delete Mp3tag::tag;
+//      Mp3tag::tag = nullptr;
+//    }
+//  };
+//  ~Mp3tag() {}
+//  static Mp3tag *tag;
+//  static Mp3tag *init() {
+//    {
+//      if (tag == nullptr) {
+//        tag = new Mp3tag();
+//        static cgMp3tag CG; //回收垃圾
+//      }
+//      return tag;
+//    }
+//  }
+//  QString GetArtis() { return Artis; }
+//  QString GetTitle() { return Title; }
+//  QString GetAblue() { return Ablue; }
+//  QPixmap GetAlbumArt() { return Picture; }
+//};
 
 //音频解码
 class AudioDeCode : public QThread {
@@ -78,17 +84,17 @@ class AudioDeCode : public QThread {
 private:
   int seekMs{};
   QString url{};
-  Mp3tag *tag = Mp3tag::init();
+  //Mp3tag *tag = Mp3tag::init();
   /*AVFormatContext 结构体中有一个属性是metadata,
   我们在读取一个多媒体文件的时候，可以通过AVDictionaryEntry访问这个属性的数据
-  */ 
+  */
   AVFormatContext *M_Format = NULL;
   AVFormatContext *pFmtCtx = NULL;
   //保存mp3-tag标签
   AVDictionaryEntry *Tag = NULL;
   //查询是音频流还是视频流
   int audioindex{-1};
-signals:  
+signals:
   void ERROR(QString str);
   void duration(int, int);
   void seekOk();   //处理控制,判断是否需要停止
@@ -98,22 +104,23 @@ protected:
   void run();
 
 public: //状态检查
-    enum class controlType {
-        control_none,
-        control_stop,   //停止
-        control_pause,  //暂停
-        control_resume, //恢复
-        control_play,   //播放
-        control_seek,   //滑动
-    };
+  enum class controlType {
+    control_none,
+    control_stop,   //停止
+    control_pause,  //暂停
+    control_resume, //恢复
+    control_play,   //播放
+    control_seek,   //滑动
+  };
+  //Mp3tag *tag{};
+  M_Tag &tag = M_Tag::GetInstance();
   controlType type;
   QAudioOutput *audio;
   explicit AudioDeCode();
-  virtual  ~AudioDeCode();
+  virtual ~AudioDeCode();
   QStringList DeCodeTag(const char *filename);
-  //QStringList DeCodeTag(const AVDictionaryEntry *tag);
-  QImage Image();
-  Mp3tag *GetTag() { return tag; };
+  QPixmap Image();
+  //M_Tag &GetTag() { return tag; };
   //获取mp3进度
   QString Duration();
   void play(const QString &url);

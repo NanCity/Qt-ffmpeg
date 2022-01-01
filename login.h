@@ -48,11 +48,12 @@ public:
   void WriteJson() const;
   void ReadJson();
   bool ParseJson(QJsonValue &value);
+
 private slots:
   void on_btn_signin_clicked();
   void replyFinished(QNetworkReply *);
   void checkBoxState(int state);
-  bool checkInput(QString &str, const QRegExp regx, const int n);
+  bool checkInput(QString str, const QRegExp regx, const int n);
 
 private:
   Ui::Login *ui;

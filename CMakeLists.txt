@@ -5,17 +5,16 @@ set (PRO_NAME Music)
 PROJECT(${PRO_NAME})
 
 #创建构建目录
-file(MAKE_DIRECTORY bin)
+file(MAKE_DIRECTORY bin lyric)
 #设置编译器
 set(CMAKE_CXX_COMPILE "g++")
-
 
 # 从Qt设计师文件列表中创建代码
 set(CMAKE_AUTOUIC ON)
 # 设置CMake在需要时自动运行moc
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 # 在相应的构建目录中查找头文件
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -64,7 +63,7 @@ find_package(Qt5 COMPONENTS Widgets Multimedia Network REQUIRED)
 #qt_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
 qt5_add_resources(QRC_SOURCE_FILES resource.qrc)
 #设置可执行文件
-add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH}  )
+add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH})
 
 # 链接Qt5的库
 target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network  ${libs_path})

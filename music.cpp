@@ -10,6 +10,8 @@
 #include "personform.h"
 #include "search.h"
 #include "skin.h"
+#include "tag.h"
+#include "desktoplyrics.h"
 #include <QComboBox>
 #include <QDebug>
 #include <QEvent>
@@ -45,10 +47,11 @@ Music::Music(QWidget *parent)
   connect(ui->btn_mini, &QPushButton::clicked, this,
           &QMainWindow::showMinimized);
 
-  //关联ListWidget和TableWidget
-  connect(ui->listWidget, &QListWidget::currentRowChanged, ui->stackedWidget,
+  //关联down_listWidget和TableWidget
+  connect(ui->down_listWidget, &QListWidget::currentRowChanged, ui->stackedWidget,
           &QStackedWidget::setCurrentIndex);
-  connect(localMusic, &Local_and_Download::t_loaded, this,&Music::on_setPlatList);
+  connect(localMusic, &Local_and_Download::t_loaded, this,
+          &Music::on_setPlatList);
 
   //双击播放
   connect(localMusic->getTable(), &QTableWidget::cellDoubleClicked, this, [=] {
@@ -56,7 +59,7 @@ Music::Music(QWidget *parent)
     ui->btn_stop->setStyleSheet(
         "border-image:url(:/images/bottom/btn_pause_h.png)");
     Decode->play(playlist.at(CurrentPlayerListIndex));
-    SetBottonInformation(Decode->GetTag());
+    SetBottonInformation(GetTag(tag));
   });
 
   //播放进度条
@@ -69,9 +72,9 @@ Music::Music(QWidget *parent)
   //接收鼠标右键菜单的信号
   connect(localMusic, &Local_and_Download::t_play, this,
           [this](const int index) {
-            //Decode->play(localMusic->PlayerList().at(index));
+            // Decode->play(localMusic->PlayerList().at(index));
             Decode->play(playlist.at(index));
-            SetBottonInformation(Decode->GetTag());
+            SetBottonInformation(GetTag(tag));
           });
 
   //播放下一首
@@ -79,9 +82,12 @@ Music::Music(QWidget *parent)
           [=](const int index) {
             if (Decode->isFinished()) {
               Decode->play(playlist.at(index));
-              SetBottonInformation(Decode->GetTag());
+              SetBottonInformation(GetTag(tag));
             }
           });
+
+  connect(this, &Music::updateSongLrc, this,
+          [&](int sec) { lyr->showcontent(sec); });
 
   //更换主题
   connect(Skin, &skin::setThem, this, [=](QByteArray rhs) {
@@ -89,8 +95,10 @@ Music::Music(QWidget *parent)
   });
 
   //删除播放列表
-  connect(localMusic->getTable(), &QTableWidget::removeRow, this,
-          [&](int row) { --CurrentPlayerListIndex; });
+  connect(localMusic->getTable(), &QTableWidget::removeRow, this, [&](int row) {
+    playlist.removeAt(row);
+    --CurrentPlayerListIndex;
+  });
 
   //播放搜索到的歌曲
   connect(search, &Search::play, this, &Music::on_playSearchMusic);
@@ -120,7 +128,7 @@ void Music::init() {
   ui->Sli_volum->setMaximum(100);
   ui->Sli_volum->setValue(50);
 
-  QPixmap pixmap;
+  QPixmap pixmap{};
   pixmap.load(":/images/top/logo.png");
   //    ui->btn_lyric->setStyleSheet("QPushButton#btn_lyric:!hover{background-color:rgb(103,
   //    103, 230)};");
@@ -134,36 +142,36 @@ void Music::init() {
 }
 
 void Music::initWidget() {
-  ui->listWidget->addItem(QString(QObject::tr("本地与下载")));
-  ui->listWidget->addItem(QString(QObject::tr("我的收藏")));
-  QLabel *lab = new QLabel(tr("我的音乐"), ui->listWidget);
-  lab->setStyleSheet(QString("color: rgb(124, 124, 124);"));
-  QListWidgetItem *item0 = new QListWidgetItem(ui->listWidget);
-  ui->listWidget->setItemWidget(item0, lab);
-  QComboBox *box = new QComboBox(this);
-  box->hidePopup();
-  QListWidgetItem *item = new QListWidgetItem(ui->listWidget);
-  QStringList btn{tr("我创建的歌单"), tr("我喜欢的音乐")};
-  box->addItems(btn);
 
-  ui->listWidget->setItemWidget(item, box);
-  //点击了其中某一个Item
-  connect(ui->listWidget, &QListWidget::itemClicked, this, [&]() {
-    search->hide();
-    ui->stackedWidget->show();
-  });
-  //  connect(box,&QComboBox::activated,ui->listWidget ,[this](){/*
-  //  项被点击时发出该信号 */});
-  box->setStyleSheet(
-      "#box{border: 1px solid gray;"
-      " subcontrol-origin: padding;"
-      " subcontrol-position: top right;"
-      " width: 20px;"
-      " border-left-width: 1px;"
-      " border-left-color: darkgray;"
-      " border-left-style: solid; /* just a single line */"
-      " border-top-right-radius: 3px; /* same radius as the QComboBox */"
-      " border-bottom-right-radius: 3px;}");
+
+
+  //下面部分
+//  ui->down_listWidget->addItem(QString(QObject::tr("本地与下载")));
+//  ui->down_listWidget->addItem(QString(QObject::tr("我的收藏")));
+//  QComboBox *box = new QComboBox(this);
+//  box->hidePopup();
+//  QListWidgetItem *item = new QListWidgetItem(ui->down_listWidget);
+//  QStringList btn{tr("我创建的歌单"), tr("我喜欢的音乐")};
+//  box->addItems(btn);
+
+//  ui->down_listWidget->setItemWidget(item, box);
+//  //点击了其中某一个Item
+//  connect(ui->down_listWidget, &QListWidget::itemClicked, this, [&]() {
+//    search->hide();
+//    ui->stackedWidget->show();
+//  });
+//  //  connect(box,&QComboBox::activated,ui->listWidget ,[this](){/*
+//  //  项被点击时发出该信号 */});
+//  box->setStyleSheet(
+//      "#box{border: 1px solid gray;"
+//      " subcontrol-origin: padding;"
+//      " subcontrol-position: top right;"
+//      " width: 20px;"
+//      " border-left-width: 1px;"
+//      " border-left-color: darkgray;"
+//      " border-left-style: solid; /* just a single line */"
+//      " border-top-right-radius: 3px; /* same radius as the QComboBox */"
+//      " border-bottom-right-radius: 3px;}");
 }
 
 void Music::initTableWidget() {}
@@ -310,24 +318,30 @@ void Music::onDuration(int currentMs, int destMs) {
   if (currentMs1 == currentMs && destMs1 == destMs) {
     return;
   }
-
   currentMs1 = currentMs;
   destMs1 = destMs;
   // qDebug() << "onDuration：" << currentMs << destMs << sliderSeeking;
   //计算秒
-  // static int  s = currentMs1 / 1000 % 60;
-  QString currentTime = QString("%1 : %2")
-                            .arg(currentMs1 / 1000 / 60 % 60, 2, 10, QChar('0'))
-                            .arg(currentMs1 / 1000 % 60, 2, 10, QChar('0'));
-  ui->lab_duration->setText(currentTime);
+  int ms = currentMs1 / 1000 / 60 % 60;
+  sec = currentMs1 / 1000 % 60;
+  // lyr->getLineByPosition(ms, sec);
+//   qDebug() << ms << ":" << sec << "\n";
+  QString currentTime =
+      QString("%1 : %2").arg(ms, 2, 10, QChar('0')).arg(sec, 2, 10, QChar('0'));
+   ui->lab_duration->setText(currentTime);
   if (!sliderSeeking) //未滑动
   {
     ui->playslider->setMaximum(destMs);
     ui->playslider->setValue(currentMs);
   }
+    emit updateSongLrc(currentMs1);
 }
 
-void Music::on_setPlatList(QStringList list) { playlist = list; }
+void Music::on_setPlatList(QStringList list) {
+  CurrentPlayerListIndex = 0;
+  curCoding = 0;
+  playlist = list;
+}
 
 //滑动滑块
 void Music::on_Sli_volum_valueChanged(int value) {
@@ -383,42 +397,11 @@ void Music::on_btn_stop_clicked() {
     }
     CurrentPlayerListIndex = 0;
     Decode->play(playlist.at(CurrentPlayerListIndex));
-    SetBottonInformation(Decode->GetTag());
+    SetBottonInformation(GetTag(tag));
     ui->btn_stop->setStyleSheet(
         "border-image:url(:/images/bottom/btn_pause_h.png)");
     break;
   }
-}
-
-void Music::SetBottonInformation(Mp3tag *tag) {
-  QPixmap pixmap = QPixmap::fromImage(tag->Picture);
-  pixmap.scaled(ui->btn_pictrue->size(), Qt::KeepAspectRatio);
-  //自适应缩放图片
-  ui->btn_pictrue->setSizePolicy(QSizePolicy::Expanding,
-                                 QSizePolicy::Expanding);
-  int width = ui->btn_pictrue->width();
-  int height = ui->btn_pictrue->height();
-  ui->btn_pictrue->setIconSize(QSize(width + 5, height));
-  ui->btn_pictrue->setIcon(QIcon(pixmap));
-  ui->btn_pictrue->setStyleSheet("");
-  ui->lab_message->setText(QString("%1\n%2").arg(tag->Artis).arg(tag->Title));
-  ui->lab_time->setText(tag->Duration);
-  lyr->setMessage(tag->Picture, tag->Artis + QString("--%0").arg(tag->Ablue),
-                  tag->Title);
-}
-
-void Music::setBottomInformation() {
-  int n = search->CurInex();
-  QString artist = search->getSearchResults().at(n).singer_name;
-  QString title = search->getSearchResults().at(n).song_name;
-  QPixmap map = search->getAlbumArt();
-  //自适应缩放图片
-  ui->btn_pictrue->setSizePolicy(QSizePolicy::Expanding,
-                                 QSizePolicy::Expanding);
-  ui->btn_pictrue->setIcon(map);
-  ui->btn_pictrue->setIconSize(ui->btn_pictrue->size());
-  ui->lab_message->setText(QString("%1\n%2").arg(artist).arg(title));
-  lyr->setMessage(map.toImage(), artist, title);
 }
 
 //上一首
@@ -428,8 +411,9 @@ void Music::Previous(QStringList &playerlist) {
     if (CurrentPlayerListIndex == -1) {
       CurrentPlayerListIndex = playerlist.length() - 1;
     }
+    NetCodec();
     Decode->play(playlist.at(CurrentPlayerListIndex));
-    SetBottonInformation(Decode->GetTag());
+    SetBottonInformation(GetTag(tag));
   } else {
     QMessageBox::information(this, tr("Error"), tr("播放列表为空!!!!"),
                              QMessageBox::Yes);
@@ -442,27 +426,46 @@ void Music::Next(QStringList &playerlist) {
     if (CurrentPlayerListIndex == playerlist.length()) {
       CurrentPlayerListIndex = 0;
     }
+    NetCodec();
     Decode->play(playlist.at(CurrentPlayerListIndex));
-    SetBottonInformation(Decode->GetTag());
+    SetBottonInformation(GetTag(tag));
   } else {
     QMessageBox::information(this, tr("Error"), tr("播放列表为空!!!!"),
                              QMessageBox::Yes);
   }
 }
 
-void Music::on_btn_prev_clicked() { Previous(localMusic->PlayerList()); }
+void Music::NetCodec() {
+  if (curCoding == 1) {
+    search->GetDetailsOfSong(CurrentPlayerListIndex);
+    search->curindex = CurrentPlayerListIndex;
+  }
+}
+
+void Music::on_btn_prev_clicked() { Previous(playlist); }
 
 void Music::on_btn_next_clicked() {
-  if (localMusic->PlayerList().isEmpty()) {
-    qDebug() << "播放列表为空\n";
-    return;
-  }
-  ++CurrentPlayerListIndex;
-  if (CurrentPlayerListIndex >= localMusic->PlayerList().length()) {
-    CurrentPlayerListIndex = 0;
-  }
-  Decode->play(playlist.at(CurrentPlayerListIndex));
-  SetBottonInformation(Decode->GetTag());
+  // if (playlist.isEmpty()) {
+  //  qDebug() << "播放列表为空\n";
+  //  return;
+  //}
+  //++CurrentPlayerListIndex;
+  // if (CurrentPlayerListIndex >= playlist.length()) {
+  //  CurrentPlayerListIndex = 0;
+  //}
+  // Decode->play(playlist.at(CurrentPlayerListIndex));
+  SetBottonInformation(GetTag(tag));
+  Next(playlist);
+}
+
+//打开桌面歌词
+void Music::on_btn_lyric_clicked()
+{
+   if(lyr->destlyric->isHidden()){
+       lyr->destlyric->show();
+   }else{
+       lyr->destlyric->close();
+   }
 }
 
 //最大化与还原
@@ -523,7 +526,7 @@ void Music::PlayerMode() {
   switch (Mode) {
     //顺序播放
   case PlayMode::Order:
-    Next(localMusic->PlayerList());
+    Next(playlist);
     break;
     //单曲循环
   case PlayMode::Single:
@@ -532,25 +535,28 @@ void Music::PlayerMode() {
     //设置随机种子，即随机数在种子值到32767之间
     qsrand(QTime::currentTime().msec());
     //随机生成0到播放列表的长度的随机数
-    CurrentPlayerListIndex = qrand() % localMusic->PlayerList().length();
+    CurrentPlayerListIndex = qrand() % playlist.length();
     break;
   }
+  NetCodec();
   Decode->play(playlist.at(CurrentPlayerListIndex));
-  SetBottonInformation(Decode->GetTag());
+  SetBottonInformation(GetTag(tag));
 }
 
 void Music::on_btn_pictrue_clicked() {
   // 歌词界面未打开
   if (lyr->isHidden()) {
-    ui->listWidget->hide();
-    ui->stackedWidget->hide();
-    ui->horizontalLayout_11->addWidget(lyr);
 
+      ui->scrollArea->hide();
+    ui->stackedWidget->hide();
+
+    ui->gridLayout_2->addWidget(lyr);
     search->close();
     lyr->show();
+
   } else {
     lyr->close();
-    ui->listWidget->show();
+       ui->scrollArea->show();
     ui->stackedWidget->show();
   }
 }
@@ -582,22 +588,25 @@ void Music::on_lineEdit_search_returnPressed() {
   search->GetSearchText(ui->lineEdit_search->text());
   if (search->isHidden()) {
     ui->stackedWidget->hide();
-    ui->horizontalLayout_11->addWidget(search);
+      //ui11
+    ui->gridLayout_2->addWidget(search);
     search->show();
   }
 }
 
-void Music::on_playSearchMusic(const int songid) {
-  mutex.lock();
-  setBottomInformation();
-  mutex.unlock();
 
+//QLabel drawText
+void Music::on_playSearchMusic(const int songid) {
+  CurrentPlayerListIndex = 0;
+  curCoding = 1;
+  mutex.lock();
+  SetBottonInformation(GetTag(tag));
+  mutex.unlock();
   playlist.clear();
   playlist = search->GetPlaylistID();
-
+  ui->btn_stop->setStyleSheet("border-image:url(:/images/bottom/btn_pause_h.png);");
   QString url = QString("https://music.163.com/song/media/outer/url?id=%1.mp3")
                     .arg(songid);
+
   Decode->play(url);
-
-
 }
