@@ -62,7 +62,7 @@ void Base::SerachData(QString search_data) {
 
 void Base::InsertDataInfoTableWidget(const QStringList value, const int index) {
   tab->insertRow(index); //插入新的一行
-  for (int row = 0; row != column; ++row) {
+  for (int row = 0; row != value.length(); ++row) {
     tab->setItem(index, row, new QTableWidgetItem(value.at(row)));
   }
 }

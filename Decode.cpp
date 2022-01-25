@@ -1,19 +1,27 @@
 ﻿#include "Decode.h"
-#include "tag.h"
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
+#include <QMutex>
 // Mp3tag *Mp3tag::tag = nullptr;
 
 AudioDeCode::AudioDeCode() {
   audio = nullptr;
+  tag = new M_Tag();
+  mutex = new QMutex();
   //注册所有的解码器格式
   // av_register_all(); 已被弃用
   //初始化网络库 （可以打开rtsp rtmp http协议的流媒体视频）
   avformat_network_init();
   type = controlType::control_none;
+  connect(tag, &M_Tag::NoCopyright, this, [&]() { stop(); });
 }
-AudioDeCode::~AudioDeCode() { qDebug() << "已完成全部解码,析构完毕\n"; }
+AudioDeCode::~AudioDeCode() {
+  delete tag;
+  tag = nullptr;
+  delete mutex;
+  mutex = nullptr;
+}
 
 bool AudioDeCode::initAudio(int SampleRate) {
   QAudioFormat format;
@@ -37,9 +45,21 @@ bool AudioDeCode::initAudio(int SampleRate) {
   return true;
 }
 
-void AudioDeCode::play(const QString &url) {
+void AudioDeCode::play(const QString &url, const int index) {
   this->url = url;
-  DeCodeTag(url.toLocal8Bit().data());
+  qDebug() << "AudioDeCode::play被调用\n";
+  //在这里判断一下，是否为https链接，是的话用tag解析，否则调用DeCodeTag本地解析
+  // Qt::CaseSensitive找到返回 true
+  if (url.startsWith("https", Qt::CaseSensitive)) {
+    mutex->lock();
+    tag->CheekState(index);
+    mutex->unlock();
+    tag->GetDetailsSong(index);
+  } else {
+    //解析本地mp3文件
+    DeCodeTag(url.toLocal8Bit().data());
+  }
+
   type = controlType::control_play;
   if (!this->isRunning()) {
     this->start();
@@ -138,6 +158,7 @@ void AudioDeCode::runPlay() {
   }
 
   AVFormatContext *pFmtCtx = NULL;
+
   ret = avformat_open_input(
       &pFmtCtx, this->url.toLocal8Bit().data(), NULL,
       NULL); //打开音视频文件并创建AVFormatContext结构体以及初始化.
@@ -154,12 +175,15 @@ void AudioDeCode::runPlay() {
 
   audioindex =
       av_find_best_stream(pFmtCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
-
+  if (audioindex == AVERROR_STREAM_NOT_FOUND) {
+    qDebug() << __FILE__ << " " << __LINE__ << "\tStream not found\n";
+    return;
+  }
   qDebug() << "audioindex:" << audioindex;
 
+  //查询解码器
   AVCodec *acodec = avcodec_find_decoder(
       pFmtCtx->streams[audioindex]->codecpar->codec_id); //获取codec
-
   AVCodecContext *acodecCtx = avcodec_alloc_context3(
       acodec); //构造AVCodecContext ,并将vcodec填入AVCodecContext中
   avcodec_parameters_to_context(
@@ -182,12 +206,15 @@ void AudioDeCode::runPlay() {
 
   destMs = av_q2d(pFmtCtx->streams[audioindex]->time_base) * 1000 *
            pFmtCtx->streams[audioindex]->duration;
+#ifdef _DEBUG
   qDebug() << "码率:" << acodecCtx->bit_rate;
   qDebug() << "格式:" << acodecCtx->sample_fmt;
   qDebug() << "通道:" << acodecCtx->channels;
   qDebug() << "采样率:" << acodecCtx->sample_rate;
   qDebug() << "时长:" << destMs;
   qDebug() << "解码器:" << acodec->name;
+#endif // _DEBUG
+
   int outChannelCount = acodecCtx->channels;
   AVPacket *packet = av_packet_alloc();
   AVFrame *frame = av_frame_alloc();
@@ -262,10 +289,6 @@ void AudioDeCode::runPlay() {
   swr_free(&swrctx);
   avcodec_free_context(&acodecCtx);
   avformat_close_input(&pFmtCtx);
-  //改善
-  // if ((destMs - currentMs) < 500) {
-  //		emit nextsong();
-  //}
 }
 
 QStringList AudioDeCode::DeCodeTag(const char *filename) {
@@ -293,14 +316,13 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
 #elif WIN32 // windows 操作系统的API
     if (!_stricmp(Tag->key, "title")) {
       // tag->Title = Tag->value;
-      tag.SetTitle(Tag->value);
+      tag->SetTitle(Tag->value);
     } else if (!_stricmp(Tag->key, "artist")) {
       // tag->Artis = Tag->value;
-      tag.SetArtist(Tag->value);
-
+      tag->SetArtist(Tag->value);
     } else if (!_stricmp(Tag->key, "album")) {
       // tag->Ablue = Tag->value;
-      tag.SetAblue(Tag->value);
+      tag->SetAblue(Tag->value);
     } else {
       continue; //跳过一些无用tag信息
     }
@@ -310,16 +332,15 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
     //获取音频文件的大小
     QFile fp(filename);
     QString _size =
-        QString("%0 MB").number((double)fp.size() / 1024 / 1024, 'f', 2) +
-        " MB";
+        QString("%0").number((double)fp.size() / 1024 / 1024, 'f', 2) + " MB";
     list.append(_size);
     fp.close();
     // tag->Size = _size;
-    tag.SetSize(_size);
+    tag->SetSize(_size);
     // tag->Duration = Duration();
-    tag.SetDuration(Duration());
+    tag->SetDuration(Duration());
     // tag->Picture = Image();
-    tag.SetAblueArt(Image());
+    tag->SetAblueArt(Image());
     list.append(Duration()); //获取音频时长
 #ifdef _DEBUG
     /*  qDebug() << "Artis = " << tag->Artis << " Title = " << tag->Title
@@ -328,7 +349,9 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
 #endif // _DEBUG
     avformat_close_input(&M_Format);
     avformat_free_context(M_Format);
-    // M_Format = nullptr;
+    M_Format = nullptr;
+    //本地音乐解码完毕
+    emit LocalparseOk();
     return list;
   }
 
@@ -342,12 +365,13 @@ QStringList AudioDeCode::DeCodeTag(const char *filename) {
         //使用QImage读取完整图片数据（注意，图片数据是为解析的文件数据，需要用QImage::fromdata来解析读取）
         QImage image = QImage::fromData((uchar *)pkt.data, pkt.size);
         // tag->Picture = QPixmap::fromImage(image);
-        tag.SetAblueArt(QPixmap::fromImage(image));
+        tag->SetAblueArt(QPixmap::fromImage(image));
         break;
       }
     }
+    // return QPixmap();
     // return tag->Picture;
-    return tag.GetAblueArt();
+    return tag->GetAblueArt();
   }
 
   QString AudioDeCode::Duration() {

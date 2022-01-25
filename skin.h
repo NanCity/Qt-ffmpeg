@@ -1,6 +1,5 @@
 ﻿#ifndef SKIN_H
 #define SKIN_H
-
 #include <QByteArray>
 #include <QDialog>
 #include <QFile>
@@ -21,7 +20,7 @@ public:
   explicit skin(QWidget *parent = nullptr);
   virtual ~skin();
   void init();
-  void OpenQssFile(QString path);
+  //void OpenQssFile(QString path);
 signals:
   void setThem(QByteArray aray);
 
@@ -40,9 +39,9 @@ private slots:
 
   void on_btn_gold_clicked();
 
+
 private:
   Ui::skin *ui;
-  QFile qssfile{};
 };
 
 #endif // SKIN_H

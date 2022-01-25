@@ -1,5 +1,6 @@
 ﻿#include "local_and_download.h"
 #include "ui_local_and_download.h"
+#include"base.h"
 #include <QAction>
 #include <QDebug>
 #include <QFile>

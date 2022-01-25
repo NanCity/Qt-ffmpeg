@@ -23,7 +23,6 @@
         <file>images/top/btn_max_n.png</file>
         <file>images/top/btn_min_h.png</file>
         <file>images/top/btn_min_n.png</file>
-        <file>images/top/logo.png</file>
         <file>images/bottom/btn_mute.png</file>
         <file>images/bottom/btn_next_h.png</file>
         <file>images/bottom/btn_next_n.png</file>
@@ -44,5 +43,35 @@
         <file>images/top/btn_setting_n.png</file>
         <file>images/top/btn_skin_h.png</file>
         <file>images/top/btn_skin_n.png</file>
+        <file>images/HOT.png</file>
+        <file>images/btn_right_1_h.png</file>
+        <file>images/btn_right_1_n.png</file>
+        <file>images/top/title_logo.png</file>
+        <file>images/btn_add_h.png</file>
+        <file>images/btn_add_n.png</file>
+        <file>images/btn_down_h.png</file>
+        <file>images/btn_down_n.png</file>
+        <file>images/add.png</file>
+        <file>images/playAll.png</file>
+        <file>images/sq_h.png</file>
+        <file>images/sq_n.png</file>
+        <file>images/btn_unlike_h.png</file>
+        <file>images/btn_unlike_n.png</file>
+        <file>images/like.png</file>
+        <file>images/btn_cloundown_h.png</file>
+        <file>images/btn_cloundown_n.png</file>
+        <file>images/btn_download_h.png</file>
+        <file>images/btn_download_n.png</file>
+        <file>images/information/lab_bing.png</file>
+        <file>images/information/lab_grade.png</file>
+        <file>images/information/lab_market.png</file>
+        <file>images/information/lab_mesg.png</file>
+        <file>images/information/lab_out.png</file>
+        <file>images/information/lab_service.png</file>
+        <file>images/information/lab_vip.png</file>
+        <file>images/vip.png</file>
+        <file>images/lock.png</file>
+        <file>images/phone.png</file>
+        <file>images/btn_QRC.png</file>
     </qresource>
 </RCC>

@@ -5,7 +5,7 @@ set (PRO_NAME Music)
 PROJECT(${PRO_NAME})
 
 #创建构建目录
-file(MAKE_DIRECTORY bin lyric)
+file(MAKE_DIRECTORY bin lyric photowall Userpix)
 #设置编译器
 set(CMAKE_CXX_COMPILE "g++")
 
@@ -62,8 +62,8 @@ find_package(Qt5 COMPONENTS Widgets Multimedia Network REQUIRED)
 #set(QRC_SOURCE_FILES resource.qrc)
 #qt_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
 qt5_add_resources(QRC_SOURCE_FILES resource.qrc)
-#设置可执行文件
-add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH})
+#设置可执行文件 
+add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH} )
 
 # 链接Qt5的库
 target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network  ${libs_path})

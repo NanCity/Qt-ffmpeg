@@ -1,4 +1,5 @@
 ﻿#include "music.h"
+#include "tag.h"
 #include <QApplication>
 #include <QFile>
 #include <QStyleFactory>
@@ -6,20 +7,22 @@
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
-  a.setStyle(QStyleFactory::create("macintosh"));  //设置窗口风格     
+  //窗体图标
+  //    a.setWindowIcon(QIcon(""));
+  a.setStyle(QStyleFactory::create("macintosh")); //设置窗口风格
   /* #if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
-   #if _MSC_VER
-     QTextCodec *codec = QTextCodec::codecForName("GBK");
-   #else
-     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-   #endif
-     QTextCodec::setCodecForLocale(codec);
-     QTextCodec::setCodecForCStrings(codec);
-     QTextCodec::setCodecForTr(codec);
-   #else
-     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-     QTextCodec::setCodecForLocale(codec);
-   #endif*/
+ #if _MSC_VER
+   QTextCodec *codec = QTextCodec::codecForName("GBK");
+ #else
+   QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+ #endif
+   QTextCodec::setCodecForLocale(codec);
+   QTextCodec::setCodecForCStrings(codec);
+   QTextCodec::setCodecForTr(codec);
+ #else
+   QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+   QTextCodec::setCodecForLocale(codec);
+ #endif*/
 
   //加载需要用到的图标
   QFile file(":/style/qss/setImages.css");

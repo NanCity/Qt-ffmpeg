@@ -22,16 +22,19 @@
 #include <QNetworkRequest>
 #include <QRegularExpression>
 #include <QScrollBar>
+#include <QTableWidget>
 #include <QVBoxLayout> //垂直布局管理器
 lyric::lyric(QWidget *parent) : QWidget(parent), ui(new Ui::lyric) {
   ui->setupUi(this);
   this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
   ui->scrollArea->setFrameShape(QFrame::NoFrame);
+  ui->scrollArea->setStyleSheet("background-color:#dfe0ed");
   destlyric = new DesktopLyrics();
 
+
+  scrollVertical = new QVBoxLayout(ui->scrollArea->widget());
   //方便设置垂直滑块
   vScrollbar = ui->scrollArea->verticalScrollBar();
-
   Netmangelyric = new QNetworkAccessManager(this);
   connect(Netmangelyric, &QNetworkAccessManager::finished, this,
           &lyric::on_ReplyFinished);
@@ -144,6 +147,7 @@ void lyric::setpic(QPixmap pix) {
   //    pix.save("pix.png");
   //    ui->lab_lyric->setStyleSheet("border-image:url(./pix.png);");
 }
+//热搜
 
 bool lyric::process(QString content) {
   const QRegExp rx(
@@ -258,28 +262,25 @@ QString lyric::getLyricText(int index) {
 }
 
 void lyric::clearlabel() {
-  for (int x = 0; x != 27; x++) {
-    listLab.at(x)->clear();
+  if (!listLab.isEmpty()) {
+    for (int x = 0; x != listLab.length(); x++) {
+      listLab.at(x)->clear();
+      scrollVertical->removeWidget(listLab.at(x));
+    }
+    listLab.erase(listLab.begin(), listLab.end());
   }
 }
 
 void lyric::creatlab() {
-  QVBoxLayout *box = new QVBoxLayout(ui->scrollArea->widget());
-  int len = lines.length();
-  if (len == 0) {
-    QLabel *lab = new QLabel("暂无歌词", ui->scrollArea->widget());
-    lab->setStyleSheet("color:red");
-    return;
-  }
-
-  for (int x = 0; x != len; ++x) {
+  clearlabel();
+  for (int x = 0; x != lines.length(); ++x) {
     QLabel *bel = new QLabel(ui->scrollArea->widget());
     //设置居中
     bel->setAlignment(Qt::AlignCenter);
     bel->setStyleSheet("font-family:Microsoft YaHei;font-size:20px;");
     listLab.push_back(bel);
     //加入布局管理器
-    box->addWidget(listLab.at(x));
+    scrollVertical->addWidget(listLab.at(x));
   }
   showlyric();
 }
@@ -298,6 +299,11 @@ void lyric::slidingDown(int index) {
     return;
   //恢复颜色
   listLab.at(index - 1)->setStyleSheet("color:#666666");
-  int height = listLab.at(1)->height();
-  vScrollbar->setSliderPosition(index * height);
+  static int height = listLab.at(1)->height();
+  if (index < 10) {
+    //不滑动
+    return;
+  }
+  //设置滚动速度
+  vScrollbar->setSliderPosition(index * 15);
 }

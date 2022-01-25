@@ -61,10 +61,14 @@ Json/
 *.txt.*
 
 # MinGW generated files
+Userpix
 lyric
 out
 Debug
 build
+config
+bin
+
 *.vs
 # *.vscode
 *.build

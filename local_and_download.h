@@ -3,8 +3,12 @@
 #define LOCAL_AND_DOWNLOAD_H
 
 #include "Decode.h"
-#include "base.h"
 #include <QWidget>
+
+class Base;
+class QMenu;
+class QTableWidget;
+
 namespace Ui {
 class Local_and_Download;
 }

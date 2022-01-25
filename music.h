@@ -1,7 +1,5 @@
-﻿
-#ifndef MUSIC_H
+﻿#ifndef MUSIC_H
 #define MUSIC_H
-#include "tag.h"
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include <QMainWindow>
@@ -14,7 +12,8 @@ class Music;
 QT_END_NAMESPACE
 
 enum status { STATE_VOLUME };
-
+class Config;
+class M_Tag;
 class skin;
 class Base;
 class Login;
@@ -24,8 +23,11 @@ class Search;
 class PersonForm;
 class AudioDeCode;
 class DesktopLyrics;
-//class QNetworkReply;
+class CloudMusic;
+class QListWidgetItem;
 class Local_and_Download;
+class Dicovermusic;
+class SoloAlbum;
 
 class Music : public QMainWindow {
   Q_OBJECT
@@ -38,16 +40,21 @@ private:
   int CurrentPlayerListIndex{0};
   QStringList playlist{};
   QMutex mutex{};
+  Config *config;
   Base *base;
   Login *login;
   lyric *lyr{};
   skin *Skin;
   Search *search;
-//  DesktopLyrics *dest;
+  //云盘
+  CloudMusic *cloudMusic;
+  //  DesktopLyrics *dest;
   //解码器
   AudioDeCode *Decode;
-  M_Tag &tag = M_Tag::GetInstance();
+  // M_Tag &tag = M_Tag::GetInstance();
   QTableWidget *tableWidget{};
+
+  Dicovermusic *DicMusic;
   //检查鼠标是否移动
   bool mMoving = false;
   QPoint mLastMousePosition{};
@@ -79,19 +86,25 @@ private:
 public:
   explicit Music(QWidget *parent = nullptr);
   virtual ~Music();
+  //窗口事件安装
+  void InstallEventFilter();
+  //初始化
   void init();
-  void initWidget();
-  void initTableWidget();
   //悬停提示
   void HoverTip();
-  //播放歌曲
-  // void SetBottonInformation(Mp3tag *tag);
-  // void setBottomInformation();
   void PlayerMode();
+  void CheckState();
   void Previous(QStringList &playerlist);
   void Next(QStringList &playerlist);
-  void NetCodec();
-  template <typename T> void SetBottonInformation(T &rhs = nullptr);
+  void SetBottonInformation(M_Tag *);
+
+  void AlbConnect();
+  void DecodeConnect();
+  void SearchConnect();
+  void SocalMusicConnect();
+  void CloudMusicConnect();
+  void LocalMusicConnect();
+  void PersonFormConnect();
 signals:
   void updateSongLrc(int sec);
 
@@ -107,8 +120,12 @@ protected:
   void closeEvent(QCloseEvent *event);
   void dragEnterEvent(QDragEnterEvent *event);
   void dropEvent(QDropEvent *event);
-
+  template <class T> void On_NetplayAll(T rhs);
+  template <class T> void On_Netplay(T rhs, const int index);
+  template <class T>
+  void On_NetNextPlay(T rhs, const int index, const QString url);
 private slots:
+
   void onSeekOk();
   void onDuration(int, int);
   void on_setPlatList(QStringList list);
@@ -122,6 +139,22 @@ private slots:
   void on_btn_max_clicked();
   void on_btn_prev_clicked();
   void on_btn_volum_clicked();
+  //登录成功
+  void on_login_succes();
+
+  //我的音乐这个listwidget被单击
+  void on_down_listWidgetClicked(QListWidgetItem *item);
+
+  //展开/隐藏歌单列表
+  void on_btn_SongMenu_clicked();
+  //创建歌单
+  void on_AddSongMenu_clicked();
+  //展开/隐藏收藏歌单
+  void on_btn_collectMenu_clicked();
+
+  /*搜索框输入内容*/
+  void on_lineEdit_search_textChanged(QString str);
+  void on_lineEdit_search_returnPressed();
   void on_Sli_volum_valueChanged(int value);
   //进度条按压处理
   void on_playslider_sliderPressed();
@@ -129,25 +162,43 @@ private slots:
   void on_playslider_sliderReleased();
   void on_btn_skin_clicked();
   void on_btn_personmessage_clicked();
-  void on_lineEdit_search_returnPressed();
   /***************播放搜索到的歌曲*****************/
-  void on_playSearchMusic(const int songid);
+  //播放全部，先清空播放列表
+  //  void on_NetplayAll();
+  //  //播放点击的歌曲
+  //  void on_Netplay(const int index);
+  //  //下一首播放
+  //  void on_NetNextPlay(const int index, const QString url);
 };
 #endif // MUSIC_H
 
-template <typename T> inline void Music::SetBottonInformation(T &rhs) {
-  if (0 == curCoding) {
-    Decode->DeCodeTag(playlist.at(CurrentPlayerListIndex).toLocal8Bit());
-  }
+template <class T> inline void Music::On_NetplayAll(T rhs) {
+  playlist.clear();
+  CurrentPlayerListIndex = 0;
+  playlist = rhs->GetPlayList();
+  Decode->tag->SetSongId(rhs->GetPlaylistID());
+  ui->btn_stop->setStyleSheet(
+      "border-image:url(:/images/bottom/btn_pause_h.png);");
+  Decode->play(playlist.at(CurrentPlayerListIndex), 0);
+  qDebug() << "进入次数\n";
+}
 
-  ui->btn_pictrue->setIcon(rhs.GetAblueArt());
-  ui->btn_pictrue->setIconSize(ui->btn_pictrue->size());
-  ui->lab_message->setText(
-      QString("%1\n%2").arg(rhs.GetArtist()).arg(rhs.GetTitle()));
-  ui->lab_time->setText(rhs.GetDuration());
-  lyr->setMessage(rhs.GetAblueArt().toImage(), rhs.GetArtist(), rhs.GetTitle());
-  SongName = rhs.GetTitle();
-  lyr->setpic(rhs.GetAblueArt());
-  //获取歌词
-  lyr->GetTheLyricsName(SongName);
+template <class T> inline void Music::On_Netplay(T rhs, const int index) {
+  QString url = QString("https://music.163.com/song/media/outer/url?id=%1.mp3")
+                    .arg(rhs->GetPlaylistID().at(index));
+  Decode->tag->SetSongId(rhs->GetPlaylistID());
+  playlist.insert(CurrentPlayerListIndex, url);
+  Decode->play(url, index);
+
+  ui->btn_stop->setStyleSheet(
+      "border-image:url(:/images/bottom/btn_pause_h.png);");
+}
+
+template <class T>
+inline void Music::On_NetNextPlay(
+    T rhs, const int index,
+    const QString url) { //插入当前播放位置下一个位置，等待播放
+  playlist.insert(CurrentPlayerListIndex + 1, url);
+  Decode->tag->insertUrl(CurrentPlayerListIndex + 1,
+                         rhs->GetPlaylistID().at(index));
 }

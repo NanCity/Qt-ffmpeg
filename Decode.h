@@ -1,34 +1,31 @@
-﻿
-#ifndef DECODE_H_
+﻿#ifndef DECODE_H_
 #define DECODE_H_
 
+#include "tag.h"
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include <QPixmap>
 #include <QString>
 #include <QStringList>
 #include <QThread>
-#include "tag.h"
 /*
  * 导入外部 FFmpeg 库头文件
  */
 
 #define _STDC_CONSTANT_MACROS
-
 extern "C" {
 #include <libavcodec/avcodec.h>
+#include <libavcodec/packet.h>
 #include <libavdevice/avdevice.h>
 #include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
 #include <libavutil/dict.h>
 #include <libavutil/mathematics.h>
 #include <libavutil/time.h>
 #include <libswresample/swresample.h>
-#include <libavcodec/packet.h>
-#include <libavutil/avutil.h>
 }
-
-//方便调试，不需要打印东西的时候设置为0
-#define DEBUG 1
+class QMutex;
+class M_Tag;
 //打印key value的之4
 #define MESSAGE(Artis, value, format)                                          \
   qDebug() << "Key = " << key << " Value = " << value                          \
@@ -42,11 +39,11 @@ extern "C" {
  * Size       --- 大小
  * Duration   --- 时长
  */
-//class Mp3tag {
-//private:
+// class Mp3tag {
+// private:
 //  Mp3tag() : Artis{}, Title{}, Ablue{}, Size{}, Duration{}, Picture{} {}
 //
-//public:
+// public:
 //  QString Artis;
 //  QString Title;
 //  QString Ablue;
@@ -82,9 +79,10 @@ extern "C" {
 class AudioDeCode : public QThread {
   Q_OBJECT
 private:
+  QMutex *mutex{};
   int seekMs{};
   QString url{};
-  //Mp3tag *tag = Mp3tag::init();
+  // Mp3tag *tag = Mp3tag::init();
   /*AVFormatContext 结构体中有一个属性是metadata,
   我们在读取一个多媒体文件的时候，可以通过AVDictionaryEntry访问这个属性的数据
   */
@@ -99,6 +97,7 @@ signals:
   void duration(int, int);
   void seekOk();   //处理控制,判断是否需要停止
   void nextsong(); //自动播放下一首
+  void LocalparseOk();
 
 protected:
   void run();
@@ -112,18 +111,17 @@ public: //状态检查
     control_play,   //播放
     control_seek,   //滑动
   };
-  //Mp3tag *tag{};
-  M_Tag &tag = M_Tag::GetInstance();
+  //获取MP3标签
+  M_Tag *tag{};
   controlType type;
   QAudioOutput *audio;
   explicit AudioDeCode();
   virtual ~AudioDeCode();
   QStringList DeCodeTag(const char *filename);
   QPixmap Image();
-  //M_Tag &GetTag() { return tag; };
-  //获取mp3进度
+  //获取mp3播放进度
   QString Duration();
-  void play(const QString &url);
+  void play(const QString &url, const int index);
   void stop();
   void pause();
   void resume();

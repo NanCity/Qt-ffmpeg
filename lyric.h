@@ -5,6 +5,8 @@
 #include <QMouseEvent>
 #include <QWidget>
 
+class QVBoxLayout;
+
 namespace Ui {
 class lyric;
 }
@@ -69,9 +71,12 @@ private:
   int id{};
   QString name{};
   bool mHasTimer{};
+
+
   QList<QLabel*>listLab{};
   //储存所有歌词
   QList<LyricLine> lines{};
+  QVBoxLayout *scrollVertical;
   QNetworkAccessManager *Netmanger;
   QNetworkAccessManager *Netmangelyric;
   QScrollBar *vScrollbar;

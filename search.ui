@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>769</width>
-    <height>581</height>
+    <width>985</width>
+    <height>898</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>900</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -16,7 +22,7 @@
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QGridLayout" name="gridLayout_2">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -34,22 +40,19 @@
    </property>
    <item row="0" column="0">
     <widget class="QScrollArea" name="scrollArea">
-     <property name="styleSheet">
-      <string notr="true">background-color: rgb(255, 255, 255);</string>
-     </property>
      <property name="widgetResizable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>750</width>
-        <height>626</height>
+        <width>983</width>
+        <height>896</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0">
+      <layout class="QGridLayout" name="gridLayout">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -66,12 +69,12 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <layout class="QVBoxLayout" name="verticalLayout">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="spacing">
           <number>0</number>
          </property>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
            <property name="spacing">
             <number>0</number>
            </property>
@@ -94,9 +97,7 @@
              </property>
              <property name="font">
               <font>
-               <family>Consolas</family>
                <pointsize>14</pointsize>
-               <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
               </font>
@@ -134,7 +135,7 @@ font-weight:bolder;</string>
             </widget>
            </item>
            <item>
-            <spacer name="horizontalSpacer">
+            <spacer name="horizontalSpacer_7">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -174,7 +175,7 @@ font-weight:bolder;</string>
           </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
            <property name="spacing">
             <number>0</number>
            </property>
@@ -207,7 +208,7 @@ font-weight:bolder;</string>
             <widget class="QPushButton" name="btn_details">
              <property name="minimumSize">
               <size>
-               <width>41</width>
+               <width>200</width>
                <height>50</height>
               </size>
              </property>
@@ -218,7 +219,9 @@ font-weight:bolder;</string>
               </size>
              </property>
              <property name="styleSheet">
-              <string notr="true"/>
+              <string notr="true"> border: none;
+ background-color: transparent;
+</string>
              </property>
              <property name="text">
               <string/>
@@ -226,7 +229,7 @@ font-weight:bolder;</string>
             </widget>
            </item>
            <item>
-            <spacer name="horizontalSpacer_3">
+            <spacer name="horizontalSpacer_8">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -253,11 +256,11 @@ font-weight:bolder;</string>
          <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="QWidget" name="tab">
+         <widget class="QWidget" name="tab_7">
           <attribute name="title">
            <string>单曲</string>
           </attribute>
-          <layout class="QGridLayout" name="gridLayout_3">
+          <layout class="QGridLayout" name="gridLayout_4">
            <property name="leftMargin">
             <number>0</number>
            </property>
@@ -273,41 +276,21 @@ font-weight:bolder;</string>
            <property name="spacing">
             <number>0</number>
            </property>
-           <item row="1" column="0" colspan="4">
-            <widget class="QTableWidget" name="table_playlist">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>450</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QPushButton" name="btn_playall">
-             <property name="text">
-              <string>播放全部</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="2">
             <widget class="QPushButton" name="btn_downloadall">
+             <property name="minimumSize">
+              <size>
+               <width>140</width>
+               <height>35</height>
+              </size>
+             </property>
              <property name="text">
               <string>下载全部</string>
              </property>
             </widget>
            </item>
            <item row="0" column="3">
-            <spacer name="horizontalSpacer_2">
+            <spacer name="horizontalSpacer">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -319,8 +302,24 @@ font-weight:bolder;</string>
              </property>
             </spacer>
            </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="btn_playall">
+             <property name="minimumSize">
+              <size>
+               <width>140</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">border-image: url(:/images/playAll.png);</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1">
-            <spacer name="horizontalSpacer_4">
+            <spacer name="horizontalSpacer_2">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -335,29 +334,54 @@ font-weight:bolder;</string>
              </property>
             </spacer>
            </item>
+           <item row="1" column="0" colspan="4">
+            <widget class="QTableWidget" name="table_playlist">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="verticalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOff</enum>
+             </property>
+             <property name="horizontalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOff</enum>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_2">
+         <widget class="QWidget" name="tab_8">
           <attribute name="title">
            <string>歌手</string>
           </attribute>
          </widget>
-         <widget class="QWidget" name="tab_3">
+         <widget class="QWidget" name="tab_9">
           <attribute name="title">
            <string>专辑</string>
           </attribute>
          </widget>
-         <widget class="QWidget" name="tab_4">
+         <widget class="QWidget" name="tab_10">
           <attribute name="title">
            <string>视频</string>
           </attribute>
          </widget>
-         <widget class="QWidget" name="tab_5">
+         <widget class="QWidget" name="tab_11">
           <attribute name="title">
            <string>歌单</string>
           </attribute>
          </widget>
-         <widget class="QWidget" name="tab_6">
+         <widget class="QWidget" name="tab_12">
           <attribute name="title">
            <string>播客</string>
           </attribute>
