@@ -1,5 +1,4 @@
 ﻿#include "music.h"
-#include "tag.h"
 #include <QApplication>
 #include <QFile>
 #include <QStyleFactory>

@@ -9,17 +9,22 @@
 class Recommend;
 class SoloAlbum;
 class QGridLayout;
+class RecommendedDaily;
+//发现音乐
 class Dicovermusic : public QTabWidget {
   Q_OBJECT
 public:
   Dicovermusic(QWidget *parent = nullptr);
-  ~Dicovermusic();
+  virtual ~Dicovermusic();
   void InitTabWidget();
+  //个性推荐
   Recommend *getRecommendUi() { return recommend; }
-  SoloAlbum *getSoloAlbum() { return soloAlbum; };
+  //专辑
+  SoloAlbum *getSoloAlbum();
+  //每日推荐
+  RecommendedDaily *getRecDaily();
 
 private:
-  SoloAlbum *soloAlbum;
   Recommend *recommend;
   QGridLayout *grid;
 };

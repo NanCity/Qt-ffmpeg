@@ -9,13 +9,12 @@ Dicovermusic::Dicovermusic(QWidget *parent) {
   this->setParent(parent);
   grid = new QGridLayout(this);
   recommend = new Recommend(this);
-
   InitTabWidget();
 }
 Dicovermusic::~Dicovermusic() {}
 
 void Dicovermusic::InitTabWidget() {
-  soloAlbum = recommend->getAlbumUi();
+  //soloAlbum = recommend->getAlbumUi();
   //添加各个子窗口
   this->addTab(recommend, "个性推荐");
   this->addTab(new QWidget(), "专属定制");
@@ -35,4 +34,10 @@ void Dicovermusic::InitTabWidget() {
       "QTabBar::tab:selected {border-color: "
       "#3a3a3f;color:black;/*选中后显示下划线*/ border-bottom-color: "
       "#dcdde4;border-bottom: 3px solid #3c3e42;}");
+}
+
+SoloAlbum *Dicovermusic::getSoloAlbum() { return recommend->getAlbumUi(); }
+
+RecommendedDaily *Dicovermusic::getRecDaily() {
+  return recommend->getRecDailyUi();
 }

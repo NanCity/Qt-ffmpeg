@@ -73,5 +73,11 @@
         <file>images/lock.png</file>
         <file>images/phone.png</file>
         <file>images/btn_QRC.png</file>
+        <file>images/comment_h.png</file>
+        <file>images/btn_collect.png</file>
+        <file>images/btn_top50.png</file>
+        <file>images/btn_checkin_h.png.png</file>
+        <file>images/btn_checkin_n.png</file>
+        <file>images/lab_cloud.png</file>
     </qresource>
 </RCC>

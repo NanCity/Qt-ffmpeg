@@ -6,29 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>967</width>
-    <height>770</height>
+    <width>1174</width>
+    <height>729</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
-   <property name="spacing">
-    <number>0</number>
-   </property>
    <item row="0" column="0">
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
@@ -39,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>965</width>
-        <height>768</height>
+        <width>1154</width>
+        <height>709</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -431,51 +416,27 @@ background-color: #cc4a4a;</string>
              <set>Qt::AlignCenter</set>
             </property>
            </widget>
-           <zorder>lab_2</zorder>
            <zorder>lab_3</zorder>
+           <zorder>lab_2</zorder>
            <zorder>layoutWidget_3</zorder>
-           <zorder>btn_next</zorder>
            <zorder>lab_1</zorder>
            <zorder>btn_prev</zorder>
            <zorder>lab_title_2</zorder>
            <zorder>lab_title_1</zorder>
+           <zorder>btn_next</zorder>
           </widget>
          </item>
          <item>
           <widget class="QWidget" name="recommendwidget" native="true">
            <layout class="QGridLayout" name="gridLayout_5">
-            <item row="1" column="2">
-             <widget class="QPushButton" name="btn_rec_3">
-              <property name="minimumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
+            <item row="4" column="4">
+             <widget class="QLabel" name="lab_rec_10">
               <property name="maximumSize">
                <size>
-                <width>140</width>
-                <height>140</height>
+                <width>205</width>
+                <height>45</height>
                </size>
               </property>
-              <property name="styleSheet">
-               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
-background-color: rgb(255, 85, 255);</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QLabel" name="lab_rec_7">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="3">
-             <widget class="QLabel" name="lab_rec_9">
               <property name="text">
                <string/>
               </property>
@@ -485,171 +446,14 @@ background-color: rgb(255, 85, 255);</string>
              <widget class="QPushButton" name="btn_rec_6">
               <property name="minimumSize">
                <size>
-                <width>140</width>
-                <height>140</height>
+                <width>0</width>
+                <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
-background-color: rgb(255, 85, 255);</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="3">
-             <widget class="QLabel" name="lab_rec_4">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="lab_rec_6">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="4">
-             <widget class="QPushButton" name="btn_rec_5">
-              <property name="minimumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
-background-color: rgb(255, 85, 255);</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QPushButton" name="btn_rec_2">
-              <property name="minimumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
-background-color: rgb(255, 85, 255);</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QPushButton" name="btn_rec_7">
-              <property name="minimumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
-background-color: rgb(255, 85, 255);</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QLabel" name="lab_rec_3">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="lab_rec_1">
-              <property name="text">
-               <string>每日推荐歌曲</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="4">
-             <widget class="QLabel" name="lab_rec_5">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="2">
-             <widget class="QLabel" name="lab_rec_8">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="4">
-             <widget class="QPushButton" name="btn_rec_10">
-              <property name="minimumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
-background-color: rgb(255, 85, 255);</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="3">
-             <widget class="QPushButton" name="btn_rec_9">
-              <property name="minimumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>140</width>
-                <height>140</height>
+                <width>205</width>
+                <height>210</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -665,27 +469,20 @@ background-color: rgb(255, 85, 255);</string>
              <widget class="QPushButton" name="btn_rec_8">
               <property name="minimumSize">
                <size>
-                <width>140</width>
-                <height>140</height>
+                <width>0</width>
+                <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>140</width>
-                <height>140</height>
+                <width>205</width>
+                <height>210</height>
                </size>
               </property>
               <property name="styleSheet">
                <string notr="true">border-radius: 10px; /*设置圆角的大小*/
 background-color: rgb(255, 85, 255);</string>
               </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="lab_rec_2">
               <property name="text">
                <string/>
               </property>
@@ -695,14 +492,14 @@ background-color: rgb(255, 85, 255);</string>
              <widget class="QPushButton" name="btn_rec_4">
               <property name="minimumSize">
                <size>
-                <width>140</width>
-                <height>140</height>
+                <width>0</width>
+                <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>140</width>
-                <height>140</height>
+                <width>205</width>
+                <height>210</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -714,10 +511,147 @@ background-color: rgb(255, 85, 255);</string>
               </property>
              </widget>
             </item>
+            <item row="2" column="2">
+             <widget class="QLabel" name="lab_rec_3">
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="btn_rec_2">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>210</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
+background-color: rgb(255, 85, 255);</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QPushButton" name="btn_rec_5">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>210</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
+background-color: rgb(255, 85, 255);</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3">
+             <widget class="QPushButton" name="btn_rec_9">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>210</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
+background-color: rgb(255, 85, 255);</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QLabel" name="lab_rec_4">
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="lab_rec_6">
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QLabel" name="lab_rec_7">
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3">
+             <widget class="QLabel" name="lab_rec_9">
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
               <property name="spacing">
                <number>0</number>
+              </property>
+              <property name="sizeConstraint">
+               <enum>QLayout::SetFixedSize</enum>
               </property>
               <item>
                <widget class="QPushButton" name="pushButton_57">
@@ -767,18 +701,139 @@ background-color: transparent;</string>
               </item>
              </layout>
             </item>
-            <item row="1" column="0">
-             <widget class="QPushButton" name="btn_rec_1">
+            <item row="3" column="4">
+             <widget class="QPushButton" name="btn_rec_10">
               <property name="minimumSize">
                <size>
-                <width>140</width>
-                <height>140</height>
+                <width>0</width>
+                <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>140</width>
-                <height>140</height>
+                <width>205</width>
+                <height>210</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
+background-color: rgb(255, 85, 255);</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="4">
+             <widget class="QLabel" name="lab_rec_5">
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2">
+             <widget class="QLabel" name="lab_rec_8">
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="btn_rec_3">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>210</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
+background-color: rgb(255, 85, 255);</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lab_rec_2">
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="lab_rec_1">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>每日推荐歌曲</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QPushButton" name="btn_rec_7">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>210</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">border-radius: 10px; /*设置圆角的大小*/
+background-color: rgb(255, 85, 255);</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="btn_rec_1">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>205</width>
+                <height>210</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -787,13 +842,6 @@ background-color: rgb(255, 85, 255);
 
 </string>
               </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="4">
-             <widget class="QLabel" name="lab_rec_10">
               <property name="text">
                <string/>
               </property>

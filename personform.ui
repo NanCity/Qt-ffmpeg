@@ -92,10 +92,10 @@
     </size>
    </property>
    <property name="styleSheet">
-    <string notr="true"> border-radius: 13px !important; </string>
+    <string notr="true">border-image: url(:/images/btn_checkin_n.png);</string>
    </property>
    <property name="text">
-    <string>签到 </string>
+    <string/>
    </property>
   </widget>
   <widget class="QPushButton" name="btn_follow">

@@ -8,6 +8,7 @@
 #include <QString>
 #include <QStringList>
 #include <QThread>
+
 /*
  * 导入外部 FFmpeg 库头文件
  */
@@ -121,7 +122,7 @@ public: //状态检查
   QPixmap Image();
   //获取mp3播放进度
   QString Duration();
-  void play(const QString &url, const int index);
+  void play(const QString &url);
   void stop();
   void pause();
   void resume();

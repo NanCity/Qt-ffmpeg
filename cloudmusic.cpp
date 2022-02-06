@@ -177,7 +177,7 @@ void CloudMusic::ParseJson(QJsonObject &rootobj) {
       ++n;
     }
   } else {
-    QMessageBox::warning(this, "Warning", "未设置cookies,无法查询网盘数据\n",
+    QMessageBox::warning(this, "Warning", "未登录账号,无法查询网盘数据\n",
                          QMessageBox::Yes);
     return;
   }

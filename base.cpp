@@ -1,70 +1,170 @@
 ﻿#include "base.h"
 #include <QDebug>
+#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QList>
+#include <QPushButton>
 #include <QTableWidget>
-#include <qtablewidget.h>
-Base::Base(QTableWidget *parent) : tab{parent} {
-  this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
-  InitTableWidget();
+#include <QWheelEvent>
+#include <QScrollBar>
+
+//多线程
+MyThread::MyThread(QWidget* parent ) {}
+
+
+
+Base::Base(QTableWidget* parent) : tab{ parent } {
+
+	tab->installEventFilter(this);
+
+	this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
+	InitTableWidget();
+	//可以接受鼠标操作
+	tab->setContextMenuPolicy(Qt::CustomContextMenu);
+	//与鼠标右键关联
+	connect(tab, &QTableWidget::customContextMenuRequested, this,
+		&Base::RightClickMouse);
+
+	menu = new QMenu(tab);
+	mythread = new MyThread(this);
+	CreatorMenu();
+
 }
 
 Base::~Base() {}
 
+bool Base::eventFilter(QObject* obj, QEvent* event)
+{
+	if (obj == tab) {
+		if (event->type() == QEvent::Wheel) {
+			QWheelEvent* wheel = static_cast<QWheelEvent*>(event);
+			//y() < 0 鼠标滚轮向自己滑动 
+			if (wheel->angleDelta().y() < 0) {
+				emit loadNextPage();
+			}
+		}
+	}
+	return QTableWidget::eventFilter(obj,event);
+}
+
+
 //初始化TableWidget
 void Base::InitTableWidget() {
-  //设置无边框
-  // ui->tableWidget->setFrameShape(QFrame::NoFrame);
-  //设置触发条件：不可编辑
-  tab->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  tab->setSortingEnabled(false); //启动排序
-  // item 水平表头自适应大小
-  tab->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-  tab->horizontalHeader()->setDefaultSectionSize(35);
-  // item 垂直表头自适应大小
-  // ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	//设置无边框
+	tab->setFrameShape(QFrame::NoFrame);
+	//设置触发条件：不可编辑
+	tab->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	tab->setSortingEnabled(false); //启动排序
+	// item 水平表头自适应大小
+	tab->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	tab->horizontalHeader()->setDefaultSectionSize(35);
+	// item 垂直表头自适应大小
+	// ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-  //是否使用交替的颜色绘制背景
-  tab->setAlternatingRowColors(true);
-  tab->setSelectionBehavior(
-      QAbstractItemView::SelectRows); //设置选择行为时每次选择一行
+	//是否使用交替的颜色绘制背景
+	tab->setAlternatingRowColors(true);
+	tab->setSelectionBehavior(
+		QAbstractItemView::SelectRows); //设置选择行为时每次选择一行
 }
 
 void Base::DelTableWidgetRow() {
-  for (int index = tab->rowCount(); index >= 0; --index) {
-    tab->removeRow(index);
-  }
+	for (int index = tab->rowCount(); index >= 0; --index) {
+		tab->removeRow(index);
+	}
 }
 
 void Base::SerachData(QString search_data) {
-  const int curRow = tab->rowCount();
-  if ("" == search_data) {
-    for (int i = 0; i != curRow; i++) {
-      tab->setRowHidden(i, false);
-    }
-  } else {
-    //列出所有的条件的cell索引
-    QList<QTableWidgetItem *> item =
-        tab->findItems(search_data, Qt::MatchContains);
-    for (int i = 0; i != curRow; i++) {
-      //隐藏所有行
-      tab->setRowHidden(i, true);
-    }
-    if (!item.isEmpty()) {
-      //打印查询到的结果
-      for (int i = 0; i != item.count(); i++) {
-        tab->setRowHidden(item.at(i)->row(), false);
-      }
-    }
-  }
+	const int curRow = tab->rowCount();
+	if ("" == search_data) {
+		for (int i = 0; i != curRow; i++) {
+			tab->setRowHidden(i, false);
+		}
+	}
+	else {
+		//列出所有的条件的cell索引
+		QList<QTableWidgetItem*> item =
+			tab->findItems(search_data, Qt::MatchContains);
+		for (int i = 0; i != curRow; i++) {
+			//隐藏所有行
+			tab->setRowHidden(i, true);
+		}
+		if (!item.isEmpty()) {
+			//打印查询到的结果
+			for (int i = 0; i != item.count(); i++) {
+				tab->setRowHidden(item.at(i)->row(), false);
+			}
+		}
+	}
 }
 
 void Base::InsertDataInfoTableWidget(const QStringList value, const int index) {
-  tab->insertRow(index); //插入新的一行
-  for (int row = 0; row != value.length(); ++row) {
-    tab->setItem(index, row, new QTableWidgetItem(value.at(row)));
-  }
+	tab->insertRow(index); //插入新的一行
+	for (int row = 0; row != value.length(); ++row) {
+		tab->setItem(index, row, new QTableWidgetItem(value.at(row)));
+	}
+}
+
+//添加tablewidget小部件
+QWidget* Base::setItemWidget(int statue) {
+	QHBoxLayout* hbox = new QHBoxLayout(tab);
+	QPushButton* like = new QPushButton(this);
+	if (statue == 1) {
+		like->setToolTip("取消喜欢");
+		like->setIcon(QIcon(":/images/like.png"));
+	}
+	else
+	{
+		like->setToolTip("喜欢");
+		like->setIcon(QIcon(":/images/btn_unlike_h.png"));
+	}
+
+	QPushButton* down = new QPushButton(this);
+	down->setIcon(QIcon(":/images/btn_download_h.png"));
+	down->setToolTip("下载");
+	like->setMaximumSize(QSize(40, 40));
+	down->setMaximumSize(QSize(40, 40));
+	hbox->addWidget(like);
+	hbox->addWidget(down);
+	widget = new QWidget(this);
+
+	widget->setMinimumHeight(35);
+	widget->setMaximumSize(100, 40);
+	widget->setLayout(hbox);
+	return widget;
+}
+
+//下载歌曲
+void Base::Download(const unsigned int in) {}
+
+void Base::CreatorMenu() {
+	Actcomment = new QAction(QIcon(":/images/comment_h.png"), "评论", menu);
+	Actplay = new QAction(QIcon(":/images/bottom/btn_play_h.png"), "播放", menu);
+	Actnextplay = new QAction(QIcon(":/images/bottom/btn_single_h.png"),
+		"下一首播放", menu);
+	Actcollect =
+		new QAction(QIcon(":/images/btn_openfile_h.png"), "收藏到歌单", menu);
+	Actdownload = new QAction(QIcon(":/images/btn_download_h.png"), "下载", menu);
+
+	menu->addAction(Actcomment);
+	menu->addAction(Actplay);
+	menu->addAction(Actnextplay);
+	//加一条横线
+	menu->addSeparator();
+	menu->addAction(Actcollect);
+	menu->addAction(Actdownload);
+}
+
+void Base::CreatorMenu(const QList<QAction*> Act) {
+	menu->clear();
+	menu->addActions(Act);
+}
+
+//相应鼠标右键槽函数
+void Base::RightClickMouse(const QPoint& pos) {
+	if (tab->itemAt(pos) != nullptr) {
+		menu->exec(QCursor::pos());
+	}
 }
 
 /*******************初始化QAudioOutPut***********************/
