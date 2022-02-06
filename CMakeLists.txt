@@ -8,6 +8,7 @@ PROJECT(${PRO_NAME})
 file(MAKE_DIRECTORY bin lyric photowall Userpix)
 #设置编译器
 set(CMAKE_CXX_COMPILE "g++")
+# ADD_COMPILE_OPTIONS(-Wall -std=c++11 -g )
 
 # 从Qt设计师文件列表中创建代码
 set(CMAKE_AUTOUIC ON)
@@ -41,31 +42,27 @@ file(GLOB libs_path ${PROJECT_SOURCE_DIR}/ffmpeg/lib/*.lib)
 message(${libs_path})
 message("*********************** end **************************")
 
-# ADD_COMPILE_OPTIONS(-Wall -std=c++11 -g )
-
 #set Qt PATH  windows下无法调试，解决方案：将qt的的qmake配置成环境变量
 set (CMAKE_PREFIX_PATH D:/Qt6/6.2.2/msvc2019_64)
 
 # 搜索当前目录下的源文件
 aux_source_directory(. DIR_SRCS)
-
 #搜索目录下的.ui文件
 file(GLOB USER_UI_PATH ./*.ui)
-
-# 添加Style子目录
-# add_subdirectory()
-
 # 寻找Qt5的库
 find_package(Qt5 COMPONENTS Widgets Multimedia Network REQUIRED)
 
 #添加Qt的资源文件，必须放在find_package之后，不然无法识别qt5_add_resources函数
 #set(QRC_SOURCE_FILES resource.qrc)
 #qt_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
+#添加子目录
+add_subdirectory(photowall)
+
 qt5_add_resources(QRC_SOURCE_FILES resource.qrc)
 #设置可执行文件 
 add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH} )
 
 # 链接Qt5的库
-target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network  ${libs_path})
+target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network  photowall ${libs_path})
 #动态库 target_link_libraries(${PRO_NAME}  PRIVATE ${libs_path}   Qt5::Multimedia Qt5::Sql  Qt5::Widgets Qt5::Network )
 

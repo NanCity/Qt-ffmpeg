@@ -25,6 +25,7 @@
 #include <QFont>
 #include <QEventLoop>
 #include <QPainter>
+#include "photowall/photowall.h"
 Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 	ui->setupUi(this);
 	InitLabel();
@@ -33,6 +34,10 @@ Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 	ui->lab_2->installEventFilter(this);
 	ui->lab_3->installEventFilter(this);
 
+
+
+	PhotoWall* p = new PhotoWall(this);
+	p->show();
 	config = new Config();
 	time = new QTimer(this);
 	m_tag = new M_Tag(this);
@@ -127,7 +132,7 @@ void Recommend::on_btn_rec_1_clicked() {
 //加载本地图片
 void Recommend::LoadPic() {
 	QPixmap pix{};
-	for (int x = 0; x != 10; ++x) {
+	for (int x = 1; x != 9; ++x) {
 		pix.load(QString("../photowall/%1.png").arg(x));
 		pixmap.push_back(pix);
 	}
@@ -253,17 +258,16 @@ bool Recommend::eventFilter(QObject* obj, QEvent* event) {
 
 void Recommend::getPic() {
 	//事件循环，防止没保存完图片就去读取，照成的数据越界
-	QEventLoop evenloop;
-	foreach(auto & val, targetlist) {
+	//Num = 1;
+	//QEventLoop evenloop;
+	//foreach(auto & val, targetlist) {
+	//	NetGetBanner->get(QNetworkRequest(QString("%1").arg(val.picUrl)));
 
-		NetGetBanner->get(QNetworkRequest(QString("%1").arg(val.picUrl)));
-
-	}
-
-	connect(NetGetBanner, &QNetworkAccessManager::finished, &evenloop, &QEventLoop::quit);
-	evenloop.exec();
-	//加载图片到照片墙
-	this->LoadPic();
+	//}
+	//connect(NetGetBanner, &QNetworkAccessManager::finished, &evenloop, &QEventLoop::quit);
+	//evenloop.exec();
+	////加载图片到照片墙
+	//this->LoadPic();
 }
 
 void Recommend::on_BannerReplyFinished(QNetworkReply* reply) {
@@ -297,8 +301,8 @@ void Recommend::on_GetBannerPic(QNetworkReply* reply) {
 	if (reply->error() == QNetworkReply::NoError) {
 		QPixmap map;
 		map.loadFromData(reply->readAll());
-		static int n = 0;
-		map.save(QString("../photowall/%1.png").arg(n));
+		map.save(QString("../photowall/%1.png").arg(Num));
+		++Num;
 	}
 	reply->deleteLater();
 }

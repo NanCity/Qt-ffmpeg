@@ -5,7 +5,6 @@
 #include <QList>
 #include <QMainWindow>
 #include <QMutex>
-
 #include <QTableWidget>
 QT_BEGIN_NAMESPACE
 namespace Ui {

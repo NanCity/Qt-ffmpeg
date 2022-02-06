@@ -2,6 +2,8 @@
 #include <QApplication>
 #include <QFile>
 #include <QStyleFactory>
+#include <QSplashScreen>
+
 //#include <QTextCodec>
 
 int main(int argc, char *argv[]) {
@@ -31,6 +33,12 @@ int main(int argc, char *argv[]) {
   }
   //关闭文件
   file.close();
+  //启动动画
+  //QPixmap pix("F:/QTCode/Music/photowall/5.png");
+  //QSplashScreen splash(pix);
+  //splash.show();
+  //splash.showMessage("正在启动程序", Qt::AlignTop | Qt::AlignRight, Qt::red);
+  //a.processEvents();
   Music w;
   w.show();
   return a.exec();

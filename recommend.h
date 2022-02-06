@@ -73,6 +73,8 @@ protected slots:
 
 private:
 	unsigned int index{};
+	//保存的图片顺序
+	int Num;
 	Ui::Recommend* ui;
 	Config* config;
 	QMutex* mutex;

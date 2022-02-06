@@ -37,9 +37,7 @@
 #include <QTableWidget>
 #include <QTime>
 //随机数
-
 #include <QtGlobal>
-
 // ffplay -ar 44100 -ac 2 -f s16le -i out.pcm 命令行播放
 Music::Music(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::Music), CurrentPlayerListIndex(0) {
