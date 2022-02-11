@@ -21,6 +21,7 @@ class Login;
 class lyric;
 class Mp3tag;
 class Search;
+class QLineEdit;
 class PersonForm;
 class AudioDeCode;
 class DesktopLyrics;
@@ -32,11 +33,13 @@ class SoloAlbum;
 class Singer;
 class SingerDetails;
 class SongMenu;
+class QListWidget;
 class Music : public QMainWindow {
 	Q_OBJECT
 private:
 	int sec{};
 	Ui::Music* ui;
+	QLineEdit* edit;
 	QString SongName{};
 	unsigned int CurrVolume{};
 	bool sliderSeeking = false;
@@ -58,14 +61,20 @@ private:
 	//歌单
 	SongMenu* songmenu;
 	QTableWidget* tableWidget{};
-
 	Dicovermusic* DicMusic;
-	//检查鼠标是否移动
-	bool mMoving = false;
 	QPoint mLastMousePosition{};
 	PersonForm* perform;
 	Local_and_Download* localMusic;
+	//QListWidget鼠标右键操作
+	QMenu* menu;
+	QAction* Play;
+	QAction* NextPlay;
+	QAction* Down;
+	QAction* Editmenuinfo;
+	QAction* DelSongMenu;
 
+	//检查鼠标是否移动
+	bool mMoving = false;
 	// stop按钮的状态
 	enum class State {
 		/*暂停*/
@@ -95,6 +104,8 @@ public:
 	void InstallEventFilter();
 	//初始化
 	void init();
+	//初始化菜单
+	void initMenu(QListWidget *listwidget);
 	//悬停提示
 	void HoverTip();
 	void PlayerMode();

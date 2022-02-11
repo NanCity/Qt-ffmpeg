@@ -1,8 +1,13 @@
 ﻿#ifndef RECOMMEND_H
 #define RECOMMEND_H
 //个性推荐Ui
+
+//每日推荐
 #include "recommendeddaily.h"
+//专辑
 #include "soloalbum.h"
+
+
 #include <QPixmap>
 #include <QWidget>
 class Config;
@@ -10,6 +15,8 @@ class M_Tag;
 class QLabel;
 class QMutex;
 class QTimer;
+class SongMenu;
+class PhotoWall;
 class QByteArray;
 class QEventLoop;
 class QNetworkReply;
@@ -21,16 +28,17 @@ namespace Ui {
 }
 
 //轮播图区分专辑和单曲
-struct Target {
-	int targetId;
-	QString typeTitle;
-	QString picUrl;
-	Target() : targetId{}, typeTitle{}, picUrl{} {}
-};
+//struct Target {
+//	int targetId;
+//	QString typeTitle;
+//	QString picUrl;
+//	Target() : targetId{}, typeTitle{}, picUrl{} {}
+//};
 
 struct RecPlaylist
 {
-	int id{};
+	int trackCount{};
+	long long id{};
 	long long playCount{};
 };
 
@@ -42,18 +50,14 @@ class Recommend : public QWidget {
 public:
 	explicit Recommend(QWidget* parent = nullptr);
 	virtual ~Recommend();
-	void InitLabel();
-	void LoadPic();
-	void setPic(const int _index = 0);
-	void getPic();
-	void NextPic();
-	void Prevpic();
 	//将所有的Btn_rec_..控件集合
 	void addBtn_rec_();
 	void addLab_rec_();
 	//首页推荐歌单
 	void RecommendPlaylist();
+	//void getMyLikeMuiscId();
 	SoloAlbum* getAlbumUi();
+	SongMenu* getSoungMenu();
 	RecommendedDaily* getRecDailyUi();
 
 protected:
@@ -61,15 +65,26 @@ protected:
 protected slots:
 	//每日推荐单曲
 	void on_btn_rec_1_clicked();
+	//其余9个btn按钮
+	void on_btn_rec_2_clicked();
+	void on_btn_rec_3_clicked();
+	void on_btn_rec_4_clicked();
+	void on_btn_rec_5_clicked();
+	void on_btn_rec_6_clicked();
+	void on_btn_rec_7_clicked();
+	void on_btn_rec_8_clicked();
+	void on_btn_rec_9_clicked();
+	void on_btn_rec_10_clicked();
 
-	void on_BannerReplyFinished(QNetworkReply*);
-	void on_GetBannerPic(QNetworkReply*);
+
 	void on_FinshedNewSong(QNetworkReply*);
 	void on_FinshedNewDisc(QNetworkReply*);
 	void on_FinshedGetAlubPic(QNetworkReply*);
 	void on_FinshedNetRecommend(QNetworkReply*);
 	//首页推荐歌单
 	void on_FinishedNetRecPlaylist(QNetworkReply*);
+
+	//void on_FinshedNetMyLikeMusicId(QNetworkReply*);
 
 private:
 	unsigned int index{};
@@ -78,25 +93,26 @@ private:
 	Ui::Recommend* ui;
 	Config* config;
 	QMutex* mutex;
-	Target target;
-	QTimer* time;
 	M_Tag* m_tag;
+	//照片墙
+	PhotoWall* photowall;
 	//专辑UI
 	SoloAlbum* soloalbum;
 	//每日推荐UI
 	RecommendedDaily* recDaily;
+	//歌单UI
+	SongMenu* songmuen;
 
 	QList<QPixmap> pixmap{};
-	QList<Target> targetlist;
 	QList<QLabel*> lablist{};
-	QList<QLabel*> lab_title;
-
+	QList<QLabel*> lab_title{};
 	QList<QPushButton*> btn_recAll{};
 	QList<QLabel*>	lab_recAll;
+
+	//保存歌单ID和歌曲数量
+	QList<RecPlaylist>RecList;
 	QNetworkRequest* request;
-	QNetworkAccessManager* NetMangBanner;
-	QNetworkAccessManager* NetGetBanner;
-	//搜索banner内的资源
+
 	QNetworkAccessManager* NetNewSong;
 	QNetworkAccessManager* NetNewDisc;
 	//专辑封面
@@ -105,6 +121,8 @@ private:
 	QNetworkAccessManager* NetRecommend;
 	//每日首页推荐歌单
 	QNetworkAccessManager* NetRecPlaylist;
+	//我喜欢的音乐 -- ID
+	//QNetworkAccessManager* NetMyLikeMusicId;
 };
 
 #endif // RECOMMEND_H

@@ -36,8 +36,13 @@ void Dicovermusic::InitTabWidget() {
       "#dcdde4;border-bottom: 3px solid #3c3e42;}");
 }
 
-SoloAlbum *Dicovermusic::getSoloAlbum() { return recommend->getAlbumUi(); }
+SoloAlbum *Dicovermusic::getSoloAlbumUi() { return recommend->getAlbumUi(); }
 
-RecommendedDaily *Dicovermusic::getRecDaily() {
+RecommendedDaily *Dicovermusic::getRecDailyUi() {
   return recommend->getRecDailyUi();
+}
+
+SongMenu* Dicovermusic::getSongMuen()
+{
+    return recommend->getSoungMenu();
 }

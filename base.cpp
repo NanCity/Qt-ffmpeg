@@ -8,17 +8,21 @@
 #include <QTableWidget>
 #include <QWheelEvent>
 #include <QScrollBar>
-
-//多线程
-MyThread::MyThread(QWidget* parent ) {}
-
-
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QMovie>
+#include "Loading.h"
 
 Base::Base(QTableWidget* parent) : tab{ parent } {
 
 	tab->installEventFilter(this);
-
 	this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
+	movie = new Loading(tab);
 	InitTableWidget();
 	//可以接受鼠标操作
 	tab->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -27,25 +31,42 @@ Base::Base(QTableWidget* parent) : tab{ parent } {
 		&Base::RightClickMouse);
 
 	menu = new QMenu(tab);
-	mythread = new MyThread(this);
 	CreatorMenu();
+	NetMyLikeMusicId = new QNetworkAccessManager(this);
+	connect(NetMyLikeMusicId, &QNetworkAccessManager::finished, this, &Base::on_FinshedNetMyLikeMusicId);
 
+	//获取我喜欢的音乐ID
+	GetMyLikeMusicID();
 }
 
 Base::~Base() {}
+
+void Base::loadMovie()
+{
+	if (movie->isHidden()) {
+		movie->show();
+	}
+	movie->start();
+}
+
+void Base::closeMovie()
+{
+	movie->Stop();
+	movie->hide();
+}
 
 bool Base::eventFilter(QObject* obj, QEvent* event)
 {
 	if (obj == tab) {
 		if (event->type() == QEvent::Wheel) {
 			QWheelEvent* wheel = static_cast<QWheelEvent*>(event);
-			//y() < 0 鼠标滚轮向自己滑动 
+			//y() < 0 鼠标滚轮向自己滑动 ，并且滑块到达底部
 			if (wheel->angleDelta().y() < 0) {
 				emit loadNextPage();
 			}
 		}
 	}
-	return QTableWidget::eventFilter(obj,event);
+	return QTableWidget::eventFilter(obj, event);
 }
 
 
@@ -122,14 +143,15 @@ QWidget* Base::setItemWidget(int statue) {
 	QPushButton* down = new QPushButton(this);
 	down->setIcon(QIcon(":/images/btn_download_h.png"));
 	down->setToolTip("下载");
-	like->setMaximumSize(QSize(40, 40));
-	down->setMaximumSize(QSize(40, 40));
+	like->setMaximumSize(QSize(20, 25));
+	down->setMaximumSize(QSize(20, 25));
 	hbox->addWidget(like);
 	hbox->addWidget(down);
 	widget = new QWidget(this);
 
-	widget->setMinimumHeight(35);
-	widget->setMaximumSize(100, 40);
+	//widget->setMinimumHeight(40);
+	widget->setMaximumSize(60, 40);
+	widget->setMinimumSize(60, 40);
 	widget->setLayout(hbox);
 	return widget;
 }
@@ -160,12 +182,87 @@ void Base::CreatorMenu(const QList<QAction*> Act) {
 	menu->addActions(Act);
 }
 
+/*
+* uid 传入的是用户ID(需要先登录)
+*/
+void Base::GetMyLikeMusicID()
+{
+	QString userid = config.GetValue("/Userinfo/userId");
+	if (userid.isEmpty()) {
+		QLabel* lab = new QLabel(this);
+		lab->setText("还未登录账号");
+		lab->move(this->width() / 2 + 10, 40);
+		return;
+	}
+	else
+	{
+		QString Url{ QString("http://cloud-music.pl-fe.cn/likelist?uid=%1").arg(userid.toInt()) };
+		QNetworkRequest* request{ config.setCookies() };
+		request->setUrl(Url);
+		NetMyLikeMusicId->get(*request);
+	}
+}
+
+bool Base::isLike(const int ID)
+{
+	QList<int>::const_iterator it{};
+	//std::find(STL算法)返回一个迭代器，如若没有找到则返回尾后迭代器
+	it = std::find(likeMusicId.cbegin(), likeMusicId.cend(), ID);
+	if (it != likeMusicId.cend()) {
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 //相应鼠标右键槽函数
 void Base::RightClickMouse(const QPoint& pos) {
 	if (tab->itemAt(pos) != nullptr) {
 		menu->exec(QCursor::pos());
 	}
 }
+
+
+void Base::on_FinshedNetMyLikeMusicId(QNetworkReply* reply)
+{
+	if (reply->error() == QNetworkReply::NoError) {
+		QJsonParseError err_t{};
+		QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &err_t);
+		//我喜欢的音乐了列表ID
+		if (err_t.error == QJsonParseError::NoError) {
+			QJsonObject rot = document.object();
+			QJsonValue idsAry = rot.value("ids");
+			Config cfg("../config/MyLikeMusicId.ini");
+			likeMusicId.clear();
+			if (idsAry.isArray()) {
+				QJsonArray ary = idsAry.toArray();
+				int i = 0;
+				int id{};
+				cfg.SetBeginGroup("MusicId");
+				foreach(const QJsonValue & rhs, ary) {
+					id = rhs.toInt();
+					cfg.SetValue(QString::number(i), QVariant(id));
+					likeMusicId.push_back(id);
+					++i;
+				}
+				cfg.endGroup();
+			}
+		}
+		else
+		{
+			fprintf(stdout, "Json format Error\n");
+		}
+	}
+	reply->deleteLater();
+}
+
+
+
+
+
+
 
 /*******************初始化QAudioOutPut***********************/
 // Player::Player() : data_pcm(0) {

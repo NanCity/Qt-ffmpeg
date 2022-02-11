@@ -1,4 +1,4 @@
-#ifndef PICTUREVIEW_H
+﻿#ifndef PICTUREVIEW_H
 #define PICTUREVIEW_H
 
 #include <QGraphicsView>
@@ -16,7 +16,7 @@ public:
     virtual ~pictureView();
 protected:
     virtual void resizeEvent(QResizeEvent *event); //
-
+    virtual void mousePressEvent(QMouseEvent* event);
 signals:
     void sizeChanged(const QSize &);
 };

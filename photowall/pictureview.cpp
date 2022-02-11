@@ -1,4 +1,4 @@
-#include "pictureview.h"
+﻿#include "pictureview.h"
 #include <QResizeEvent>
 pictureView::pictureView(QWidget *parent)
     : QGraphicsView(parent)
@@ -13,5 +13,11 @@ void pictureView::resizeEvent(QResizeEvent *event)
 {
     emit sizeChanged(event->size());
     return QGraphicsView::resizeEvent(event);
+}
+
+void pictureView::mousePressEvent(QMouseEvent* event)
+{
+
+	printf("mousePressEvent\n");
 }
 

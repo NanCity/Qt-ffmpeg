@@ -45,22 +45,9 @@ void SoloAlbum::Init() {
 	for (int i = 0; i != len; i++) {
 		ui->playlist->setHorizontalHeaderItem(i, new QTableWidgetItem(head.at(i)));
 	}
+	//设置第一列表头自适应widget宽高
+	ui->playlist->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 
-	//设置无边框
-	// ui->playlist->setFrameShape(QFrame::NoFrame);
-	////不可编辑
-	// ui->playlist->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	////启动排序
-	// ui->playlist->setSortingEnabled(false);
-	//// item 水平表头自适应大小
-	// ui->playlist->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	//设置第一列表头不可拉伸
-	ui->playlist->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
-	// ui->playlist->verticalHeader()->setDefaultSectionSize(35);
-	////是否使用交替的颜色绘制背景
-	// ui->playlist->setAlternatingRowColors(true);
-	////设置选择行为时每次选择一行
-	// ui->playlist->setSelectionBehavior(QAbstractItemView::SelectRows);
 }
 
 void SoloAlbum::InitMenu() {
@@ -87,10 +74,7 @@ void SoloAlbum::InitMenu() {
 	//下一首播放
 	connect(Actnextplay, &QAction::triggered, this, [&]() {
 		int index = ui->playlist->currentRow();
-		/*QString url =
-			QString("https://music.163.com/song/media/outer/url?id=%1.mp3")
-			.arg(Albtag.at(index).Song_id);*/
-		emit Alb_Nextplay(this, index,songID.at(index));
+		emit Alb_Nextplay(this, index, songID.at(index));
 		});
 	//下载
 	connect(Actdownload, &QAction::triggered, this, [&]() {});
@@ -100,28 +84,17 @@ void SoloAlbum::setAlbumtag(Albumtag& t) { Albtag.push_back(t); }
 
 void SoloAlbum::LoadData() {
 	const int len = Albtag.length();
-	//ui->playlist->setColumnWidth(0, 100);
-	//ui->playlist->setColumnWidth(1, 120);
-	//ui->playlist->setColumnWidth(2, 120);
-	//ui->playlist->setColumnWidth(3, 120);
-	//ui->playlist->setColumnWidth(3, 120);
 	songID.clear();
 	for (int x = 0; x != len; x++) {
 		//插入新的一行
 		ui->playlist->insertRow(x);
-		// QHBoxLayout *hbox = new QHBoxLayout(ui->playlist);
-		// like = new QPushButton(this);
-		// like->setIcon(QIcon(":/images/btn_unlike_h.png"));
-		// down = new QPushButton(this);
-		// down->setIcon(QIcon(":/images/btn_download_h.png"));
-		// like->setMaximumSize(QSize(35, 35));
-		// down->setMaximumSize(QSize(35, 35));
-		// hbox->addWidget(like);
-		// hbox->addWidget(down);
-		// QWidget *widget = new QWidget(this);
-		// widget->setMaximumSize(80, 35);
-		// widget->setLayout(hbox);
-		ui->playlist->setCellWidget(x, 0, base->setItemWidget());
+		if (base->isLike(Albtag.at(x).Song_id)) {
+			ui->playlist->setCellWidget(x, 0, base->setItemWidget(1));
+		}
+		else
+		{
+			ui->playlist->setCellWidget(x, 0, base->setItemWidget(0));
+		}
 		QTableWidgetItem* item1 = new QTableWidgetItem(Albtag.at(x).Title);
 		QTableWidgetItem* item2 = new QTableWidgetItem(Albtag.at(x).Artist);
 		QTableWidgetItem* item3 = new QTableWidgetItem(Albtag.at(x).Album);

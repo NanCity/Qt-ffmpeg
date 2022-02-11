@@ -19,8 +19,7 @@ namespace Ui {
 class UserSongMuen {
 public:
 	//歌单用户ID
-	int userID;
-
+	int userID{};
 	//歌单ID
 	long long id{};
 	//歌曲数量
@@ -41,29 +40,36 @@ class SongMenu : public QWidget
 public:
 	explicit SongMenu(QWidget* parent = nullptr);
 	~SongMenu();
+	void loadData();
 	//获取我喜欢的歌曲列表ID,方便后续操作
 	void RequestSongTable();
-	//返回列表ID
-	QMap<int, unsigned int>SongTableID() { return SongListIDMap; }
 	//返回歌单名字
 	QStringList getSongMenu();
 	void RequestUserSongMenu();
 	void SongMenuAt(const int index = 0);
-	void loadData();
+	//拿到歌单之后，直接请求歌单中的歌曲
+	void getSongMenuID(const long long ID = 0, const int limit = 10);
+	//创建歌单
+	void CreatorSongMuen(const QString &name);
+	void DelereSongMuenu(const int ID);
+signals:
+	//加载歌单列表
+	void DataLoading();
+	void CreatorSongMenuOk();
+	void DeleteOk();
 protected slots:
-	void on_finshedNetSongTable(QNetworkReply*);
 	void on_finshedNetSongMenu(QNetworkReply*);
 	void on_finsedNetAllSong(QNetworkReply*);
 private:
-	Ui::SongMenu* ui; int userId{};
+	Ui::SongMenu* ui;
+	int userId{};
+	int songMenuID{};
 	int curtableindex{};
 	Base* base;
 	Config config{};
-	QMap<int, unsigned int> SongListIDMap;
 	//保存用户歌单
 	QList<UserSongMuen> songlistMenu{};
 	QList<Temptag>taglsit{};
-	QNetworkAccessManager* NetSongTable;
 	QNetworkAccessManager* NetSongMenu;
 	QNetworkAccessManager* NetAllSong;
 };

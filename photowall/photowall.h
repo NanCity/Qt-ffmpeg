@@ -23,11 +23,23 @@
 
 class QButtonGroup;
 class QGraphicsScene;
+class QNetworkReply;
 class QGraphicsItemAnimation;
+class QNetworkAccessManager;
 
 namespace Ui {
 	class PhotoWall;
 }
+
+//轮播图区分专辑和单曲
+struct Target {
+	int targetId;
+	QString typeTitle;
+	QString picUrl;
+	Target() : targetId{}, typeTitle{}, picUrl{} {}
+};
+
+
 
 class PhotoWall : public QWidget
 {
@@ -42,38 +54,64 @@ public:
 public:
 	explicit PhotoWall(QWidget* parent = nullptr);
 	virtual ~PhotoWall();
-	void setButtonGroup();  //设置button组
-	void setInitList(); //设置相关图片信息
-	void setPictureScreen(); //
-	void setTimerAndConnect(); //设置定时器与
-//    int getIndexByRules(int oldIndex,int rule);
+	//设置button组
+	void setButtonGroup();  
+	//设置相关图片信息
+	void setInitList(); 
+	//加载图片
+	void setPictureScreen(); 
+	//设置定时器
+	void setTimerAndConnect(); 
 	template<typename T>
 	void rollList(QList<T>& oldList, int dir, int count);
 	void rollItem(int rollDir, unsigned rollCount);
-	int  getrightN(int num); //获取准确的位置
+	//获取准确的位置
+	int  getrightN(int num); 
+	void loadBannerPci();
+	void loadLocalImages();
+
 protected slots:
 	void timerOutFunc();
 	//点击滚动
 	void clickedItemRoll(int type);
 	void on_btnL_clicked();
 	void on_btnR_clicked();
+
+	void on_finshedNetMangBanner(QNetworkReply* reply);
+	void on_finshedNetGetBanner(QNetworkReply* reply);
 private:
 	Ui::PhotoWall* ui;
-	QTimer* m_timer; //定时器
-	QGraphicsScene* m_scene; //场景
+	//定时器
+	QTimer* m_timer; 
+	//场景
+	QGraphicsScene* m_scene; 
 	//    PictrueView *m_view; //视图
 	QLineF m_MidLine{}; //中等线，确定图片位置
-	QList<qreal> m_PointList{}; //各个图片位置信息
-	QList<QPixmap> m_PixmapList{}; //各个图片列表
-	QList<qreal> m_ZValueList{}; //各个显示优先级列表
-	QList<qreal> m_PixmapScaleList{}; //各个图片位置信息伸缩因子列表
+	//各个图片位置信息
+	QList<qreal> m_PointList{}; 
+	//各个图片列表
+	QList<QPixmap> m_PixmapList{};
+	//各个显示优先级列表
+	QList<qreal> m_ZValueList{};
+	//各个图片位置信息伸缩因子列表
+	QList<qreal> m_PixmapScaleList{}; 
 	int m_index{};
-	Rules m_currentRule{}; //当前执行的类型操作
-	unsigned m_rollCount{}; //滚动次数
-	QButtonGroup* m_BtnGroup{}; //按钮盒子
+	//当前执行的类型操作
+	Rules m_currentRule{}; 
+	//滚动次数
+	unsigned m_rollCount{}; 
+	//按钮盒子
+	QButtonGroup* m_BtnGroup{};
 	bool btnMoveEnable{};
 	QVector<QGraphicsItemAnimation*>item{ 10 };
 	QTimer* m_newT{}; //旋转定时器
+
+	//获取网易云音乐的照片墙图片
+	int index{0};
+	QList<Target> targetlist;
+	QNetworkAccessManager* NetMangBanner;
+	//解析图片
+	QNetworkAccessManager* NetGetBanner;
 };
 
 

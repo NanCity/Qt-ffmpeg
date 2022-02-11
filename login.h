@@ -7,7 +7,7 @@
 #include <QJsonValue>
 
 namespace Ui {
-class Login;
+	class Login;
 }
 
 #define Error(string)                                                          \
@@ -49,75 +49,79 @@ class QTimer;
 //};
 
 class Login : public QDialog {
-  Q_OBJECT
+	Q_OBJECT
 
 public:
-  explicit Login(QWidget *parent = nullptr);
-  virtual ~Login();
-  bool ParseJson(QJsonObject &value);
-  void AutoLogin();
-  void Grade();
-  void Vip();
-  QPixmap getPix() { return pix; }
+	explicit Login(QWidget* parent = nullptr);
+	virtual ~Login();
+	bool ParseJson(QJsonObject& value);
+	void AutoLogin();
+	//扫码确认登陆后,获取用户信息
+	void GetUserInfo(const int& UserId);
+	void Grade();
+	void Vip();
+	QPixmap getPix() { return pix; }
 private slots:
-  //时间过滤器
-  bool eventFilter(QObject *obj, QEvent *event);
+	//时间过滤器
+	bool eventFilter(QObject* obj, QEvent* event);
 
-  void on_btn_signin_clicked();
-  void on_btn_signup_clicked();
-  void countrieslist_itemClicked(QListWidgetItem *item);
-  //获取国家编码列表
-  void on_btn_countrieslist_clicked();
-  //返回登录界面
-  void on_btn_backlogin_clicked();
-  //扫码登录
-  void on_btn_QRC_clicked();
+	void on_btn_signin_clicked();
+	void on_btn_signup_clicked();
+	void on_btn_Qrcode_clicked();
+	void countrieslist_itemClicked(QListWidgetItem* item);
+	//获取国家编码列表
+	void on_btn_countrieslist_clicked();
+	//返回登录界面
+	void on_btn_backlogin_clicked();
+	//扫码登录
+	void on_btn_QRC_clicked();
 
-  void on_replyFinished(QNetworkReply *);
-  void on_FinshedPic(QNetworkReply *);
-  bool checkInput(QString str, const QRegExp regx, const int n);
-  void on_finshedGrade(QNetworkReply *reply);
-  void on_finshedVip(QNetworkReply *reply);
-  void on_finshedUserMsg(QNetworkReply *reply);
-  void on_finshedCountriesList(QNetworkReply *reply);
-  //处理二维码登录
-  void on_finshedQRC_key(QNetworkReply *reply);
-  void on_finshedQRC_create(QNetworkReply *reply);
-  void on_finshedQRC_check(QNetworkReply *reply);
+	void on_replyFinished(QNetworkReply*);
+	void on_FinshedPic(QNetworkReply*);
+	bool checkInput(QString str, const QRegExp regx, const int n);
+	void on_finshedGrade(QNetworkReply* reply);
+	void on_finshedVip(QNetworkReply* reply);
+	void on_finshedUserMsg(QNetworkReply* reply);
+	void on_finshedCountriesList(QNetworkReply* reply);
+	void on_finshedNetUserInfo(QNetworkReply* reply);
+	//处理二维码登录
+	void on_finshedQRC_key(QNetworkReply* reply);
+	void on_finshedQRC_create(QNetworkReply* reply);
+	void on_finshedQRC_check(QNetworkReply* reply);
 
-  void on_pushButton_clicked();
-  //二维码过期
-  void on_QRCexpired();
+	void on_pushButton_clicked();
+	//二维码过期
+	void on_QRCexpired();
 signals:
-  void LoginSucces();
+	void LoginSucces();
 
 private:
-  Ui::Login *ui;
-  //用于检测扫码状态
-  QTimer *time;
-  //每隔2秒确认一次是否扫描
-  QTimer *request_time;
-  Signup *signup;
-  int level;
-  QString phone{};
-  QString pwd{};
-  QPixmap pix;
-  Config *config;
-  QString QRC_KEY;
-  QListWidget *countrieslist;
-  QNetworkRequest *NetRequest;
-  //发送网络请求和接受应答
-  QNetworkAccessManager *NetManager;
-  QNetworkAccessManager *NetUserPic;
-  QNetworkAccessManager *Netgrade;
-  QNetworkAccessManager *NetVip;
-  QNetworkAccessManager *NetUserMsg;
-  QNetworkAccessManager *NetCountries;
-
-  //二维码登录
-  QNetworkAccessManager *NetQRC_key;
-  QNetworkAccessManager *NetQRC_create;
-  QNetworkAccessManager *NetQRC_check;
+	Ui::Login* ui;
+	//用于检测扫码状态
+	QTimer* time;
+	//每隔2秒确认一次是否扫描
+	QTimer* request_time;
+	Signup* signup;
+	int level;
+	QString phone{};
+	QString pwd{};
+	QPixmap pix;
+	Config* config;
+	QString QRC_KEY;
+	QListWidget* countrieslist;
+	QNetworkRequest* NetRequest;
+	//发送网络请求和接受应答
+	QNetworkAccessManager* NetManager;
+	QNetworkAccessManager* NetUserPic;
+	QNetworkAccessManager* Netgrade;
+	QNetworkAccessManager* NetVip;
+	QNetworkAccessManager* NetUserMsg;
+	QNetworkAccessManager* NetCountries;
+	QNetworkAccessManager* NetUserInfo;
+	//二维码登录
+	QNetworkAccessManager* NetQRC_key;
+	QNetworkAccessManager* NetQRC_create;
+	QNetworkAccessManager* NetQRC_check;
 };
 
 #endif // LOGIN_H

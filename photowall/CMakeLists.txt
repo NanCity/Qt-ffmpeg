@@ -13,11 +13,12 @@ set (CMAKE_PREFIX_PATH D:/Qt6/6.2.2/msvc2019_64)
 find_package(Qt5 COMPONENTS Widgets  REQUIRED)
 include_directories(
 	${Qt5Widgets_INCLUDE_DIRS}
+	${Qt5Network_INCLUDE_DIRS}
 )
 # 搜索当前目录下的源文件
 aux_source_directory(. DIR_LIB_SRCS)
 #搜索目录下的.ui文件
-#file(GLOB USER_UI_PATH photowall.ui)
-#message("Ui = " ${USER_UI_PATH})
+file(GLOB USER_UI_PATH *.ui)
+message("UiPath = " ${USER_UI_PATH})
 message(${DIR_LIB_SRCS})
 add_library(photowall ${DIR_LIB_SRCS} ${USER_UI_PATH}	)

@@ -1,36 +1,39 @@
-#include "photowall.h"
+ï»¿#include "photowall.h"
 #include "ui_photowall.h"
 #include "picturebutton.h"
 #include "pictureview.h"
-#include "qpixmap.h"
 #include <QPixmap>
 #include <QPainterPath>
 #include <QGraphicsView>
 #include <QDebug>
-#include <QQueue>
-#include <QGraphicsItemAnimation>
 #include <QTimeLine>
-#include <cmath>
-#include <ctime>
 #include <QTransform>
 #include <QButtonGroup>
 #include <QMap>
 #include <QTimer>
-#include <QButtonGroup>
-#include <QGraphicsScene>
-#include <QButtonGroup>
 #include <QGraphicsScene>
 #include <QGraphicsItemAnimation>
 
-static int dir = 0;//¼ÇÂ¼·½Ïò
+#include <QEventLoop>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QNetworkAccessManager>
+#include <QNetworkCookie>
+#include <QNetworkCookieJar>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+
+//static int dir = 0;//è®°å½•æ–¹å‘
 static QList<qreal> spaceList;
 static QList<qreal> unitList;
-static QList<qreal> transScaleList;//Ëõ·Å±ÈÀı±í
+static QList<qreal> transScaleList;//ç¼©æ”¾æ¯”ä¾‹è¡¨
 static QSize pictrueBigSize = RAW_VIEW_SIZE / SCALE_VIEW_PIXMAP;
 static QSize pictrueSmallSize = RAW_VIEW_SIZE / SCALE_VIEW_PIXMAP / SCALE_BIG_SMALL;
 static QList<pictureItem*> itemList;
 static QList<int> finishList;
-static QMap<int, pictureItem*> mapLink;  //°´Å¥id Óë Í¼Æ¬×ÊÔ´µÄÓ³Éä
+static QMap<int, pictureItem*> mapLink;  //æŒ‰é’®id ä¸ å›¾ç‰‡èµ„æºçš„æ˜ å°„
 static int startNum = 0;
 static QList<QPointF> pointA;
 
@@ -39,6 +42,19 @@ PhotoWall::PhotoWall(QWidget* parent) :
 	ui(new Ui::PhotoWall)
 {
 	ui->setupUi(this);
+	this->installEventFilter(this);
+	for (int i = 0; i < 10; i++) {
+		item[i] = new QGraphicsItemAnimation(this);
+	}
+
+	NetMangBanner = new QNetworkAccessManager(this);
+	QString url{ "http://cloud-music.pl-fe.cn/banner?type=0" };
+	NetMangBanner->get(QNetworkRequest(url));
+	connect(NetMangBanner, &QNetworkAccessManager::finished, this, &PhotoWall::on_finshedNetMangBanner);
+
+	NetGetBanner = new QNetworkAccessManager(this);
+	connect(NetGetBanner, &QNetworkAccessManager::finished, this, &PhotoWall::on_finshedNetGetBanner);
+
 	m_timer = new QTimer(this),
 		m_scene = new QGraphicsScene(this);
 	m_index = 0;
@@ -46,28 +62,106 @@ PhotoWall::PhotoWall(QWidget* parent) :
 	m_rollCount = 0;
 	btnMoveEnable = true;
 
-	for (int i = 0; i < 10; i++) {
-		item[i] = new QGraphicsItemAnimation(this);
-	}
 
-	setAttribute(Qt::WA_StyledBackground); //ÉèÖÃÑùÊ½±í
-	setButtonGroup(); //ÉèÖÃ°´Å¥×é
-	setInitList();
-	setPictureScreen();
-	setTimerAndConnect();
-
-	m_newT = new QTimer(this);
-	m_newT->setInterval(5000);
 	connect(m_newT, &QTimer::timeout, [this]() {
 		on_btnR_clicked();
 		});
+
+	setAttribute(Qt::WA_StyledBackground); //è®¾ç½®æ ·å¼è¡¨
+	setButtonGroup(); //è®¾ç½®æŒ‰é’®ç»„
+	setInitList();
+
+	ui->btnL->hide();
+	ui->btnR->hide();
+
+	ui->btnR->setGeometry(100, 80, 35, 35);
+
+	m_newT = new QTimer(this);
+	m_newT->setInterval(5000);
 	m_newT->start();
+	connect(m_newT, &QTimer::timeout, [this]() {
+		on_btnR_clicked();
+		});
+
 }
 
 PhotoWall::~PhotoWall()
 {
+	m_newT->stop();
 	delete ui;
 }
+
+
+void PhotoWall::on_finshedNetMangBanner(QNetworkReply* reply)
+{
+	if (reply->error() == QNetworkReply::NoError) {
+		QByteArray byt = reply->readAll();
+		QJsonParseError error_t{};
+		QJsonDocument docm = QJsonDocument::fromJson(byt, &error_t);
+		if (error_t.error == QJsonParseError::NoError) {
+			targetlist.clear();
+			QJsonObject root = docm.object();
+			auto Banrot = root.value("banners");
+			if (Banrot.isArray()) {
+				QJsonArray BanArry = Banrot.toArray();
+				foreach(const auto & x, BanArry) {
+					if (x.isObject()) {
+						Target target{};
+						auto Ban_r = x.toObject();
+						target.targetId = Ban_r.value("targetId").toInt();
+						target.typeTitle = Ban_r.value("typeTitle").toString();
+						target.picUrl = Ban_r.value("imageUrl").toString();
+						//å–å¾—è½®æ’­å›¾çš„é“¾æ¥
+						targetlist.push_back(target);
+					}
+				}
+				loadBannerPci();
+			}
+		}
+	}
+	else
+	{
+		//åŠ è½½æœ¬åœ°å›¾ç‰‡
+		loadLocalImages();
+	}
+	reply->deleteLater();
+}
+
+
+void PhotoWall::loadBannerPci()
+{
+	index = 0;
+	QEventLoop loop;
+	foreach(const Target & rhs, targetlist) {
+		NetGetBanner->get(QNetworkRequest(rhs.picUrl));
+	}
+	connect(NetGetBanner, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
+	loop.exec();
+	//åŠ è½½å›¾ç‰‡
+	setPictureScreen();
+	setTimerAndConnect();
+}
+
+//æ— ç½‘ç»œï¼ŒåŠ è½½æœ¬åœ°å›¾ç‰‡
+void PhotoWall::loadLocalImages() {
+	setPictureScreen();
+}
+
+
+void PhotoWall::on_finshedNetGetBanner(QNetworkReply* reply)
+{
+
+	if (reply->error() == QNetworkReply::NoError) {
+		QPixmap map{};
+		++index;
+		map.loadFromData(reply->readAll());
+		map.save(QString("../photowall/pictrue/%1.png").arg(index));
+	}
+
+	reply->deleteLater();
+
+}
+
 void PhotoWall::setButtonGroup()
 {
 	m_BtnGroup = new QButtonGroup(this);
@@ -82,7 +176,8 @@ void PhotoWall::setButtonGroup()
 	m_BtnGroup->addButton(ui->btnPic8, 8);
 	m_BtnGroup->addButton(ui->btnPic9, 9);
 	m_BtnGroup->setExclusive(true);
-	m_BtnGroup->button(1)->setChecked(true);
+	//èµ·å§‹ä½ç½®
+	m_BtnGroup->button(0)->setChecked(true);
 	for (int i = 0; i < 10; i++) {
 		static_cast<pictureButton*>(m_BtnGroup->button(i))->setId(i);
 	}
@@ -97,19 +192,17 @@ void PhotoWall::setInitList()
 
 void PhotoWall::setPictureScreen()
 {
-	//ÉèÖÃÑùÊ½ ÎŞ±ê±ß¿ò
+	//è®¾ç½®æ ·å¼ æ— æ ‡è¾¹æ¡†
 	ui->graphicsView->setStyleSheet("background: transparent; padding: 0px; border: 0px;");
 	ui->graphicsView->setScene(m_scene);
 	m_scene->setSceneRect(0, 0, RAW_VIEW_SIZE.width(), RAW_VIEW_SIZE.height());
-
 	m_MidLine.setPoints(QPointF(0, 0), \
 		QPointF(RAW_VIEW_SIZE.width(), 0));
-
-	//Ìí¼Ó¶ÔÓ¦Í¼Æ¬
-	for (int i = 1; i <= 10; i++) {
-		m_PixmapList.append(QPixmap(QString(":/photowall/%1.png").arg(i)));
+	//æ·»åŠ å¯¹åº”å›¾ç‰‡
+	for (int i = 1; i <= index; i++) {
+		m_PixmapList.append(QPixmap(QString("../photowall/pictrue/%1.png").arg(i)));
 	}
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < index; i++) {
 		itemList.append(new pictureItem(m_PixmapList[i].scaled(pictrueBigSize,
 			Qt::KeepAspectRatio, Qt::SmoothTransformation)));
 		itemList[i]->setScale(m_PixmapScaleList[i]);
@@ -117,27 +210,27 @@ void PhotoWall::setPictureScreen()
 		itemList[i]->setItemId(i);
 		itemList[i]->setOffset(QPointF(0, 0));
 	}
-	//Í¼ÔªÌí¼ÓÍ¼Æ¬
-	for (int i = 0; i < 10; i++)
+	//å›¾å…ƒæ·»åŠ å›¾ç‰‡
+	for (int i = 0; i < index; i++)
 	{
-		m_scene->addItem(itemList[i]);//Ìí¼ÓÍ¼Ôª
-		itemList[i]->setPos(m_MidLine.pointAt(m_PointList[i]));//ÉèÖÃÎ»ÖÃ
-		itemList[i]->setZValue(m_ZValueList[i]);//ÉèÖÃÏÔÊ¾ÓÅÏÈ¼¶
-		itemList[i]->setTransformationMode(Qt::SmoothTransformation);//ÉèÖÃËõ·ÅÄ£Ê½
+		m_scene->addItem(itemList[i]);//æ·»åŠ å›¾å…ƒ
+		itemList[i]->setPos(m_MidLine.pointAt(m_PointList[i]));//è®¾ç½®ä½ç½®
+		itemList[i]->setZValue(m_ZValueList[i]);//è®¾ç½®æ˜¾ç¤ºä¼˜å…ˆçº§
+		itemList[i]->setTransformationMode(Qt::SmoothTransformation);//è®¾ç½®ç¼©æ”¾æ¨¡å¼
 		if (i != 1)
 		{
 			itemList[i]->setPos(itemList[i]->x(), RAW_VIEW_SIZE.height() / 10);
 		}
-		pointA.append(itemList[i]->pos());  //·ÅÈëµ½¶ÔÓ¦Î»ÖÃ
+		pointA.append(itemList[i]->pos());  //æ”¾å…¥åˆ°å¯¹åº”ä½ç½®
 		qDebug() << pointA[i].x() << ": " << pointA[i].y();
 	}
-	//·ÅÈëÓ³ÉämapÖĞ
-	for (int i = 0; i < 10; i++)
+	//æ”¾å…¥æ˜ å°„mapä¸­
+	for (int i = 0; i < index; i++)
 	{
 		mapLink.insert(static_cast<pictureButton*>(m_BtnGroup->button(i))->id(), itemList[i]);
 	}
 
-	//´òÓ¡ĞÅÏ¢
+	//æ‰“å°ä¿¡æ¯
 	//    QMap<int,pictureItem *>::const_iterator it;
 
 	//    for (it = mapLink.constBegin();it!=mapLink.constEnd();it++) {
@@ -148,16 +241,16 @@ void PhotoWall::setPictureScreen()
 
 void PhotoWall::setTimerAndConnect()
 {
-	//ÀûÓÃ³ÖĞøÊ±¼äºÍÖ¡Êı¼ÆËã³ö¶¨Ê±Ê±¼ä,³ÖĞøÊ±¼ä/£¨Ö¡Êı*³ÖĞøÊ±¼ä£©£¬ÕâÀï³Ë1000ÊÇ×ªÎªÃë
+	//åˆ©ç”¨æŒç»­æ—¶é—´å’Œå¸§æ•°è®¡ç®—å‡ºå®šæ—¶æ—¶é—´,æŒç»­æ—¶é—´/ï¼ˆå¸§æ•°*æŒç»­æ—¶é—´ï¼‰ï¼Œè¿™é‡Œä¹˜1000æ˜¯è½¬ä¸ºç§’
 	m_timer->setInterval(DURATION_MS / (FPS * DURATION_MS / 1000));
 	connect(m_timer, &QTimer::timeout, this, &PhotoWall::timerOutFunc);
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < index; i++)
 	{
 		connect(itemList[i], &pictureItem::clickedId, this, &PhotoWall::clickedItemRoll);
 
 		void (pictureButton:: * funcPtr)(int) = &pictureButton::entered;
 		connect(static_cast<pictureButton*>(m_BtnGroup->button(i)), funcPtr, [this](int id) {
-			pictureItem* p = mapLink.value(id); //»ñÈ¡id µÄÍ¼Æ¬Öµ
+			pictureItem* p = mapLink.value(id); //è·å–id çš„å›¾ç‰‡å€¼
 			btnMoveEnable = false;
 			clickedItemRoll(p->type());
 			qDebug() << p->type();
@@ -165,46 +258,34 @@ void PhotoWall::setTimerAndConnect()
 		//        connect(static_cast<pictureButton*>(m_BtnGroup->button(i)),&pictureButton::stop,[this](){
 		//            m_timer->stop();
 		//            //            m_timer->
-		//            qDebug()<<"ÔİÍ£\n";
+		//            qDebug()<<"æš‚åœ\n";
 		//        });
 	}
 
 }
-
-//int MainWindow::getIndexByRules(int oldIndex, int rule)
-//{
-//    qDebug()<<"rule = "<<rule;
-//    switch (rule) {
-//    case 1:
-//        return  (oldIndex+1)/10;
-//    case -1:
-//        return oldIndex==0?9:oldIndex-1;
-//    default:
-//        return 0;
-//    }
-
-//}
 
 void PhotoWall::rollItem(int rollDir, unsigned rollCount)
 {
 	rollCount = 0;
 	if (m_timer->isActive())
 		return;
-	//»ñÈ¡ĞÂµÄÊı¾İ
-	//Ö÷ÒªÎ»ÖÃ  Ö÷Î»ÖÃ
+	//è·å–æ–°çš„æ•°æ®
+	//ä¸»è¦ä½ç½®  ä¸»ä½ç½®
 	int nbegin = rollDir;
+	qDebug() << "nbegin = " << nbegin << "title= " << targetlist.at(nbegin).typeTitle;
 	startNum = getrightN(nbegin);
 	m_timer->start();
 }
 
 int PhotoWall::getrightN(int num)
 {
-	qDebug() << "num = " << num;
 	if (num == -1)
 	{
-		num = 9;
+		//num = 9;
+		num = index - 1;
 	}
-	if (num == 10)
+	//if(num == 10)
+	if (num == index)
 	{
 		num = 0;
 	}
@@ -212,23 +293,18 @@ int PhotoWall::getrightN(int num)
 	return num;
 }
 
+
 void PhotoWall::timerOutFunc()
 {
-	//    QVector<QGraphicsItemAnimation *>item(10);
-
-	//    for (int i = 0; i < 10; i++) {
-	//        item[i] = new QGraphicsItemAnimation();
-	//    }
-
 	QTimeLine* timeline = new QTimeLine(200);
-	timeline->setLoopCount(1); //ÉèÖÃ3´Î
+	timeline->setLoopCount(1); //è®¾ç½®3æ¬¡
 	int first = getrightN(startNum - 1);
-	for (int i = 0; i < 10; i++) {
-		itemList[i] = mapLink.value(first % 10);
+	for (int i = 0; i < index; i++) {
+		itemList[i] = mapLink.value(first % index);
 		first++;
 		itemList[i]->setScale(m_PixmapScaleList[i]);
-		itemList[i]->setZValue(m_ZValueList[i]);//ÉèÖÃÏÔÊ¾ÓÅÏÈ¼¶
-		itemList[i]->setTransformationMode(Qt::SmoothTransformation);//ÉèÖÃËõ·ÅÄ£Ê½
+		itemList[i]->setZValue(m_ZValueList[i]);//è®¾ç½®æ˜¾ç¤ºä¼˜å…ˆçº§
+		itemList[i]->setTransformationMode(Qt::SmoothTransformation);//è®¾ç½®ç¼©æ”¾æ¨¡å¼
 		item[i]->setItem(itemList[i]);
 		item[i]->setTimeLine(timeline);
 		item[i]->setPosAt(1, pointA[i]);
@@ -241,19 +317,20 @@ void PhotoWall::timerOutFunc()
 
 void PhotoWall::clickedItemRoll(int type)
 {
-	//²é¿´¶¨Ê±Æ÷ÊÇ·ñÔËĞĞ
+	//æŸ¥çœ‹å®šæ—¶å™¨æ˜¯å¦è¿è¡Œ
 	if (m_timer->isActive())
 		return;
-	rollItem(type, 0); //µÃµ½×îĞÂµÄid °´Å¥Î»ÖÃ
+	rollItem(type, 0); //å¾—åˆ°æœ€æ–°çš„id æŒ‰é’®ä½ç½®
 }
 
-//×ó±ßÔË¶¯
+//å·¦è¾¹è¿åŠ¨
 void PhotoWall::on_btnL_clicked()
 {
 	int id = m_BtnGroup->checkedId();
 	if (id - 1 < 0)
 	{
-		id = 8;
+		//id = 8;
+		id = index - 2;
 	}
 	else {
 		id = id - 1;
@@ -261,14 +338,16 @@ void PhotoWall::on_btnL_clicked()
 	m_BtnGroup->button(id)->setChecked(true);
 	rollItem(id, 0);
 }
-//ÓÒ±ßÔË¶¯
+//å³è¾¹è¿åŠ¨
 void PhotoWall::on_btnR_clicked()
 {
+	if (index == 0)return;
 	int id = m_BtnGroup->checkedId();
-	id = (id + 1) % 10;
+	id = (id + 1) % index;
 	m_BtnGroup->button(id)->setChecked(true);
 	rollItem(id, 0);
 }
+
 
 template<typename T>
 void PhotoWall::rollList(QList<T>& oldList, int dir, int count)

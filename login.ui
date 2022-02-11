@@ -416,19 +416,6 @@ padding-left:2px;  </string>
         <string>账号登录</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>340</y>
-         <width>75</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>刷新</string>
-       </property>
-      </widget>
      </widget>
     </widget>
    </item>

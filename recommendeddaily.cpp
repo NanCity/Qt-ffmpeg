@@ -40,10 +40,8 @@ void RecommendedDaily::init() {
 		ui->table_songslist->setHorizontalHeaderItem(
 			i, new QTableWidgetItem(title.at(i)));
 	}
-
-	//设置第一列表头不可拉伸
-	ui->table_songslist->horizontalHeader()->setSectionResizeMode(
-		0, QHeaderView::Fixed);
+	//设置第一列表头自适应widget宽高
+	ui->table_songslist->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 }
 
 void RecommendedDaily::loadData(QList<Temptag>& rhs) {

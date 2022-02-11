@@ -133,7 +133,6 @@ bool M_Tag::ParseDetailsSong(QJsonObject& root, const QString& objname) {
 					SetAlbumId(alobj.value("id").toInt());
 					SetAblue(alobj.value("name").toString());
 					QString pciUrl = alobj.value("picUrl").toString();
-
 					//获取专辑封面
 					NetManager->get(QNetworkRequest(pciUrl));
 				}

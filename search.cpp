@@ -17,6 +17,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QVBoxLayout>
+#include <QScrollBar>
 // http://cloud-music.pl-fe.cn/
 Search::Search(QWidget* parent) : QWidget(parent), ui(new Ui::Search) {
 	ui->setupUi(this);
@@ -137,6 +138,7 @@ void Search::InitMenu() {
 }
 //搜索歌曲
 void Search::GetSearchText(QString _str) {
+	base->loadMovie();
 	this->str = _str;
 	ui->lab_song->setText(_str);
 	QString url =
@@ -217,10 +219,7 @@ void Search::InitTableHeader() {
 		ui->table_playlist->setHorizontalHeaderItem(
 			x, new QTableWidgetItem(HorizontalHeaderItem.at(x)));
 	}
-
-	//设置第一列表头不可拉伸
-	ui->table_playlist->horizontalHeader()->setSectionResizeMode(
-		0, QHeaderView::Fixed);
+	ui->table_playlist->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 }
 
 //解析获取到的热搜列表
@@ -353,9 +352,17 @@ void Search::TopSearch(QWidget* wgt) {
 
 void Search::loadData() {
 	int index = 0;
+	//重新定位到开始处
+	ui->table_playlist->verticalScrollBar()->setValue(0);
 	foreach(const NetSongTag & rhs, taglist) {
 		ui->table_playlist->insertRow(index);
-		ui->table_playlist->setCellWidget(index, 0, base->setItemWidget(rhs.status));
+		if (base->isLike(rhs.song_id)) {
+			ui->table_playlist->setCellWidget(index, 0, base->setItemWidget(1));
+		}
+		else
+		{
+			ui->table_playlist->setCellWidget(index, 0, base->setItemWidget(0));
+		}
 		QTableWidgetItem* item1 = new QTableWidgetItem(rhs.singer_name);
 		QTableWidgetItem* item2 = new QTableWidgetItem(rhs.song_name);
 		QTableWidgetItem* item3 = new QTableWidgetItem(rhs.album);
@@ -366,6 +373,7 @@ void Search::loadData() {
 		ui->table_playlist->setItem(index, 4, item4);
 		++index;
 	}
+	base->closeMovie();
 }
 
 void Search::on_table_playlist_cellDoubleClicked(int row, int column) {

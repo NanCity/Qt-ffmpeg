@@ -4,13 +4,6 @@
 searchItem::searchItem(QWidget *parent)
     : QWidget(parent), ui(new Ui::searchItem) {
   ui->setupUi(this);
-  //让QLabel自适应text的大小
-  // ui->lab_content->adjustSize();
-  // ui->lab_content->setScaledContents(true);
-  // ui->lab_name->adjustSize();
-  // ui->lab_name->setScaledContents(true);
-  // ui->lab_score->adjustSize();
-  // ui->lab_score->setScaledContents(true);
   ui->lab_content->setStyleSheet("color:#999999");
 }
 

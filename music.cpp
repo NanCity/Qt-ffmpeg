@@ -132,18 +132,18 @@ void Music::on_login_succes() {
 }
 
 void Music::AlbConnect() {
-	connect(DicMusic->getSoloAlbum(), &SoloAlbum::loadOk,
+	connect(DicMusic->getSoloAlbumUi(), &SoloAlbum::loadOk,
 		[&]() { ui->stackedWidget->setCurrentIndex(11); });
 
-	connect(DicMusic->getSoloAlbum(), &SoloAlbum::Alb_playAll, this,
+	connect(DicMusic->getSoloAlbumUi(), &SoloAlbum::Alb_playAll, this,
 		[&](auto rhs) { On_NetplayAll(rhs); });
 
 	//播放搜索到的歌曲（播放）
-	connect(DicMusic->getSoloAlbum(), &SoloAlbum::Alb_play, this,
+	connect(DicMusic->getSoloAlbumUi(), &SoloAlbum::Alb_play, this,
 		[&](auto rhs, int index) { On_Netplay(rhs, index); });
 
 	//播放搜索到的歌曲（下一首播放）
-	connect(DicMusic->getSoloAlbum(), &SoloAlbum::Alb_Nextplay, this,
+	connect(DicMusic->getSoloAlbumUi(), &SoloAlbum::Alb_Nextplay, this,
 		[&](auto rhs, int index, const QString _id) {
 			On_NetNextPlay(rhs, index, _id);
 		});
@@ -249,17 +249,23 @@ void Music::PersonFormConnect() {
 }
 
 void Music::RecommendedDailyConnect() {
-	connect(DicMusic->getRecDaily(), &RecommendedDaily::playAll,
+	connect(DicMusic->getRecDailyUi(), &RecommendedDaily::playAll,
 		[&](auto rhs) { On_NetplayAll(rhs); });
 
-	connect(DicMusic->getRecDaily(), &RecommendedDaily::loadOk, this,
+	connect(DicMusic->getRecDailyUi(), &RecommendedDaily::loadOk, this,
 		[&] { ui->stackedWidget->setCurrentIndex(12); });
 
-	connect(DicMusic->getRecDaily(), &RecommendedDaily::play, this, [&](RecommendedDaily* rhs, const int index) {
+	connect(DicMusic->getRecDailyUi(), &RecommendedDaily::play, this, [&](RecommendedDaily* rhs, const int index) {
 		this->On_Netplay(rhs, index);
 		});
-	connect(DicMusic->getRecDaily(), &RecommendedDaily::Nextplay, this, [&](auto rhs, const int index, const QString id) {
+	connect(DicMusic->getRecDailyUi(), &RecommendedDaily::Nextplay, this, [&](auto rhs, const int index, const QString id) {
 		this->On_NetNextPlay(rhs, index, id);
+		});
+
+	//正在歌单歌曲
+	connect(DicMusic->getSongMuen(), &SongMenu::DataLoading, this, [&] {
+		ui->stackedWidget->setCurrentIndex(16);
+		qDebug() << "我进来了\n";
 		});
 }
 
@@ -277,9 +283,14 @@ void Music::SingerDetailsConnect()
 }
 
 void Music::InstallEventFilter() {
+	//设置接受鼠标右键
+	//ui->SongMenuList->setContextMenuPolicy(Qt::CustomContextMenu);
+	//ui->CollectSongMenuList->setContextMenuPolicy(Qt::CustomContextMenu);
 	ui->TopWidget->installEventFilter(this);
 	ui->lineEdit_search->installEventFilter(this);
 	localMusic->getTable()->installEventFilter(this);
+	ui->SongMenuList->installEventFilter(this);
+	ui->CollectSongMenuList->installEventFilter(this);
 }
 
 void Music::init() {
@@ -329,11 +340,12 @@ void Music::init() {
 	ui->stackedWidget->insertWidget(9, new QWidget());
 	ui->stackedWidget->insertWidget(10, new QWidget());
 
-	ui->stackedWidget->insertWidget(11, DicMusic->getSoloAlbum());
-	ui->stackedWidget->insertWidget(12, DicMusic->getRecDaily());
+	ui->stackedWidget->insertWidget(11, DicMusic->getSoloAlbumUi());
+	ui->stackedWidget->insertWidget(12, DicMusic->getRecDailyUi());
 	ui->stackedWidget->insertWidget(13, singetdeatils);
 	ui->stackedWidget->insertWidget(14, search);
 	ui->stackedWidget->insertWidget(15, songmenu);
+	ui->stackedWidget->insertWidget(16, DicMusic->getSongMuen());
 	//创建的歌单列表
 
 	//默认音量
@@ -345,6 +357,19 @@ void Music::init() {
 	ui->playslider->setMaximum(100);
 	//悬停提示
 	HoverTip();
+}
+
+void Music::initMenu(QListWidget* listwidget)
+{
+	menu = new QMenu(listwidget);
+	Play = new QAction(QIcon(""), "播放", menu);
+	NextPlay = new QAction(QIcon(""), "下一首播放", menu);
+	menu->addSeparator();
+	Down = new QAction(QIcon(""), "下载全部(L)", menu);
+	menu->addSeparator();
+	Editmenuinfo = new QAction(QIcon(""), "编辑歌单信息", menu);
+	DelSongMenu = new QAction(QIcon(""), "删除歌单(Delete)", menu);
+
 }
 
 // mMoving ： bool值，判断鼠标是否移动
@@ -406,6 +431,20 @@ void Music::Presskey(QKeyEvent* event) {
 
 //事件过滤器
 bool Music::eventFilter(QObject* obj, QEvent* event) {
+
+	//QListWidget的鼠标右键菜单
+	if (obj == ui->SongMenuList) {
+		if (event->type() == QEvent::ContextMenu) {
+			if (ui->SongMenuList->itemAt(mapFromGlobal(QCursor::pos())) != nullptr) {
+				initMenu(ui->SongMenuList);
+				//菜单栏在当前鼠标位置弹出
+				menu->exec(QCursor::pos());
+
+			}
+		}
+	}
+
+
 	if (obj == ui->TopWidget) {
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
@@ -588,7 +627,7 @@ void Music::on_btn_SongMenu_clicked() {
 			QListWidgetItem* item = new QListWidgetItem(rhs);
 			ui->SongMenuList->addItem(item);
 		}
-		
+
 		if (ui->SongMenuList->isHidden()) {
 			ui->SongMenuList->show();
 		}
@@ -602,36 +641,39 @@ void Music::on_btn_SongMenu_clicked() {
 	{
 		//未登录
 	}
-
-	/*if (ui->SongMenuList->isHidden()) {
-		ui->btn_SongMenu->setStyleSheet(
-			"QLabel#label_2{"
-			"border-image:url(:/images/btn_down_h.png);}"
-			"QLabel#label_2:hover {"
-			"border-image :url(:/images/btn_down_n.png);}");
-
-		ui->SongMenuList->show();
-	}
-	else {
-		ui->btn_SongMenu->setStyleSheet(
-			"QLabel#label_2{"
-			"border-image:url(:/images/btn_right_1_h.png);}"
-			"QLabel#label_2:hover {"
-			"border-image :url(:/images/btn_right_1_n.png);}");
-
-		ui->SongMenuList->hide();
-	}*/
 }
 
+//创建歌单
 void Music::on_AddSongMenu_clicked() {
 	//    ui->label->setStyleSheet("border-image: url(:/images/btn_down_n.png);");
-	QSize n = ui->SongMenuList->size();
-	for (int x = 0; x != 20; ++x) {
-		QListWidgetItem* item = new QListWidgetItem("新歌单", ui->SongMenuList);
-		item->setSizeHint(QSize(20, 20));
+	QDialog* Creat = new QDialog(this);
+	Creat->resize(470, 230);
+	Creat->setMaximumSize(470, 230);
+	Creat->setMinimumSize(470, 230);
+	QLabel* lab = new QLabel("创建歌单", Creat);
+	lab->resize(70, 20);
+	lab->setStyleSheet("background-color:white; color:black;font:13pt");
+	lab->move(205, 30);
+	edit = new QLineEdit(Creat);
+	edit->resize(440, 30);
+	edit->move(20, 85);
+	QPushButton* btn = new QPushButton("创建", Creat);
+	btn->resize(85, 30);
+	btn->move(195, 150);
+	btn->setStyleSheet("background-color:#fdbdd3; color:black; font:13pt");
+	connect(btn, &QPushButton::clicked, this, [&] {
+		if (!edit->text().isEmpty()) {
+			DicMusic->getSongMuen()->CreatorSongMuen(edit->text());
+		}
+		});
+
+	Creat->show();
+
+	connect(DicMusic->getSongMuen(), &SongMenu::CreatorSongMenuOk, this, [&] {
+		QListWidgetItem* item = new QListWidgetItem(edit->text());
 		ui->SongMenuList->addItem(item);
-		ui->SongMenuList->resize(item->sizeHint() + n);
-	}
+		Creat->close();
+		});
 }
 
 void Music::on_btn_collectMenu_clicked() {

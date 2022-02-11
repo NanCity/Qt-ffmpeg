@@ -18,25 +18,32 @@ SongMenu::SongMenu(QWidget* parent) :
 {
 	ui->setupUi(this);
 	base = new Base(ui->tab_SongTable);
-	NetSongTable = new QNetworkAccessManager(this);
 	NetSongMenu = new QNetworkAccessManager(this);
 	NetAllSong = new QNetworkAccessManager(this);
-	RequestSongTable();
-	connect(NetSongTable, &QNetworkAccessManager::finished, this, &SongMenu::on_finshedNetSongTable);
+	//设置第一列表头自适应widget宽高
+	ui->tab_SongTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 	connect(NetSongMenu, &QNetworkAccessManager::finished, this, &SongMenu::on_finshedNetSongMenu);
 	connect(NetAllSong, &QNetworkAccessManager::finished, this, &SongMenu::on_finsedNetAllSong);
-
+	//获取用户歌单
+	RequestUserSongMenu();
 	//加载剩余的数据
 	connect(base, &Base::loadNextPage, this, [&]() {
 		for (int i = 0; i != 5; i++) {
 			if (curtableindex >= taglsit.length()) {
-				return;
+				break;
 			}
 			else
 			{
 				int currow = ui->tab_SongTable->rowCount();
 				ui->tab_SongTable->insertRow(currow);
-				ui->tab_SongTable->setCellWidget(currow, 0, base->setItemWidget(1));
+				if (base->isLike(taglsit.at(currow).Songid)) {
+					ui->tab_SongTable->setCellWidget(currow, 0, base->setItemWidget(1));
+				}
+				else
+				{
+					ui->tab_SongTable->setCellWidget(currow, 0, base->setItemWidget(0));
+				}
+
 				QTableWidgetItem* item1 = new QTableWidgetItem(taglsit.at(currow).Title);
 				QTableWidgetItem* item2 = new QTableWidgetItem(taglsit.at(currow).Artist);
 				QTableWidgetItem* item3 = new QTableWidgetItem(taglsit.at(currow).Ablue);
@@ -45,8 +52,8 @@ SongMenu::SongMenu(QWidget* parent) :
 				ui->tab_SongTable->setItem(currow, 2, item2);
 				ui->tab_SongTable->setItem(currow, 3, item3);
 				ui->tab_SongTable->setItem(currow, 4, item4);
+				++curtableindex;
 			}
-			++curtableindex ;
 		}
 		});
 
@@ -57,7 +64,8 @@ SongMenu::~SongMenu()
 	delete ui;
 }
 
-void SongMenu::RequestSongTable()
+
+void SongMenu::RequestUserSongMenu()
 {
 	QString userid = config.GetValue("/Userinfo/userId");
 	if (userid.isEmpty()) {
@@ -68,38 +76,104 @@ void SongMenu::RequestSongTable()
 	}
 	else
 	{
-		int id = userid.toInt();
-		userId = id;
-		QString Url{ QString("http://cloud-music.pl-fe.cn/likelist?uid=%1").arg(id) };
-		NetSongTable->get(QNetworkRequest(Url));
-		//获取用户歌单
-		RequestUserSongMenu();
+		QString Url{ QString("http://cloud-music.pl-fe.cn/user/playlist?uid=%1").arg(userId) };
+		QNetworkRequest* req = config.setCookies();
+		req->setUrl(Url);
+		NetSongMenu->get(*req);
 	}
-}
-
-void SongMenu::RequestUserSongMenu()
-{
-	QString Url{ QString("http://cloud-music.pl-fe.cn/user/playlist?uid=%1").arg(userId) };
-	NetSongMenu->get(QNetworkRequest(Url));
 }
 void SongMenu::SongMenuAt(const int index)
 {
+	base->loadMovie();
 	base->DelTableWidgetRow();
-	QString Url{ QString("http://localhost:3000/playlist/track/all?id=%1")
-		.arg(songlistMenu.at(index).id) };
-
+	QString Url{ QString("http://localhost:3000/playlist/track/all?id=%1&limit=%2")
+		.arg(songlistMenu.at(index).id).arg(songlistMenu.at(index).trackCount) };
 	QNetworkRequest* request{ config.setCookies() };
 	request->setUrl(Url);
 	NetAllSong->get(*request);
 }
 
+/*
+* id = 歌单ID
+* limit = 每次加载的数量
+*/
+void SongMenu::getSongMenuID(const long long ID, const int limit)
+{
+	base->loadMovie();
+	emit DataLoading();
+	QString Url{ QString("http://localhost:3000/playlist/track/all?id=%1&limit=%2").arg(ID).arg(limit) };
+	qDebug() << "获取所有的歌曲\nURL = " << Url;
+	NetAllSong->get(QNetworkRequest(Url));
+}
+
+void SongMenu::CreatorSongMuen(const QString& str)
+{
+	if (str.isEmpty())return;
+	QString URL{ QString("http://cloud-music.pl-fe.cn/playlist/create?name=%1").arg(str) };
+	QNetworkRequest* req{ config.setCookies() };
+	QNetworkAccessManager* Creat = new QNetworkAccessManager(this);
+	req->setUrl(URL);
+	Creat->get(*req);
+	connect(Creat, &QNetworkAccessManager::finished, this, [&](QNetworkReply* reply) {
+		if (reply->error() == QNetworkReply::NoError) {
+			QJsonParseError err_t{};
+			QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &err_t);
+			if (err_t.error == QJsonParseError::NoError) {
+				QJsonObject obj = document.object();
+				UserSongMuen menu;
+				menu.id = obj.value("id").toInt();
+				menu.trackCount = 0;
+				songlistMenu.push_back(menu);
+				emit CreatorSongMenuOk();
+			}
+			reply->deleteLater();
+		}
+		});
+}
+
+void SongMenu::DelereSongMuenu(const int ID)
+{
+	QString URL{ "http://cloud-music.pl-fe.cn/playlist/delete?id=" + ID };
+	QNetworkAccessManager* del = new QNetworkAccessManager(this);
+	QNetworkRequest* req{ config.setCookies() };
+	del->get(*req);
+	connect(del, &QNetworkAccessManager::finished, this, [&](QNetworkReply* reply) {
+		if (reply->error() == QNetworkReply::NoError) {
+			QJsonParseError err_t{};
+			QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &err_t);
+			if (err_t.error == QJsonParseError::NoError) {
+				QJsonObject obj = document.object();
+				if (obj.value("message").toBool() == false) {
+					fprintf(stdout, "歌单删除失败\n");
+				}
+			}
+		}
+		reply->deleteLater();
+		});
+}
+
+
+
 void SongMenu::loadData()
 {
 	int len = taglsit.length();
 	for (int i = 0; i != 20; ++i) {
-		if (i >= len)return;
+		//越界检查
+		if (i >= len) {
+			curtableindex = i;
+			base->closeMovie();
+			return;
+		}
+
 		ui->tab_SongTable->insertRow(i);
-		ui->tab_SongTable->setCellWidget(i, 0, base->setItemWidget(1));
+		if (base->isLike(taglsit.at(i).Songid)) {
+			ui->tab_SongTable->setCellWidget(i, 0, base->setItemWidget(1));
+		}
+		else
+		{
+			ui->tab_SongTable->setCellWidget(i, 0, base->setItemWidget(0));
+		}
+
 		QTableWidgetItem* item1 = new QTableWidgetItem(taglsit.at(i).Title);
 		QTableWidgetItem* item2 = new QTableWidgetItem(taglsit.at(i).Artist);
 		QTableWidgetItem* item3 = new QTableWidgetItem(taglsit.at(i).Ablue);
@@ -109,9 +183,8 @@ void SongMenu::loadData()
 		ui->tab_SongTable->setItem(i, 3, item3);
 		ui->tab_SongTable->setItem(i, 4, item4);
 	}
-	//设置第一列表头不可拉伸
-	ui->tab_SongTable->horizontalHeader()->setSectionResizeMode(
-		0, QHeaderView::Fixed);
+	base->closeMovie();
+	//第一次加载数量
 	curtableindex = 20;
 	//下面的加载大量数据会卡顿，原因:一次性把所有的数据都添加了
 	/*foreach(const Temptag & rhs, taglsit) {
@@ -128,7 +201,6 @@ void SongMenu::loadData()
 	}*/
 }
 
-
 QStringList SongMenu::getSongMenu()
 {
 	QStringList list{};
@@ -138,30 +210,6 @@ QStringList SongMenu::getSongMenu()
 	return list;
 }
 
-void SongMenu::on_finshedNetSongTable(QNetworkReply* reply)
-{
-	if (reply->error() == QNetworkReply::NoError) {
-		QJsonParseError err_t{};
-		QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &err_t);
-		//我喜欢的音乐了列表ID
-		if (err_t.error == QJsonParseError::NoError) {
-			QJsonObject rot = document.object();
-			QJsonValue idsAry = rot.value("ids");
-			int index = 0;
-			if (idsAry.isArray()) {
-				QJsonArray ary = idsAry.toArray();
-				foreach(const QJsonValue & rhs, ary) {
-					SongListIDMap.insert(index, rhs.toInt());
-				}
-			}
-		}
-		else
-		{
-			fprintf(stdout, "Json format Error\n");
-		}
-	}
-	reply->deleteLater();
-}
 
 void SongMenu::on_finshedNetSongMenu(QNetworkReply* reply)
 {
@@ -226,7 +274,9 @@ void SongMenu::on_finsedNetAllSong(QNetworkReply* reply)
 			taglsit.clear();
 			QJsonObject rot = document.object();
 			M_Tag tag;
-			tag.ParseDetailsSong(rot, "songs");
+			if (!tag.ParseDetailsSong(rot, "songs")) {
+				base->closeMovie();
+			};
 			taglsit = tag.getTag();
 			curtableindex = 0;
 			loadData();

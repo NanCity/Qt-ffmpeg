@@ -25,53 +25,38 @@
 #include <QFont>
 #include <QEventLoop>
 #include <QPainter>
+#include "songmenu.h"
 #include "photowall/photowall.h"
 Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 	ui->setupUi(this);
-	InitLabel();
 	mutex = new QMutex();
-	ui->lab_1->installEventFilter(this);
-	ui->lab_2->installEventFilter(this);
-	ui->lab_3->installEventFilter(this);
 
-
-
-	PhotoWall* p = new PhotoWall(this);
-	p->show();
+	photowall = new PhotoWall(this);
+	//添加到布局
+	ui->verLout_pic->addWidget(photowall);
 	config = new Config();
-	time = new QTimer(this);
 	m_tag = new M_Tag(this);
 	soloalbum = new SoloAlbum(this);
 	soloalbum->hide();
 	recDaily = new RecommendedDaily(this);
 	recDaily->hide();
-
+	songmuen = new SongMenu(this);
+	songmuen->hide();
+	//325
+	ui->horizontalSpacer->sizeHint().setWidth(0);
 	addBtn_rec_();
 	addLab_rec_();
 
-	NetMangBanner = new QNetworkAccessManager(this);
-	NetGetBanner = new QNetworkAccessManager(this);
 	NetNewDisc = new QNetworkAccessManager(this);
 	NetNewSong = new QNetworkAccessManager(this);
 	NetAlbumPic = new QNetworkAccessManager(this);
 	NetRecPlaylist = new QNetworkAccessManager(this);
 	NetRecommend = new QNetworkAccessManager(this);
-
-	QString url{ "http://cloud-music.pl-fe.cn/banner?type=0" };
-	request = new QNetworkRequest(url);
-	NetMangBanner->get(*request);
 	//每日推荐歌单
-	QString RecPlaylistUrl{ "http://cloud-music.pl-fe.cn//personalized?limit=9" };
+	QString RecPlaylistUrl{ "http://cloud-music.pl-fe.cn/personalized?limit=9" };
 	request = config->setCookies();
 	request->setUrl(RecPlaylistUrl);
 	NetRecPlaylist->get(*request);
-
-
-	connect(NetMangBanner, &QNetworkAccessManager::finished, this,
-		&Recommend::on_BannerReplyFinished);
-
-	connect(NetGetBanner, &QNetworkAccessManager::finished, this,
-		&Recommend::on_GetBannerPic);
 
 	connect(NetNewDisc, &QNetworkAccessManager::finished, this,
 		&Recommend::on_FinshedNewDisc);
@@ -83,21 +68,6 @@ Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 		&Recommend::on_FinshedNetRecommend);
 
 	connect(NetRecPlaylist, &QNetworkAccessManager::finished, this, &Recommend::on_FinishedNetRecPlaylist);
-
-	//每5秒更换一个照片墙
-	time->setInterval(5000);
-	time->start();
-	// connect(time, &QTimer::timeout, this, &Recommend::NextPic);
-
-	connect(ui->btn_prev, &QPushButton::clicked, this, [&] {
-		--index;
-		Prevpic();
-		time->setInterval(5000);
-		});
-	connect(ui->btn_next, &QPushButton::clicked, this, [&] {
-		NextPic();
-		time->setInterval(5000);
-		});
 }
 
 Recommend::~Recommend() {
@@ -113,7 +83,6 @@ Recommend::~Recommend() {
 
 //每日推荐单曲 (需要登录)
 void Recommend::on_btn_rec_1_clicked() {
-	qDebug() << "on_btn_rec_1_clicked\n";
 	QString loggingstatus = config->GetValue("Pwd/loggingstatus");
 	//未登录账号
 	if (0 == loggingstatus.compare("0") || loggingstatus.isEmpty()) {
@@ -129,52 +98,68 @@ void Recommend::on_btn_rec_1_clicked() {
 	}
 }
 
-//加载本地图片
-void Recommend::LoadPic() {
-	QPixmap pix{};
-	for (int x = 1; x != 9; ++x) {
-		pix.load(QString("../photowall/%1.png").arg(x));
-		pixmap.push_back(pix);
+void Recommend::on_btn_rec_2_clicked()
+{
+	if (!RecList.isEmpty()) { 
+		songmuen->getSongMenuID(RecList.at(0).id, RecList.at(0).trackCount);
 	}
-	setPic(0);
 }
 
-void Recommend::setPic(const int _index) {
-	ui->lab_2->setPixmap(pixmap.at(9));
-	ui->lab_1->setPixmap(pixmap.at(_index));
-	ui->lab_3->setPixmap(pixmap.at(1));
-	ui->lab_title_1->setText(QString("%1").arg(targetlist.at(index).typeTitle));
-	ui->lab_title_2->setText(
-		QString("%1").arg(targetlist.at(index + 1).typeTitle));
+void Recommend::on_btn_rec_3_clicked()
+{
+	if (!RecList.isEmpty()) {
+		songmuen->getSongMenuID(RecList.at(1).id, RecList.at(1).trackCount);
+	}
 }
 
-void Recommend::NextPic() {
-	fprintf(stdout, "index = %d\n", index);
-	if (index == 9) {
-		fprintf(stdout, "index == %d\n", index);
-		ui->lab_2->setPixmap(pixmap.at(index - 1));
-		ui->lab_1->setPixmap(pixmap.at(index));
-		ui->lab_3->setPixmap(pixmap.at(0));
-		index = 0;
-		return;
+void Recommend::on_btn_rec_4_clicked()
+{
+	if (!RecList.isEmpty()) {
+		songmuen->getSongMenuID(RecList.at(2).id, RecList.at(2).trackCount);
 	}
-	//回到开始
-	if (index == 0) {
-		setPic(0);
-		++index;
-		return;
-	}
-	ui->lab_2->setPixmap(pixmap.at(index - 1));
-	ui->lab_1->setPixmap(pixmap.at(index));
-	ui->lab_3->setPixmap(pixmap.at(index + 1));
-	ui->lab_title_1->setText(QString("%1").arg(targetlist.at(index).typeTitle));
-	ui->lab_title_2->setText(
-		QString("%1").arg(targetlist.at(index + 1).typeTitle));
-	++index;
-	// fprintf(stdout, "index = %d\n", index);
 }
 
-void Recommend::Prevpic() { fprintf(stdout, "prev index = %d\n", index); }
+void Recommend::on_btn_rec_5_clicked()
+{
+	if (!RecList.isEmpty()) {
+		songmuen->getSongMenuID(RecList.at(3).id, RecList.at(3).trackCount);
+	}
+}
+
+void Recommend::on_btn_rec_6_clicked()
+{
+	if (!RecList.isEmpty()) {
+		songmuen->getSongMenuID(RecList.at(4).id, RecList.at(4).trackCount);
+	}
+}
+
+void Recommend::on_btn_rec_7_clicked()
+{
+	if (!RecList.isEmpty()) {
+		songmuen->getSongMenuID(RecList.at(5).id, RecList.at(5).trackCount);
+	}
+}
+
+void Recommend::on_btn_rec_8_clicked()
+{
+	if (!RecList.isEmpty()) {
+		songmuen->getSongMenuID(RecList.at(6).id, RecList.at(6).trackCount);
+	}
+}
+
+void Recommend::on_btn_rec_9_clicked()
+{
+	if (!RecList.isEmpty()) {
+		songmuen->getSongMenuID(RecList.at(7).id, RecList.at(7).trackCount);
+	}
+}
+
+void Recommend::on_btn_rec_10_clicked()
+{
+	if (!RecList.isEmpty()) {
+		songmuen->getSongMenuID(RecList.at(8).id, RecList.at(8).trackCount);
+	}
+}
 
 void Recommend::addBtn_rec_()
 {
@@ -187,7 +172,7 @@ void Recommend::addBtn_rec_()
 		for (int x = 0; x != 9; ++x) {
 			QLabel* lab = new QLabel("0万", btn_recAll.at(x));
 			lab->setMaximumSize(65, 25);
-			//lab->setStyleSheet("color:#efeceb");
+			lab->setStyleSheet("color:#fbfbfc");
 			lab->setFont(QFont("QFont::Bold"));
 			lab->setAlignment(Qt::AlignRight);
 
@@ -215,100 +200,45 @@ void Recommend::addLab_rec_()
 	}
 }
 
-void Recommend::InitLabel() {
-	lablist.push_back(ui->lab_1);
-	lablist.push_back(ui->lab_2);
-	lablist.push_back(ui->lab_3);
-	//缩放位图填空间
-	for (const auto& x : lablist) {
-		x->setScaledContents(true);
-	}
-}
 
 bool Recommend::eventFilter(QObject* obj, QEvent* event) {
-	if (obj == ui->lab_1) {
-		//鼠标进入事件
-		if (event->type() == QEvent::Enter) {
-		}
-		else if (event->type() == QEvent::Leave) {
-		}
+	//	if (obj == ui->lab_1) {
+	//		//鼠标进入事件
+	//		if (event->type() == QEvent::Enter) {
+	//		}
+	//		else if (event->type() == QEvent::Leave) {
+	//		}
 
-		// label被点击
-		if (event->type() == QEvent::MouseButtonPress) {
-			QMouseEvent* mouse = static_cast<QMouseEvent*>(event);
+	//		// label被点击
+	//		if (event->type() == QEvent::MouseButtonPress) {
+	//			QMouseEvent* mouse = static_cast<QMouseEvent*>(event);
 
-			if (mouse->button() == Qt::LeftButton) {
-				if (!strcmp(targetlist.at(index - 1).typeTitle.toUtf8().data(),
-					"新碟首发")) {
-					fprintf(stdout, "enter Disc\n");
-					NetNewDisc->get(
-						QNetworkRequest(QString("http://cloud-music.pl-fe.cn/album?id=%1")
-							.arg(targetlist.at(index - 1).targetId)));
-				}
-				else {
-					NetNewSong->get(QNetworkRequest(
-						QString("http://cloud-music.pl-fe.cn/song/detail?ids=%1")
-						.arg(targetlist.at(index).targetId)));
-				}
-			}
-		}
-	}
+	//			if (mouse->button() == Qt::LeftButton) {
+	//				if (!strcmp(targetlist.at(index - 1).typeTitle.toUtf8().data(),
+	//					"新碟首发")) {
+	//					fprintf(stdout, "enter Disc\n");
+	//					NetNewDisc->get(
+	//						QNetworkRequest(QString("http://cloud-music.pl-fe.cn/album?id=%1")
+	//							.arg(targetlist.at(index - 1).targetId)));
+	//				}
+	//				else {
+	//					NetNewSong->get(QNetworkRequest(
+	//						QString("http://cloud-music.pl-fe.cn/song/detail?ids=%1")
+	//						.arg(targetlist.at(index).targetId)));
+	//				}
+	//			}
+	//		}
+	//	}
 	return QWidget::eventFilter(obj, event);
-}
-
-void Recommend::getPic() {
-	//事件循环，防止没保存完图片就去读取，照成的数据越界
-	//Num = 1;
-	//QEventLoop evenloop;
-	//foreach(auto & val, targetlist) {
-	//	NetGetBanner->get(QNetworkRequest(QString("%1").arg(val.picUrl)));
-
-	//}
-	//connect(NetGetBanner, &QNetworkAccessManager::finished, &evenloop, &QEventLoop::quit);
-	//evenloop.exec();
-	////加载图片到照片墙
-	//this->LoadPic();
-}
-
-void Recommend::on_BannerReplyFinished(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
-		QByteArray byt = reply->readAll();
-		QJsonParseError error_t{};
-		QJsonDocument docm = QJsonDocument::fromJson(byt, &error_t);
-		if (error_t.error == QJsonParseError::NoError) {
-			QJsonObject root = docm.object();
-			auto Banrot = root.value("banners");
-			if (Banrot.isArray()) {
-				QJsonArray BanArry = Banrot.toArray();
-				foreach(const auto & x, BanArry) {
-					if (x.isObject()) {
-						auto Ban_r = x.toObject();
-						target.targetId = Ban_r.value("targetId").toInt();
-						target.typeTitle = Ban_r.value("typeTitle").toString();
-						target.picUrl = Ban_r.value("imageUrl").toString();
-						//取得轮播图的链接
-						targetlist.push_back(target);
-					}
-				}
-			}
-		}
-		//请求轮播图,不阻塞当前线程
-		this->getPic();
-	}
-	reply->deleteLater();
-}
-void Recommend::on_GetBannerPic(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
-		QPixmap map;
-		map.loadFromData(reply->readAll());
-		map.save(QString("../photowall/%1.png").arg(Num));
-		++Num;
-	}
-	reply->deleteLater();
 }
 
 //返回专辑Ui界面
 SoloAlbum* Recommend::getAlbumUi() { return soloalbum; }
+
+SongMenu* Recommend::getSoungMenu()
+{
+	return songmuen;
+}
 
 RecommendedDaily* Recommend::getRecDailyUi() { return recDaily; }
 
@@ -336,13 +266,14 @@ void Recommend::on_FinshedNetRecommend(QNetworkReply* reply) {
 			QJsonObject datarot = rot.value("data").toObject();
 			if (true == m_tag->ParseDetailsSong(datarot, "dailySongs")) {
 				//加载数据
-				recDaily->loadData(m_tag->getTag());
+//				recDaily->loadData(m_tag->getTag());
 				recDaily->show();
 			}
 		}
 	}
 	reply->deleteLater();
 }
+
 
 void Recommend::on_FinishedNetRecPlaylist(QNetworkReply* reply)
 {
@@ -354,38 +285,43 @@ void Recommend::on_FinishedNetRecPlaylist(QNetworkReply* reply)
 			QJsonObject rot = doucment.object();
 			QJsonValue value = rot.value("result");
 			if (value.isArray()) {
+				RecList.clear();
+				RecPlaylist recplay;
 				QJsonArray resAry = value.toArray();
 				foreach(const QJsonValue & rhs, resAry) {
 					if (rhs.isObject()) {
 						QJsonObject obj = rhs.toObject();
-						RecPlaylist recplay;
-						recplay.id = obj.value("id").toInt();
+						recplay.id = obj.value("id").toVariant().toLongLong();
+
 						lab_recAll.at(index)->setText(obj.value("name").toString());
 						QString picUrl = obj.value("picUrl").toString();
 						QEventLoop loop;
 						QNetworkAccessManager* pic = new QNetworkAccessManager(this);
+
 						pic->get(QNetworkRequest(picUrl));
 						connect(pic, &QNetworkAccessManager::finished, this, [&](QNetworkReply* reply) {
 							if (reply->error() == QNetworkReply::NoError) {
 								QPixmap pix;
 								pix.loadFromData(reply->readAll());
-								//QPushButton* btn = btn_recAll.at(index);
-								btn_recAll.at(index)->setIconSize(QSize(btn_recAll.at(index)->x(), btn_recAll.at(index)->y()));
+								btn_recAll.at(index)->setIconSize(QSize(195, 195));
 								btn_recAll.at(index)->setIcon(QIcon(pix));
-
 							}
 							reply->deleteLater();
 							});
 						connect(pic, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 						loop.exec();
 						recplay.playCount = obj.value("playCount").toVariant().toLongLong();
+						recplay.trackCount = obj.value("trackCount").toVariant().toLongLong();
 						lab_title.at(index)->setText(QString::number(recplay.playCount));
+
 						if (obj.value("canDislike").toBool() == false) {
 							QLabel* lab = new QLabel(this);
 							lab->setPixmap(QPixmap(":/images/lab_cloud.png"));
 							QRect rect = lab_recAll.at(index)->geometry();
 							lab->setGeometry(rect.x(), rect.y(), 20, 20);
 						}
+						//保存歌单ID和歌曲数量
+						RecList.push_back(recplay);
 					}
 					++index;
 				}

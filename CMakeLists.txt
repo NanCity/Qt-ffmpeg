@@ -60,7 +60,7 @@ add_subdirectory(photowall)
 
 qt5_add_resources(QRC_SOURCE_FILES resource.qrc)
 #设置可执行文件 
-add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH} )
+add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH}  "Loading.h" "Loading.cpp")
 
 # 链接Qt5的库
 target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network  photowall ${libs_path})

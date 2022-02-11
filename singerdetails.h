@@ -35,7 +35,6 @@ private:
     Ui::SingerDetails *ui;
     int singerID{};
     Base* base;
-    //QList<unsigned int> ID{};
     QStringList songid{ };
     QNetworkAccessManager* NetSingerDet;
     QNetworkAccessManager* NetTop50;

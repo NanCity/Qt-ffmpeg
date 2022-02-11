@@ -6,120 +6,145 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>852</width>
-    <height>374</height>
+    <width>673</width>
+    <height>255</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>255</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="btnL">
-   <property name="geometry">
-    <rect>
-     <x>31</x>
-     <y>91</y>
-     <width>25</width>
-     <height>25</height>
-    </rect>
+  <property name="styleSheet">
+   <string notr="true">background-color: transparent;</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
    </property>
-   <property name="text">
-    <string/>
+   <property name="topMargin">
+    <number>0</number>
    </property>
-  </widget>
-  <widget class="QPushButton" name="btnR">
-   <property name="geometry">
-    <rect>
-     <x>721</x>
-     <y>91</y>
-     <width>25</width>
-     <height>25</height>
-    </rect>
+   <property name="rightMargin">
+    <number>0</number>
    </property>
-   <property name="text">
-    <string/>
+   <property name="bottomMargin">
+    <number>0</number>
    </property>
-  </widget>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>761</width>
-     <height>225</height>
-    </rect>
+   <property name="spacing">
+    <number>0</number>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_3">
-    <item>
-     <widget class="pictureView" name="graphicsView"/>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <item>
-       <spacer name="horizontalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>280</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic0" native="true"/>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic1" native="true"/>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic2" native="true"/>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic3" native="true"/>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic4" native="true"/>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic5" native="true"/>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic6" native="true"/>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic7" native="true"/>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic8" native="true"/>
-      </item>
-      <item>
-       <widget class="pictureButton" name="btnPic9" native="true"/>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>280</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-   </layout>
-  </widget>
+   <item row="0" column="0" rowspan="2" colspan="3">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="pictureView" name="graphicsView">
+       <property name="styleSheet">
+        <string notr="true">background-color: transparent;</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <item>
+        <spacer name="horizontalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>280</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnL">
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(170, 85, 0);</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic0" native="true"/>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic1" native="true"/>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic2" native="true"/>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic3" native="true"/>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic4" native="true"/>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic5" native="true"/>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic6" native="true"/>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic7" native="true"/>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic8" native="true"/>
+       </item>
+       <item>
+        <widget class="pictureButton" name="btnPic9" native="true"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnR">
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(170, 85, 255);</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>280</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <customwidgets>
   <customwidget>

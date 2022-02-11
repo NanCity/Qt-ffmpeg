@@ -146,10 +146,7 @@ void SingerDetails::finshedNetTop50(QNetworkReply* reply)
 				ui->top50_list->setItem(index, 1, item);
 				ui->top50_list->setItem(index, 2, item2);
 				//保存ID
-				/*QString Url{QString("https://music.163.com/song/media/outer/url?id=%1").arg(rhs.Songid)};*/
 				songid.push_back(QString::number(rhs.Songid));
-				//ID.push_back(rhs.Songid);
-
 				++index;
 			}
 		}

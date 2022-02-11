@@ -1,6 +1,5 @@
 ﻿#ifndef SEARCH_H
 #define SEARCH_H
-
 #include <QMap>
 #include <QWidget>
 class QNetworkAccessManager;
@@ -77,7 +76,6 @@ private slots:
 	void on_listwidg_song_itemClicked(QListWidgetItem*);
 	void on_tabClicked(int index);
 	void on_finshedSinger(QNetworkReply*);
-	// void on_table_playlist_customContextMenuRequested(const QPoint &pos);
 signals:
 	void play(Search*, const int index);
 	void playAll(Search*);
