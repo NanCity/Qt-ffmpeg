@@ -29,10 +29,9 @@
 #include "photowall/photowall.h"
 Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 	ui->setupUi(this);
-	mutex = new QMutex();
-
+	//照片墙
 	photowall = new PhotoWall(this);
-	//添加到布局
+	/*添加到布局*/
 	ui->verLout_pic->addWidget(photowall);
 	config = new Config();
 	m_tag = new M_Tag(this);
@@ -42,7 +41,7 @@ Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 	recDaily->hide();
 	songmuen = new SongMenu(this);
 	songmuen->hide();
-	//325
+
 	ui->horizontalSpacer->sizeHint().setWidth(0);
 	addBtn_rec_();
 	addLab_rec_();
@@ -52,6 +51,7 @@ Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 	NetAlbumPic = new QNetworkAccessManager(this);
 	NetRecPlaylist = new QNetworkAccessManager(this);
 	NetRecommend = new QNetworkAccessManager(this);
+	Netpic = new QNetworkAccessManager(this);
 	//每日推荐歌单
 	QString RecPlaylistUrl{ "http://cloud-music.pl-fe.cn/personalized?limit=9" };
 	request = config->setCookies();
@@ -68,17 +68,29 @@ Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 		&Recommend::on_FinshedNetRecommend);
 
 	connect(NetRecPlaylist, &QNetworkAccessManager::finished, this, &Recommend::on_FinishedNetRecPlaylist);
+
+	connect(Netpic, &QNetworkAccessManager::finished, this, [&](QNetworkReply* reply) {
+		if (reply->error() == QNetworkReply::NoError && !queue.isEmpty()) {
+			QPixmap pix;
+			pix.loadFromData(reply->readAll());
+			btn_recAll.at(index)->setIconSize(QSize(195, 195));
+			btn_recAll.at(index)->setIcon(QIcon(pix));
+			++index;
+			//queue.pop_back();
+		}
+		reply->deleteLater();
+		});
 }
 
 Recommend::~Recommend() {
 	delete ui;
 	delete config;
 	config = nullptr;
+	delete m_tag;
+	m_tag = nullptr;
 	//关闭会导致崩溃
 	// delete request;
 	// request = nullptr;
-	delete mutex;
-	mutex = nullptr;
 }
 
 //每日推荐单曲 (需要登录)
@@ -100,7 +112,7 @@ void Recommend::on_btn_rec_1_clicked() {
 
 void Recommend::on_btn_rec_2_clicked()
 {
-	if (!RecList.isEmpty()) { 
+	if (!RecList.isEmpty()) {
 		songmuen->getSongMenuID(RecList.at(0).id, RecList.at(0).trackCount);
 	}
 }
@@ -233,7 +245,9 @@ bool Recommend::eventFilter(QObject* obj, QEvent* event) {
 }
 
 //返回专辑Ui界面
-SoloAlbum* Recommend::getAlbumUi() { return soloalbum; }
+SoloAlbum* Recommend::getAlbumUi() {
+	return soloalbum;
+}
 
 SongMenu* Recommend::getSoungMenu()
 {
@@ -266,7 +280,7 @@ void Recommend::on_FinshedNetRecommend(QNetworkReply* reply) {
 			QJsonObject datarot = rot.value("data").toObject();
 			if (true == m_tag->ParseDetailsSong(datarot, "dailySongs")) {
 				//加载数据
-//				recDaily->loadData(m_tag->getTag());
+				recDaily->loadData(m_tag->getTag());
 				recDaily->show();
 			}
 		}
@@ -289,27 +303,18 @@ void Recommend::on_FinishedNetRecPlaylist(QNetworkReply* reply)
 				RecPlaylist recplay;
 				QJsonArray resAry = value.toArray();
 				foreach(const QJsonValue & rhs, resAry) {
+					static int n = 0;
 					if (rhs.isObject()) {
 						QJsonObject obj = rhs.toObject();
 						recplay.id = obj.value("id").toVariant().toLongLong();
 
 						lab_recAll.at(index)->setText(obj.value("name").toString());
 						QString picUrl = obj.value("picUrl").toString();
-						QEventLoop loop;
-						QNetworkAccessManager* pic = new QNetworkAccessManager(this);
 
-						pic->get(QNetworkRequest(picUrl));
-						connect(pic, &QNetworkAccessManager::finished, this, [&](QNetworkReply* reply) {
-							if (reply->error() == QNetworkReply::NoError) {
-								QPixmap pix;
-								pix.loadFromData(reply->readAll());
-								btn_recAll.at(index)->setIconSize(QSize(195, 195));
-								btn_recAll.at(index)->setIcon(QIcon(pix));
-							}
-							reply->deleteLater();
-							});
-						connect(pic, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
-						loop.exec();
+						//用队列来获取图片
+
+						queue.push_back(Netpic->get(QNetworkRequest(picUrl)));
+						qDebug() << "push_back";
 						recplay.playCount = obj.value("playCount").toVariant().toLongLong();
 						recplay.trackCount = obj.value("trackCount").toVariant().toLongLong();
 						lab_title.at(index)->setText(QString::number(recplay.playCount));
@@ -324,10 +329,14 @@ void Recommend::on_FinishedNetRecPlaylist(QNetworkReply* reply)
 						RecList.push_back(recplay);
 					}
 					++index;
+
+					++n;
 				}
 			}
 		}
 	}
+	index = 0;
+	queue.pop_back();
 	reply->deleteLater();
 }
 

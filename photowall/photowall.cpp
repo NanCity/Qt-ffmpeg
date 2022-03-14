@@ -13,7 +13,6 @@
 #include <QTimer>
 #include <QGraphicsScene>
 #include <QGraphicsItemAnimation>
-
 #include <QEventLoop>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -25,7 +24,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-//static int dir = 0;//记录方向
+static int dir = 0;//记录方向
 static QList<qreal> spaceList;
 static QList<qreal> unitList;
 static QList<qreal> transScaleList;//缩放比例表
@@ -37,17 +36,20 @@ static QMap<int, pictureItem*> mapLink;  //按钮id 与 图片资源的映射
 static int startNum = 0;
 static QList<QPointF> pointA;
 
-PhotoWall::PhotoWall(QWidget* parent) :
-	QWidget(parent),
-	ui(new Ui::PhotoWall)
+PhotoWall::PhotoWall(QWidget* parent) : QWidget(parent)
+, ui(new Ui::PhotoWall)
 {
 	ui->setupUi(this);
 	this->installEventFilter(this);
 	for (int i = 0; i < 10; i++) {
 		item[i] = new QGraphicsItemAnimation(this);
 	}
-
+	m_timer = new QTimer(this);
+	m_scene = new QGraphicsScene(this);
 	NetMangBanner = new QNetworkAccessManager(this);
+	/*
+	* type = 0 表示PC端
+	*/
 	QString url{ "http://cloud-music.pl-fe.cn/banner?type=0" };
 	NetMangBanner->get(QNetworkRequest(url));
 	connect(NetMangBanner, &QNetworkAccessManager::finished, this, &PhotoWall::on_finshedNetMangBanner);
@@ -55,34 +57,21 @@ PhotoWall::PhotoWall(QWidget* parent) :
 	NetGetBanner = new QNetworkAccessManager(this);
 	connect(NetGetBanner, &QNetworkAccessManager::finished, this, &PhotoWall::on_finshedNetGetBanner);
 
-	m_timer = new QTimer(this),
-		m_scene = new QGraphicsScene(this);
+
 	m_index = 0;
 	m_currentRule = RuleA;
 	m_rollCount = 0;
 	btnMoveEnable = true;
-
-
-	connect(m_newT, &QTimer::timeout, [this]() {
-		on_btnR_clicked();
-		});
-
 	setAttribute(Qt::WA_StyledBackground); //设置样式表
 	setButtonGroup(); //设置按钮组
 	setInitList();
 
-	ui->btnL->hide();
-	ui->btnR->hide();
-
-	ui->btnR->setGeometry(100, 80, 35, 35);
-
 	m_newT = new QTimer(this);
-	m_newT->setInterval(5000);
-	m_newT->start();
 	connect(m_newT, &QTimer::timeout, [this]() {
 		on_btnR_clicked();
 		});
-
+	m_newT->setInterval(5000);
+	m_newT->start();
 }
 
 PhotoWall::~PhotoWall()
@@ -113,53 +102,32 @@ void PhotoWall::on_finshedNetMangBanner(QNetworkReply* reply)
 						target.picUrl = Ban_r.value("imageUrl").toString();
 						//取得轮播图的链接
 						targetlist.push_back(target);
+						NetGetBanner->get(QNetworkRequest(target.picUrl));
 					}
 				}
-				loadBannerPci();
 			}
 		}
 	}
-	else
-	{
-		//加载本地图片
-		loadLocalImages();
-	}
 	reply->deleteLater();
-}
-
-
-void PhotoWall::loadBannerPci()
-{
-	index = 0;
-	QEventLoop loop;
-	foreach(const Target & rhs, targetlist) {
-		NetGetBanner->get(QNetworkRequest(rhs.picUrl));
-	}
-	connect(NetGetBanner, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
-	loop.exec();
-	//加载图片
-	setPictureScreen();
-	setTimerAndConnect();
-}
-
-//无网络，加载本地图片
-void PhotoWall::loadLocalImages() {
-	setPictureScreen();
 }
 
 
 void PhotoWall::on_finshedNetGetBanner(QNetworkReply* reply)
 {
-
 	if (reply->error() == QNetworkReply::NoError) {
+		static int i = 0;
 		QPixmap map{};
 		++index;
+		++i;
 		map.loadFromData(reply->readAll());
 		map.save(QString("../photowall/pictrue/%1.png").arg(index));
+		if (i == targetlist.length()) {
+			//加载图片
+			setPictureScreen();
+			setTimerAndConnect();
+		}
 	}
-
 	reply->deleteLater();
-
 }
 
 void PhotoWall::setButtonGroup()
@@ -181,6 +149,7 @@ void PhotoWall::setButtonGroup()
 	for (int i = 0; i < 10; i++) {
 		static_cast<pictureButton*>(m_BtnGroup->button(i))->setId(i);
 	}
+	int n = 0;
 }
 
 void PhotoWall::setInitList()
@@ -253,7 +222,7 @@ void PhotoWall::setTimerAndConnect()
 			pictureItem* p = mapLink.value(id); //获取id 的图片值
 			btnMoveEnable = false;
 			clickedItemRoll(p->type());
-			qDebug() << p->type();
+			//qDebug() << p->type();
 			});
 		//        connect(static_cast<pictureButton*>(m_BtnGroup->button(i)),&pictureButton::stop,[this](){
 		//            m_timer->stop();
@@ -272,7 +241,7 @@ void PhotoWall::rollItem(int rollDir, unsigned rollCount)
 	//获取新的数据
 	//主要位置  主位置
 	int nbegin = rollDir;
-	qDebug() << "nbegin = " << nbegin << "title= " << targetlist.at(nbegin).typeTitle;
+	//qDebug() << "nbegin = " << nbegin << "title= " << targetlist.at(nbegin).typeTitle;
 	startNum = getrightN(nbegin);
 	m_timer->start();
 }
@@ -299,6 +268,7 @@ void PhotoWall::timerOutFunc()
 	QTimeLine* timeline = new QTimeLine(200);
 	timeline->setLoopCount(1); //设置3次
 	int first = getrightN(startNum - 1);
+
 	for (int i = 0; i < index; i++) {
 		itemList[i] = mapLink.value(first % index);
 		first++;

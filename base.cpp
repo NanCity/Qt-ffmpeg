@@ -60,9 +60,10 @@ bool Base::eventFilter(QObject* obj, QEvent* event)
 	if (obj == tab) {
 		if (event->type() == QEvent::Wheel) {
 			QWheelEvent* wheel = static_cast<QWheelEvent*>(event);
-			//y() < 0 鼠标滚轮向自己滑动 ，并且滑块到达底部
+			//y() < 0 鼠标滚轮向自己滑动
 			if (wheel->angleDelta().y() < 0) {
 				emit loadNextPage();
+				fprintf(stdout, "loadNextPage\n");
 			}
 		}
 	}

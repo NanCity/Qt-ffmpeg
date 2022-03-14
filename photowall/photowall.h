@@ -2,7 +2,7 @@
 #define PHOTOWALL_H
 
 #include <QWidget>
-
+#include <QQueue>
 #define RAW_VIEW_SIZE QSize(750,198)
 #define SCALE_VIEW_PIXMAP (qreal)1/1 //View与图片比例
 #define SCALE_BIG_SMALL (qreal)1/1 //图片大小比例
@@ -39,8 +39,6 @@ struct Target {
 	Target() : targetId{}, typeTitle{}, picUrl{} {}
 };
 
-
-
 class PhotoWall : public QWidget
 {
 	Q_OBJECT
@@ -55,20 +53,18 @@ public:
 	explicit PhotoWall(QWidget* parent = nullptr);
 	virtual ~PhotoWall();
 	//设置button组
-	void setButtonGroup();  
+	void setButtonGroup();
 	//设置相关图片信息
-	void setInitList(); 
+	void setInitList();
 	//加载图片
-	void setPictureScreen(); 
+	void setPictureScreen();
 	//设置定时器
-	void setTimerAndConnect(); 
+	void setTimerAndConnect();
 	template<typename T>
 	void rollList(QList<T>& oldList, int dir, int count);
 	void rollItem(int rollDir, unsigned rollCount);
 	//获取准确的位置
-	int  getrightN(int num); 
-	void loadBannerPci();
-	void loadLocalImages();
+	int  getrightN(int num);
 
 protected slots:
 	void timerOutFunc();
@@ -82,24 +78,24 @@ protected slots:
 private:
 	Ui::PhotoWall* ui;
 	//定时器
-	QTimer* m_timer; 
+	QTimer* m_timer;
 	//场景
-	QGraphicsScene* m_scene; 
+	QGraphicsScene* m_scene;
 	//    PictrueView *m_view; //视图
 	QLineF m_MidLine{}; //中等线，确定图片位置
 	//各个图片位置信息
-	QList<qreal> m_PointList{}; 
+	QList<qreal> m_PointList{};
 	//各个图片列表
 	QList<QPixmap> m_PixmapList{};
 	//各个显示优先级列表
 	QList<qreal> m_ZValueList{};
 	//各个图片位置信息伸缩因子列表
-	QList<qreal> m_PixmapScaleList{}; 
+	QList<qreal> m_PixmapScaleList{};
 	int m_index{};
 	//当前执行的类型操作
-	Rules m_currentRule{}; 
+	Rules m_currentRule;
 	//滚动次数
-	unsigned m_rollCount{}; 
+	unsigned m_rollCount{};
 	//按钮盒子
 	QButtonGroup* m_BtnGroup{};
 	bool btnMoveEnable{};
@@ -107,7 +103,7 @@ private:
 	QTimer* m_newT{}; //旋转定时器
 
 	//获取网易云音乐的照片墙图片
-	int index{0};
+	int index{ 0 };
 	QList<Target> targetlist;
 	QNetworkAccessManager* NetMangBanner;
 	//解析图片

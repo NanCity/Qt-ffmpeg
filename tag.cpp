@@ -19,6 +19,7 @@ M_Tag::M_Tag(QWidget* parent) : QDialog(parent) {
 	Netlike = new QNetworkAccessManager(this);
 	Request = new QNetworkRequest();
 	eventloop = new QEventLoop(this);
+	tag = new QList<Temptag>;
 	SetRequestHeader(Request);
 
 	connect(NetPase, &QNetworkAccessManager::finished, this,
@@ -50,10 +51,16 @@ M_Tag::M_Tag(QWidget* parent) : QDialog(parent) {
 		if (reply->error() == QNetworkReply::NoError) {
 
 		}
+		reply->deleteLater();
 		});
 }
 
-M_Tag::~M_Tag() { eventloop->exit(); }
+M_Tag::~M_Tag() { 
+	qDebug() << "~M_Tag()";
+	delete tag;
+	tag = nullptr;
+	eventloop->exit(); 
+}
 
 QString M_Tag::GetArtist() { return tmptag.Artist; }
 
@@ -120,7 +127,7 @@ void M_Tag::on_replyFinshed(QNetworkReply* reply) {
 }
 
 bool M_Tag::ParseDetailsSong(QJsonObject& root, const QString& objname) {
-	tag.clear();
+	tag->clear();
 	QJsonValue value = root.value(objname);
 	if (value.isArray()) {
 		auto songary = value.toArray();
@@ -153,7 +160,7 @@ bool M_Tag::ParseDetailsSong(QJsonObject& root, const QString& objname) {
 				}
 				SetStatus(songobj.value("status").toInt());
 			}
-			tag.push_back(tmptag);
+			tag->push_back(tmptag);
 		}
 		emit parseOk();
 		return true;

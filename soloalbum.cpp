@@ -5,8 +5,8 @@
 #include <QHBoxLayout> //水平布局管理器
 SoloAlbum::SoloAlbum(QWidget* parent) : QWidget(parent), ui(new Ui::SoloAlbum) {
 	ui->setupUi(this);
+	//setAttribute(Qt::WA_DeleteOnClose);
 	base = new Base(ui->playlist);
-	//base->InitTableWidget();
 	Init();
 	InitMenu();
 	//允许QTableWidget接收QWidget::customContextMenuRequested()信号。

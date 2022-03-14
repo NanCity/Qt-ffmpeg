@@ -4,9 +4,9 @@
 #include <QWidget>
 #include "config.h"
 #include <QMap>
+#include "tag.h"
 
 class Base;
-class Temptag;
 class UserSongMuen;
 class QNetworkReply;
 class QNetworkAccessManager;
@@ -24,6 +24,10 @@ public:
 	long long id{};
 	//歌曲数量
 	int trackCount{};
+	//收藏量
+	size_t subscribedCount{};
+	//播放量
+	size_t playCount{};
 	//歌单名称
 	QString name{};
 	//歌单封面
@@ -31,7 +35,12 @@ public:
 	QString createTime{};
 	QPixmap Userpic{};
 	QString nickname{};
-
+	//简介 
+	QString description{};
+	//标签
+	QString tags{};
+	//各大名创建者的图片
+	QString avatarUrl{};
 };
 
 class SongMenu : public QWidget
@@ -39,7 +48,7 @@ class SongMenu : public QWidget
 	Q_OBJECT
 public:
 	explicit SongMenu(QWidget* parent = nullptr);
-	~SongMenu();
+	virtual ~SongMenu();
 	void loadData();
 	//获取我喜欢的歌曲列表ID,方便后续操作
 	void RequestSongTable();
@@ -48,9 +57,9 @@ public:
 	void RequestUserSongMenu();
 	void SongMenuAt(const int index = 0);
 	//拿到歌单之后，直接请求歌单中的歌曲
-	void getSongMenuID(const long long ID = 0, const int limit = 10);
+	void getSongMenuID(const size_t ID = 0, const int limit = 10);
 	//创建歌单
-	void CreatorSongMuen(const QString &name);
+	void CreatorSongMuen(const QString& name);
 	void DelereSongMuenu(const int ID);
 signals:
 	//加载歌单列表
@@ -60,6 +69,8 @@ signals:
 protected slots:
 	void on_finshedNetSongMenu(QNetworkReply*);
 	void on_finsedNetAllSong(QNetworkReply*);
+	void on_finshedNetDetail(QNetworkReply*);
+	void on_finsedNetPic(QNetworkReply*);
 private:
 	Ui::SongMenu* ui;
 	int userId{};
@@ -67,11 +78,18 @@ private:
 	int curtableindex{};
 	Base* base;
 	Config config{};
+	UserSongMuen tempMuenInfo{};
 	//保存用户歌单
 	QList<UserSongMuen> songlistMenu{};
-	QList<Temptag>taglsit{};
+
+	M_Tag tag{};
+	QList<Temptag>* taglsit;
+
 	QNetworkAccessManager* NetSongMenu;
 	QNetworkAccessManager* NetAllSong;
+	//拿到歌单的描述之类的
+	QNetworkAccessManager* NetDetail;
+	QNetworkAccessManager* NetPic;
 };
 
 #endif // SONGMENU_H

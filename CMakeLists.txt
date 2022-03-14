@@ -32,6 +32,9 @@ SET(CMAKE_BUILD_TYPE "Debug")
 #Debug模式下的编译指令
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 ENDIF()
+#执行外部命令,不能在程序启动的时候启动脚本
+#execute_process(COMMAND  node ${CMAKE_CURRENT_SOURCE_DIR}/NeteaseCloudMusicApi/app.js  OUTPUT_VARIABLE ls_ret)
+#message(STATUS "node app.js:\n ${ls_ret}")
 
 #设置执行文件输出目录
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -57,12 +60,14 @@ find_package(Qt5 COMPONENTS Widgets Multimedia Network REQUIRED)
 #qt_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
 #添加子目录
 add_subdirectory(photowall)
+add_subdirectory(RecommendPlaylist)
+add_subdirectory(NewMusicSudi)
 
 qt5_add_resources(QRC_SOURCE_FILES resource.qrc)
 #设置可执行文件 
-add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH}  "Loading.h" "Loading.cpp")
+add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH} )
 
 # 链接Qt5的库
-target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network  photowall ${libs_path})
+target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network photowall Recommend_playlist NewMusicSudi ${libs_path})
 #动态库 target_link_libraries(${PRO_NAME}  PRIVATE ${libs_path}   Qt5::Multimedia Qt5::Sql  Qt5::Widgets Qt5::Network )
 

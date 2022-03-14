@@ -44,27 +44,42 @@ void RecommendedDaily::init() {
 	ui->table_songslist->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 }
 
-void RecommendedDaily::loadData(QList<Temptag>& rhs) {
+void RecommendedDaily::loadData(QList<Temptag>* tag) {
 	int index = 0;
-	//songsid.clear();
 	PlayerList.clear();
-	foreach(const Temptag & rhs, rhs) {
+	for (int i = 0; i != tag->length(); ++i) {
 		ui->table_songslist->insertRow(index);
 		ui->table_songslist->setCellWidget(index, 0, base->setItemWidget());
-		QTableWidgetItem* item1 = new QTableWidgetItem(rhs.Title);
-		QTableWidgetItem* item2 = new QTableWidgetItem(rhs.Artist);
-		QTableWidgetItem* item3 = new QTableWidgetItem(rhs.Ablue);
-		QTableWidgetItem* item4 = new QTableWidgetItem(rhs.Duration);
+		QTableWidgetItem* item1 = new QTableWidgetItem(tag->at(i).Title);
+		QTableWidgetItem* item2 = new QTableWidgetItem(tag->at(i).Artist);
+		QTableWidgetItem* item3 = new QTableWidgetItem(tag->at(i).Ablue);
+		QTableWidgetItem* item4 = new QTableWidgetItem(tag->at(i).Duration);
 		ui->table_songslist->setItem(index, 1, item1);
 		ui->table_songslist->setItem(index, 2, item2);
 		ui->table_songslist->setItem(index, 3, item3);
 		ui->table_songslist->setItem(index, 4, item4);
-		//songsid.push_back();
 	   /* QString Url{QString("https://music.163.com/song/media/outer/url?id=%1.mp3")
 						.arg(rhs.Songid)};*/
-		PlayerList.insert(index, QString::number(rhs.Songid));
+		PlayerList.insert(index, QString::number(tag->at(i).Songid));
 		++index;
 	}
+	//foreach(const Temptag *rhs, tag) {
+	//	ui->table_songslist->insertRow(index);
+	//	ui->table_songslist->setCellWidget(index, 0, base->setItemWidget());
+	//	QTableWidgetItem* item1 = new QTableWidgetItem(rhs->Title);
+	//	QTableWidgetItem* item2 = new QTableWidgetItem(rhs->Artist);
+	//	QTableWidgetItem* item3 = new QTableWidgetItem(rhs->Ablue);
+	//	QTableWidgetItem* item4 = new QTableWidgetItem(rhs->Duration);
+	//	ui->table_songslist->setItem(index, 1, item1);
+	//	ui->table_songslist->setItem(index, 2, item2);
+	//	ui->table_songslist->setItem(index, 3, item3);
+	//	ui->table_songslist->setItem(index, 4, item4);
+	//	//songsid.push_back();
+	//   /* QString Url{QString("https://music.163.com/song/media/outer/url?id=%1.mp3")
+	//					.arg(rhs.Songid)};*/
+	//	PlayerList.insert(index, QString::number(rhs->Songid));
+	//	++index;
+	//}
 	//数据加载完成
 	emit loadOk();
 }

@@ -16,7 +16,7 @@ public:
   explicit RecommendedDaily(QWidget *parent = nullptr);
   ~RecommendedDaily();
   void init();
-  void loadData(QList<Temptag> &rhs);
+  void loadData(QList<Temptag> *rhs);
   void Notlogin(bool login = false);
   QStringList GetPlayList() { return PlayerList; }
 protected slots:

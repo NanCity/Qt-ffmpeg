@@ -17,6 +17,7 @@
 #include "networkutil.h"
 #include "personform.h"
 #include "recommendeddaily.h"
+#include "RecommendPlaylist/recommendplaylist.h"
 #include "search.h"
 #include "skin.h"
 #include "soloalbum.h"
@@ -38,10 +39,12 @@
 #include <QTime>
 //随机数
 #include <QtGlobal>
+#include <photowall/photowall.h>
 // ffplay -ar 44100 -ac 2 -f s16le -i out.pcm 命令行播放
 Music::Music(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::Music), CurrentPlayerListIndex(0) {
 	ui->setupUi(this);
+	//setAttribute(Qt::WA_DeleteOnClose);
 	init();
 	Mode = PlayMode::Order;
 	state = State::none;
@@ -94,11 +97,18 @@ Music::Music(QWidget* parent)
 }
 
 Music::~Music() {
-	Decode->stop();
 	delete ui;
 	ui = nullptr;
+	delete lyr;
+	lyr = nullptr;
 	delete config;
 	config = nullptr;
+	Decode->stop();
+	//关闭 node.exe 进程 
+	const char* cmd{ "taskkill /f /t /im node.exe" };
+	system(cmd);
+	//getchar();
+	qDebug() << "Music 析构完毕";
 }
 
 void Music::on_login_succes() {
@@ -185,12 +195,12 @@ void Music::SearchConnect() {
 		});
 
 	//歌手详情
-/*	connect(search, &Search::loadSinger, this, [&](Singer singer) {
-		ui->stackedWidget->setCurrentIndex(13);
-		singetdeatils->setmesg(singer);
-		singetdeatils->show();
-		})*/;
-		connect(search, &Search::getid, singetdeatils, &SingerDetails::setID);
+	//connect(search, &Search::loadSinger, this, [&](Singer singer) {
+	//	ui->stackedWidget->setCurrentIndex(13);
+	//	singetdeatils->setmesg(singer);
+	//	singetdeatils->show();
+	//	});
+	connect(search, &Search::getid, singetdeatils, &SingerDetails::setID);
 }
 
 void Music::SocalMusicConnect() {}
@@ -262,10 +272,9 @@ void Music::RecommendedDailyConnect() {
 		this->On_NetNextPlay(rhs, index, id);
 		});
 
-	//正在歌单歌曲
+	//歌单歌曲
 	connect(DicMusic->getSongMuen(), &SongMenu::DataLoading, this, [&] {
 		ui->stackedWidget->setCurrentIndex(16);
-		qDebug() << "我进来了\n";
 		});
 }
 
@@ -302,7 +311,7 @@ void Music::init() {
 	Decode = new AudioDeCode{};
 	//本地音乐
 	localMusic = new Local_and_Download{};
-	//发现音乐
+	//发现音乐  （BUG）
 	DicMusic = new Dicovermusic(this);
 	//皮肤
 	Skin = new skin(this);

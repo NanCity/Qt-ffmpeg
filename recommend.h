@@ -7,7 +7,7 @@
 //专辑
 #include "soloalbum.h"
 
-
+#include <QQueue>
 #include <QPixmap>
 #include <QWidget>
 class Config;
@@ -27,13 +27,6 @@ namespace Ui {
 	class Recommend;
 }
 
-//轮播图区分专辑和单曲
-//struct Target {
-//	int targetId;
-//	QString typeTitle;
-//	QString picUrl;
-//	Target() : targetId{}, typeTitle{}, picUrl{} {}
-//};
 
 struct RecPlaylist
 {
@@ -92,7 +85,6 @@ private:
 	int Num;
 	Ui::Recommend* ui;
 	Config* config;
-	QMutex* mutex;
 	M_Tag* m_tag;
 	//照片墙
 	PhotoWall* photowall;
@@ -102,13 +94,12 @@ private:
 	RecommendedDaily* recDaily;
 	//歌单UI
 	SongMenu* songmuen;
-
+	QQueue<QNetworkReply*> queue;
 	QList<QPixmap> pixmap{};
 	QList<QLabel*> lablist{};
 	QList<QLabel*> lab_title{};
 	QList<QPushButton*> btn_recAll{};
 	QList<QLabel*>	lab_recAll;
-
 	//保存歌单ID和歌曲数量
 	QList<RecPlaylist>RecList;
 	QNetworkRequest* request;
@@ -121,6 +112,8 @@ private:
 	QNetworkAccessManager* NetRecommend;
 	//每日首页推荐歌单
 	QNetworkAccessManager* NetRecPlaylist;
+	//个性推荐UI 9张图片
+	QNetworkAccessManager* Netpic;
 	//我喜欢的音乐 -- ID
 	//QNetworkAccessManager* NetMyLikeMusicId;
 };

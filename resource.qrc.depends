@@ -79,7 +79,7 @@
         <file>images/btn_checkin_h.png.png</file>
         <file>images/btn_checkin_n.png</file>
         <file>images/lab_cloud.png</file>
-        <file>images/crown.png</file>
+		<file>images/crown.png</file>
     </qresource>
     <qresource prefix="/gif">
         <file>gif/loading3.gif</file>

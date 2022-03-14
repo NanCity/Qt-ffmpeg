@@ -71,7 +71,7 @@ public:
 	void setpicUrl(const QString _pciUrl) { picUrl = _pciUrl; }
 	void setalias(const QString _alias) { alias = _alias; }
 	void setbriefDesc(const QString _briefDesc) { briefDesc = _briefDesc; }
-	void setpixmap(const QByteArray _pixmap) { pixmap.loadFromData(_pixmap, "PNG"); }
+	void setpixmap(const QPixmap& _pixmap) { pixmap = _pixmap; }
 	void clear() {
 		id = 0;
 		mvSize = 0;
@@ -123,10 +123,9 @@ public:
 	//检查歌曲是否有版权
 	void CheekState(const int index);
 	State GetState() { return state; }
-	QList<Temptag> getTag() { return tag; };
+	QList<Temptag>* getTag() { return tag; };
 	//网络超时
 	void NetTimeOut(QNetworkReply* reply);
-
 	//喜欢音乐
 	void likeMusic(const int, const bool);
 private slots:
@@ -134,12 +133,12 @@ private slots:
 	void on_GetAblueArt(QNetworkReply* reply);
 signals:
 	void parseOk();
-	void NoCopyright();
+
 
 private:
 	Temptag tmptag{};
 	State state{};
-	QList<Temptag> tag;
+	QList<Temptag>* tag;
 	Config conf{};
 	QEventLoop* eventloop;
 	QNetworkRequest* Request;

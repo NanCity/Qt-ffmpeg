@@ -59,6 +59,20 @@ Json/
 *.vcxproj
 *vcxproj.*
 *.txt.*
+photowall/*.cmake
+photowall/*.vcproj
+photowall/*vcproj.*.*.user
+photowall/CMakeFiles
+
+RecommendPlaylist/*.cmake
+RecommendPlaylist/*.vcproj
+RecommendPlaylist/*vcproj.*.*.user
+RecommendPlaylist/CMakeFiles
+
+NewMusicSudi/*.cmake
+NewMusicSudi/*.vcproj
+NewMusicSudi/*vcproj.*.*.user
+NewMusicSudi/CMakeFiles
 
 # MinGW generated files
 Userpix
@@ -68,6 +82,7 @@ Debug
 build
 config
 bin
+
 
 *.vs
 # *.vscode
