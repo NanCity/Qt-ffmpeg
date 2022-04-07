@@ -50,7 +50,7 @@ PhotoWall::PhotoWall(QWidget* parent) : QWidget(parent)
 	/*
 	* type = 0 表示PC端
 	*/
-	QString url{ "http://cloud-music.pl-fe.cn/banner?type=0" };
+	QString url{ "http://localhost:3000/banner?type=0" };
 	NetMangBanner->get(QNetworkRequest(url));
 	connect(NetMangBanner, &QNetworkAccessManager::finished, this, &PhotoWall::on_finshedNetMangBanner);
 
@@ -72,6 +72,9 @@ PhotoWall::PhotoWall(QWidget* parent) : QWidget(parent)
 		});
 	m_newT->setInterval(5000);
 	m_newT->start();
+
+	ui->btnL->hide();
+	ui->btnR->hide();
 }
 
 PhotoWall::~PhotoWall()

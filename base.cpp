@@ -197,7 +197,7 @@ void Base::GetMyLikeMusicID()
 	}
 	else
 	{
-		QString Url{ QString("http://cloud-music.pl-fe.cn/likelist?uid=%1").arg(userid.toInt()) };
+		QString Url{ QString("http://localhost:3000/likelist?uid=%1").arg(userid.toInt()) };
 		QNetworkRequest* request{ config.setCookies() };
 		request->setUrl(Url);
 		NetMyLikeMusicId->get(*request);

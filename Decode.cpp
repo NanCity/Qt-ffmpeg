@@ -47,24 +47,25 @@ bool AudioDeCode::initAudio(int SampleRate) {
 
 void AudioDeCode::play(const QString& url) {
 
-	bool ok{ false };
+	 bool ok{ false };
 	ok = url.toInt(&ok);
 	if (ok == true) {
 		const int id = url.toInt();
 		//获取mp3标签
 		tag->GetDetailsSong(id);
-		if (tag->GetState().success == false) {
-			QDialog dialog;
-			if (dialog.exec() == QDialog::Accepted) {
-				dialog.setWindowTitle(tag->GetState().message);
-				emit nextsong();
-			}
-			else
-			{
-				stop();
-			}
-			return;
-		}
+		//判断是否可以播放
+		//if (tag->GetState().success == false) {
+		//	QDialog dialog;
+		//	if (dialog.exec() == QDialog::Accepted) {
+		//		dialog.setWindowTitle(tag->GetState().message);
+		//		emit nextsong();
+		//	}
+		//	else
+		//	{
+		//		stop();
+		//	}
+		//	return;
+		//}
 		QString Url{ "https://music.163.com/song/media/outer/url?id=" + url };
 		this->url = Url;
 	}

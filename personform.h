@@ -39,8 +39,11 @@ protected slots:
   void on_btn_out_clicked();
 
   //网络请求部分
-  void on_finshedCheckin(QNetworkReply *reply);
+  void on_finshedCheckin();
   void leaveEvent(QEvent *event);
+
+  //退出登录
+  void on_logout();
 signals:
   void out();
   void CheckinOk();
@@ -50,8 +53,9 @@ private:
   Ui::PersonForm *ui;
   Config *config;
   QNetworkRequest *request;
-  QNetworkAccessManager *NetOut;
-  QNetworkAccessManager *NetCheckin;
+  QNetworkAccessManager* manger;
+  QNetworkReply* NetOut{};
+  QNetworkReply *NetCheckin{};
 };
 
 #endif // PERSONFORM_H

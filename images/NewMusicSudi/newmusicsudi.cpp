@@ -60,7 +60,7 @@ void NewMusicSudi::on_btn_newMusic_clicked() {
 	static bool frist = true;
 	if (true == frist) {
 		ui->stackedWidget->setCurrentIndex(0);
-		QString URL{ QString("http://cloud-music.pl-fe.cn/top/song?type=0") };
+		QString URL{ QString("http://localhost:3000/top/song?type=0") };
 		NetNewMusic.get(QNetworkRequest(URL));
 		connect(&NetNewMusic, &QNetworkAccessManager::finished, this, &NewMusicSudi::on_finshedNewNewMusic);
 	}
@@ -77,7 +77,7 @@ void NewMusicSudi::on_btn_disc_clicked()
 	if (true == disc_frist) {
 		ui->stackedWidget->setCurrentIndex(1);
 		NetDisc = new QNetworkAccessManager(this);
-		QString URL{ QString("http://cloud-music.pl-fe.cn/album/new?area=ALL&limit=20") };
+		QString URL{ QString("http://localhost:3000/album/new?area=ALL&limit=20") };
 		NetDisc->get(QNetworkRequest(URL));
 		connect(NetDisc, &QNetworkAccessManager::finished, this, &NewMusicSudi::on_finshedNetDisc);
 	}

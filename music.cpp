@@ -44,6 +44,7 @@
 Music::Music(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::Music), CurrentPlayerListIndex(0) {
 	ui->setupUi(this);
+	qDebug() << "*********************QSslSocket=" << QSslSocket::sslLibraryBuildVersionString();
 	//setAttribute(Qt::WA_DeleteOnClose);
 	init();
 	Mode = PlayMode::Order;

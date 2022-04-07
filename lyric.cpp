@@ -35,31 +35,31 @@ lyric::lyric(QWidget *parent) : QWidget(parent), ui(new Ui::lyric) {
   scrollVertical = new QVBoxLayout(ui->scrollArea->widget());
   //方便设置垂直滑块
   vScrollbar = ui->scrollArea->verticalScrollBar();
-  Netmangelyric = new QNetworkAccessManager(this);
-  connect(Netmangelyric, &QNetworkAccessManager::finished, this,
-          &lyric::on_ReplyFinished);
 
-  Netmanger = new QNetworkAccessManager(this);
 
-  connect(Netmanger, &QNetworkAccessManager::finished, this,
-          [&](QNetworkReply *reply) {
-            if (reply->error() == QNetworkReply::NoError) {
-              QByteArray byte{reply->readAll()};
-              QString filepath = QString("../lyric/%1.lrc").arg(name);
-              QFile file(filepath);
-              if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                file.write(byte);
-                file.close();
-                ReadLyric(filepath);
-              } else {
-                // ERROR(QString("Can't open %1").arg(filepath));
-                //打印文件错误描述
-                perror(filepath.toStdString().data());
-                //                        ui->lab_lyric->setText("暂无歌词");
-              }
-            }
-            reply->deleteLater();
-          });
+  manger = new QNetworkAccessManager(this);
+
+}
+
+void lyric::on_ReadLyric()
+{
+	if (NetLyric->error() == QNetworkReply::NoError) {
+		QByteArray byte{ NetLyric->readAll() };
+		QString filepath = QString("../lyric/%1.lrc").arg(name);
+		QFile file(filepath);
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			file.write(byte);
+			file.close();
+			ReadLyric(filepath);
+		}
+		else {
+			// ERROR(QString("Can't open %1").arg(filepath));
+			//打印文件错误描述
+			perror(filepath.toStdString().data());
+			//                        ui->lab_lyric->setText("暂无歌词");
+		}
+	}
+	
 }
 
 lyric::~lyric() {
@@ -88,9 +88,9 @@ void lyric::setMessage(QImage img, QString Art, QString title) {
   //  ui->lab_artist->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 }
 
-void lyric::on_ReplyFinished(QNetworkReply *reply) {
-  if (reply->error() == QNetworkReply::NoError) {
-    QByteArray byte{reply->readAll()};
+void lyric::on_ReplyFinished() {
+  if (Netmangelyric->error() == QNetworkReply::NoError) {
+    QByteArray byte{ Netmangelyric->readAll()};
     QJsonParseError eror_t{};
     QJsonDocument document = QJsonDocument::fromJson(byte, &eror_t);
     if (eror_t.error == QJsonParseError::NoError) {
@@ -104,14 +104,14 @@ void lyric::on_ReplyFinished(QNetworkReply *reply) {
           QJsonValue idobj = songsarray.at(0).toObject();
           id = idobj.toObject().value("id").toInt();
           name = idobj.toObject().value("name").toString();
-          Netmanger->get(QNetworkRequest(
-              QString("http://cloud-music.pl-fe.cn/lyric?id=%1").arg(id)));
+          NetLyric = manger->get(QNetworkRequest(
+              QString("http://localhost:3000/lyric?id=%1").arg(id)));
+          connect(NetLyric, &QNetworkReply::finished, this, &lyric::on_ReadLyric);
         }
       }
     }
   }
   ERROR("未找到歌词文件");
-  reply->deleteLater();
 }
 
 void lyric::GetTheLyricsName(QString rhs) {
@@ -120,8 +120,10 @@ void lyric::GetTheLyricsName(QString rhs) {
   //文件是否存在
   if (!info.isFile()) {
     QString url =
-        QString("http://cloud-music.pl-fe.cn/search?keywords=%1").arg(rhs);
-    Netmangelyric->get(QNetworkRequest(QString(url)));
+        QString("http://localhost:3000/search?keywords=%1").arg(rhs);
+    Netmangelyric = manger->get(QNetworkRequest(QString(url)));
+	connect(Netmangelyric, &QNetworkReply::finished, this,
+		&lyric::on_ReplyFinished);
   } else {
     //读取歌词文件
     ReadLyric(filepath);
@@ -307,3 +309,4 @@ void lyric::slidingDown(int index) {
   //设置滚动速度
   vScrollbar->setSliderPosition(index * 15);
 }
+

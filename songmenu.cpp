@@ -82,7 +82,7 @@ void SongMenu::RequestUserSongMenu()
 	}
 	else
 	{
-		QString Url{ QString("http://cloud-music.pl-fe.cn/user/playlist?uid=%1").arg(userId) };
+		QString Url{ QString("http://localhost:3000/user/playlist?uid=%1").arg(userId) };
 		QNetworkRequest* req = config.setCookies();
 		req->setUrl(Url);
 		NetSongMenu->get(*req);
@@ -110,7 +110,7 @@ void SongMenu::getSongMenuID(const size_t ID, const int limit)
 	base->DelTableWidgetRow();
 	emit DataLoading();
 	QString Url{ QString("http://localhost:3000/playlist/track/all?id=%1&limit=%2").arg(ID).arg(limit) };
-	QString DeaUrl{ QString("http://cloud-music.pl-fe.cn/playlist/detail?id=%1").arg(ID) };
+	QString DeaUrl{ QString("http://localhost:3000/playlist/detail?id=%1").arg(ID) };
 	NetDetail->get(QNetworkRequest(DeaUrl));
 	NetAllSong->get(QNetworkRequest(Url));
 }
@@ -118,7 +118,7 @@ void SongMenu::getSongMenuID(const size_t ID, const int limit)
 void SongMenu::CreatorSongMuen(const QString& str)
 {
 	if (str.isEmpty())return;
-	QString URL{ QString("http://cloud-music.pl-fe.cn/playlist/create?name=%1").arg(str) };
+	QString URL{ QString("http://localhost:3000/playlist/create?name=%1").arg(str) };
 	QNetworkRequest* req{ config.setCookies() };
 	QNetworkAccessManager* Creat = new QNetworkAccessManager(this);
 	req->setUrl(URL);
@@ -142,7 +142,7 @@ void SongMenu::CreatorSongMuen(const QString& str)
 
 void SongMenu::DelereSongMuenu(const int ID)
 {
-	QString URL{ "http://cloud-music.pl-fe.cn/playlist/delete?id=" + ID };
+	QString URL{ "http://localhost:3000/playlist/delete?id=" + ID };
 	QNetworkAccessManager* del = new QNetworkAccessManager(this);
 	QNetworkRequest* req{ config.setCookies() };
 	del->get(*req);

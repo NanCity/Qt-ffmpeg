@@ -18,7 +18,7 @@
 #include <QNetworkRequest>
 #include <QVBoxLayout>
 #include <QScrollBar>
-// http://cloud-music.pl-fe.cn/
+// http://localhost:3000/
 Search::Search(QWidget* parent) : QWidget(parent), ui(new Ui::Search) {
 	ui->setupUi(this);
 	base = new Base(ui->table_playlist);
@@ -142,7 +142,7 @@ void Search::GetSearchText(QString _str) {
 	this->str = _str;
 	ui->lab_song->setText(_str);
 	QString url =
-		QString("http://cloud-music.pl-fe.cn/search?keywords=%1&limit=100")
+		QString("http://localhost:3000/search?keywords=%1&limit=100")
 		.arg(_str);
 	QNetworkReply* Reply = NetWorkUtil::instance()->get(url);
 	typeMap.insert(Reply, RequestType::SONGTYPE);
@@ -340,7 +340,7 @@ void Search::TopSearch(QWidget* wgt) {
 		//_item->setFlags(Qt::ItemIsUserCheckable);
 		topsearchlist->setItemWidget(_item, lab);
 		// 调用此接口,可获取热门搜索列表
-		static QString url{ "http://cloud-music.pl-fe.cn/search/hot/detail" };
+		static QString url{ "http://localhost:3000/search/hot/detail" };
 		QNetworkReply* Reply = NetWorkUtil::instance()->get(url);
 		typeMap.insert(Reply, RequestType::TOPSEARCHTYPE);
 	}
@@ -393,7 +393,7 @@ void Search::on_tabClicked(int index) {
 	case 1: {
 		//歌手 item
 		QString url{
-			QString("http://cloud-music.pl-fe.cn/cloudsearch?keywords=%1&type=100")
+			QString("http://localhost:3000/cloudsearch?keywords=%1&type=100")
 				.arg(str) };
 		NetSinger->get(QNetworkRequest(url));
 	} break;
@@ -476,7 +476,7 @@ void Search::on_finshedSinger(QNetworkReply* reply) {
 //许嵩ID = 5771
 void Search::on_listwidg_song_itemClicked(QListWidgetItem* item) {
 	int index = ui->listwidg_song->currentRow();
-	QString Url{ QString("http://cloud-music.pl-fe.cn/artist/detail?id=%1").arg(SingerIdList.at(index).getid()) };
+	QString Url{ QString("http://localhost:3000/artist/detail?id=%1").arg(SingerIdList.at(index).getid()) };
 	//NetSingerDetails->get(QNetworkRequest(Url));
 	emit getid(SingerIdList.at(index).getid());
 	//获取里面的QWidget
@@ -485,7 +485,7 @@ void Search::on_listwidg_song_itemClicked(QListWidgetItem* item) {
 	//	//拿到item里面的QPushButton按钮
 	//	QPushButton* btn = widget->findChild<QPushButton*>();
 	//	QString str = btn->text();
-	//	QString Url{QString("http://cloud-music.pl-fe.cn/artist/detail?id=").arg("")};
+	//	QString Url{QString("http://localhost:3000/artist/detail?id=").arg("")};
 	//}
 
 }

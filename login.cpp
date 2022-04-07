@@ -35,14 +35,11 @@ Login::Login(QWidget* parent) : QDialog(parent), ui(new Ui::Login) {
 	signup->hide();
 	//处于输入状态的时候，是正常显示字符。 输入完毕之后,使用Password形式隐藏字符
 	ui->line_word->setEchoMode(QLineEdit::PasswordEchoOnEdit);
-	NetManager = new QNetworkAccessManager{ this };
-	NetUserPic = new QNetworkAccessManager{ this };
+
+	manger = new QNetworkAccessManager(this);
+
 	NetRequest = new QNetworkRequest{};
-	Netgrade = new QNetworkAccessManager(this);
-	NetVip = new QNetworkAccessManager(this);
-	NetUserMsg = new QNetworkAccessManager(this);
-	NetCountries = new QNetworkAccessManager(this);
-	NetUserInfo = new QNetworkAccessManager(this);
+
 	connect(signup, &Signup::back, this, [&]() {
 		signup->hide();
 		this->show();
@@ -51,42 +48,10 @@ Login::Login(QWidget* parent) : QDialog(parent), ui(new Ui::Login) {
 	connect(countrieslist, &QListWidget::itemClicked, this,
 		&Login::countrieslist_itemClicked);
 
-	//请求结束以后调用该槽
-	connect(NetManager, &QNetworkAccessManager::finished, this,
-		&Login::on_replyFinished);
-	connect(NetUserPic, &QNetworkAccessManager::finished, this,
-		&Login::on_FinshedPic);
-
-	connect(Netgrade, &QNetworkAccessManager::finished, this,
-		&Login::on_finshedGrade);
-
-	connect(NetVip, &QNetworkAccessManager::finished, this,
-		&Login::on_finshedVip);
-
 	connect(signup, &Signup::singin, this, &Login::show);
 
 	connect(time, &QTimer::timeout, this, &Login::on_QRCexpired);
 
-	//二维码登录
-	NetQRC_key = new QNetworkAccessManager(this);
-	NetQRC_create = new QNetworkAccessManager(this);
-	NetQRC_check = new QNetworkAccessManager(this);
-
-	connect(NetQRC_key, &QNetworkAccessManager::finished, this,
-		&Login::on_finshedQRC_key);
-	connect(NetQRC_create, &QNetworkAccessManager::finished, this,
-		&Login::on_finshedQRC_create);
-	connect(NetQRC_check, &QNetworkAccessManager::finished, this,
-		&Login::on_finshedQRC_check);
-
-	connect(NetUserMsg, &QNetworkAccessManager::finished, this,
-		&Login::on_finshedUserMsg);
-
-	connect(NetCountries, &QNetworkAccessManager::finished, this,
-		&Login::on_finshedCountriesList);
-
-	connect(NetUserInfo, &QNetworkAccessManager::finished, this,
-		&Login::on_finshedNetUserInfo);
 	AutoLogin();
 }
 
@@ -132,7 +97,8 @@ bool Login::ParseJson(QJsonObject& rootobj) {
 			QVariant(profile.value("playlistCount").toInt()));
 		config->endGroup();
 
-		NetUserPic->get(QNetworkRequest(profile.value("avatarUrl").toString()));
+		NetUserPic = manger->get(QNetworkRequest(profile.value("avatarUrl").toString()));
+		connect(NetUserPic, &QNetworkReply::finished, this, &Login::on_FinshedPic);
 		return true;
 	}
 	return false;
@@ -149,11 +115,13 @@ void Login::AutoLogin() {
 		if (phone.isEmpty() && pwd.isEmpty()) {
 			return;
 		}
-		NetManager->get(QNetworkRequest(
+		NetManager = manger->get(QNetworkRequest(
 			QString(
-				"http://cloud-music.pl-fe.cn/login/cellphone?phone=%1&password=%2")
+				"http://localhost:3000/login/cellphone?phone=%1&password=%2")
 			.arg(phone)
 			.arg(pwd)));
+		connect(NetManager, &QNetworkReply::finished, this, &Login::on_replyFinished);
+
 		emit LoginSucces();
 		fprintf(stdout, "***login succeed\n***");
 	}
@@ -161,18 +129,22 @@ void Login::AutoLogin() {
 
 
 void Login::Grade() {
-	QString url{ "http://cloud-music.pl-fe.cn/user/level" };
+	QString url{ "http://localhost:3000/user/level" };
 	QNetworkRequest* request = config->setCookies();
 	request->setUrl(url);
-	Netgrade->get(*request);
+	Netgrade = manger->get(*request);
+	connect(Netgrade, &QNetworkReply::finished, this,
+		&Login::on_finshedGrade);
 }
 
 void Login::Vip() {
 	config->GetCookies();
-	QString url{ "http://cloud-music.pl-fe.cn/vip/info" };
+	QString url{ "http://localhost:3000/vip/info" };
 	QNetworkRequest* requests = config->setCookies();
 	requests->setUrl(url);
-	NetVip->get(*requests);
+	NetVip = manger->get(*requests);
+	connect(NetVip, &QNetworkReply::finished, this,
+		&Login::on_finshedVip);
 }
 
 //登陆
@@ -193,9 +165,9 @@ void Login::on_btn_signin_clicked() {
 	QString phone = ui->line_phoneID->text();
 	QString psw = ui->line_word->text();
 	//判断一下网络状态， 如果为NotAccessible重新设置一下
-	if (NetManager->networkAccessible() == QNetworkAccessManager::NotAccessible) {
-		NetManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
-	}
+	//if (NetManager->networkAccessible() == QNetworkAccessManager::NotAccessible) {
+	//	NetManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
+	//}
 
 	QString countrycode =
 		ui->btn_countrieslist->text().split(QRegExp("[+]")).at(1);
@@ -205,12 +177,13 @@ void Login::on_btn_signin_clicked() {
 	 * countrycode 国家码
 	 * password 密码
 	 */
-	NetManager->get(
-		QNetworkRequest(QString("http://cloud-music.pl-fe.cn/login/"
+	NetManager = manger->get(
+		QNetworkRequest(QString("http://localhost:3000/login/"
 			"cellphone?phone=%1&countrycode=%2&password=%3")
 			.arg(phone)
 			.arg(countrycode)
 			.arg(psw)));
+	connect(NetManager, &QNetworkReply::finished, this, &Login::on_replyFinished);
 }
 //注册
 void Login::on_btn_signup_clicked() {
@@ -250,8 +223,11 @@ void Login::on_btn_countrieslist_clicked() {
 	}
 	else {
 		//说明 : 调用此接口, 可获取国家编码列表
-		QString url{ "http://cloud-music.pl-fe.cn/countries/code/list" };
-		NetCountries->get(QNetworkRequest(url));
+		QString url{ "http://localhost:3000/countries/code/list" };
+		NetCountries = manger->get(QNetworkRequest(url));
+
+		connect(NetCountries, &QNetworkReply::finished, this,
+			&Login::on_finshedCountriesList);
 	}
 }
 
@@ -262,9 +238,9 @@ void Login::on_btn_backlogin_clicked() {
 
 
 
-void Login::on_replyFinished(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
-		QString all = reply->readAll();
+void Login::on_replyFinished() {
+	if (NetManager->error() == QNetworkReply::NoError) {
+		QString all = NetManager->readAll();
 		QByteArray byte_array{};
 		byte_array.append(all);
 		QJsonParseError err_rpt{};
@@ -286,8 +262,8 @@ void Login::on_replyFinished(QNetworkReply* reply) {
 			for (auto it = rootobj.begin(); it != rootobj.end(); ++it) {
 				if (ParseJson(rootobj)) {
 					//获取请求头
-					if (reply->hasRawHeader("Set-Cookie")) {
-						QByteArray cookie = reply->rawHeader("Set-Cookie");
+					if (NetManager->hasRawHeader("Set-Cookie")) {
+						QByteArray cookie = NetManager->rawHeader("Set-Cookie");
 						//将cookie写入配置文件
 						config->SetBeginGroup("cookie");
 						config->SetValue("cookie", QVariant(cookie));
@@ -320,15 +296,13 @@ void Login::on_replyFinished(QNetworkReply* reply) {
 			return;
 		}
 	}
-	reply->deleteLater();
 }
 
-void Login::on_FinshedPic(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
-		pix.loadFromData(reply->readAll());
+void Login::on_FinshedPic() {
+	if (NetUserPic->error() == QNetworkReply::NoError) {
+		pix.loadFromData(NetUserPic->readAll());
 		pix.save("../Userpix/user.png");
 	}
-	reply->deleteLater();
 }
 
 bool Login::checkInput(QString str, const QRegExp regx, const int n) {
@@ -356,10 +330,10 @@ bool Login::checkInput(QString str, const QRegExp regx, const int n) {
 	return true;
 }
 
-void Login::on_finshedGrade(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
+void Login::on_finshedGrade() {
+	if (Netgrade->error() == QNetworkReply::NoError) {
 		QJsonParseError errt_t{};
-		QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &errt_t);
+		QJsonDocument document = QJsonDocument::fromJson(Netgrade->readAll(), &errt_t);
 		if (errt_t.error == QJsonParseError::NoError) {
 			QJsonObject root = document.object();
 			auto data = root.value("data");
@@ -372,13 +346,12 @@ void Login::on_finshedGrade(QNetworkReply* reply) {
 			}
 		}
 	}
-	reply->deleteLater();
 }
 
-void Login::on_finshedVip(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
+void Login::on_finshedVip() {
+	if (NetVip->error() == QNetworkReply::NoError) {
 		QJsonParseError errt_t{};
-		QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &errt_t);
+		QJsonDocument document = QJsonDocument::fromJson(NetVip->readAll(), &errt_t);
 		config->SetBeginGroup("Userinfo");
 		if (errt_t.error == QJsonParseError::NoError) {
 			QJsonObject root = document.object();
@@ -402,15 +375,14 @@ void Login::on_finshedVip(QNetworkReply* reply) {
 		}
 		config->endGroup();
 	}
-	reply->deleteLater();
 }
 
 
 //获取国家编码列表
-void Login::on_finshedCountriesList(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
+void Login::on_finshedCountriesList() {
+	if (NetCountries->error() == QNetworkReply::NoError) {
 		QJsonParseError err_t{};
-		QJsonDocument docment = QJsonDocument::fromJson(reply->readAll(), &err_t);
+		QJsonDocument docment = QJsonDocument::fromJson(NetCountries->readAll(), &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
 			QJsonObject root = docment.object();
 			QJsonValue data = root.value("data");
@@ -451,7 +423,6 @@ void Login::on_finshedCountriesList(QNetworkReply* reply) {
 			fprintf(stdout, "Json format error\n");
 		}
 	}
-	reply->deleteLater();
 }
 
 /*
@@ -466,15 +437,18 @@ void Login::on_btn_QRC_clicked() {
 	// uint timeT = _time.toTime_t();
 	qint64 _time = QDateTime::currentMSecsSinceEpoch();
 	QString Qrc_Key{
-		QString("http://cloud-music.pl-fe.cn/login/qr/key?time=%1").arg(_time) };
-	NetQRC_key->get(QNetworkRequest(Qrc_Key));
+		QString("http://localhost:3000/login/qr/key?time=%1").arg(_time) };
+	NetQRC_key = manger->get(QNetworkRequest(Qrc_Key));
+
+	connect(NetQRC_key, &QNetworkReply::finished, this,
+		&Login::on_finshedQRC_key);
 	ui->stackedWidget->setCurrentIndex(1);
 }
 
-void Login::on_finshedQRC_key(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
+void Login::on_finshedQRC_key() {
+	if (NetQRC_key->error() == QNetworkReply::NoError) {
 		QJsonParseError err_t{};
-		QJsonDocument docment = QJsonDocument::fromJson(reply->readAll(), &err_t);
+		QJsonDocument docment = QJsonDocument::fromJson(NetQRC_key->readAll(), &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
 			QJsonObject rot = docment.object();
 			QJsonValue data = rot.value("data");
@@ -485,23 +459,24 @@ void Login::on_finshedQRC_key(QNetworkReply* reply) {
 				//创建二维码
 				QString QRC_CreateUrl{
 					QString(
-						"http://cloud-music.pl-fe.cn/login/qr/create?key=%1&qrimg=true")
+						"http://localhost:3000/login/qr/create?key=%1&qrimg=true")
 						.arg(QRC_KEY) };
-				NetQRC_create->get(QNetworkRequest(QRC_CreateUrl));
+				NetQRC_create = manger->get(QNetworkRequest(QRC_CreateUrl));
+				connect(NetQRC_create, &QNetworkReply::finished, this,
+					&Login::on_finshedQRC_create);
 			}
 		}
 		else {
 			fprintf(stdout, "json解析失败\n");
 		}
 	}
-	reply->deleteLater();
 }
 
 //获取二维码
-void Login::on_finshedQRC_create(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
+void Login::on_finshedQRC_create() {
+	if (NetQRC_create->error() == QNetworkReply::NoError) {
 		QJsonParseError err_t{};
-		QJsonDocument docment = QJsonDocument::fromJson(reply->readAll(), &err_t);
+		QJsonDocument docment = QJsonDocument::fromJson(NetQRC_create->readAll(), &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
 			QJsonObject rot = docment.object();
 			QJsonValue data = rot.value("data");
@@ -520,7 +495,7 @@ void Login::on_finshedQRC_create(QNetworkReply* reply) {
 				//开始计时，一分钟有效时间
 				time->start(1000);
 				//QString checkUrl{
-				//    QString("http://cloud-music.pl-fe.cn/login/qr/check?key=%1")
+				//    QString("http://localhost:3000/login/qr/check?key=%1")
 				//        .arg(QRC_KEY)};
 				//NetQRC_check->get(QNetworkRequest(checkUrl));
 			}
@@ -529,7 +504,6 @@ void Login::on_finshedQRC_create(QNetworkReply* reply) {
 			fprintf(stdout, "json解析失败\n");
 		}
 	}
-	reply->deleteLater();
 }
 
 /*
@@ -540,10 +514,10 @@ void Login::on_finshedQRC_create(QNetworkReply* reply) {
  * 803 为授权登录成功(803 状态码下会返回 cookies)
  */
 
-void Login::on_finshedQRC_check(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
+void Login::on_finshedQRC_check() {
+	if (NetQRC_check->error() == QNetworkReply::NoError) {
 		QJsonParseError err_t{};
-		QJsonDocument docment = QJsonDocument::fromJson(reply->readAll(), &err_t);
+		QJsonDocument docment = QJsonDocument::fromJson(NetQRC_check->readAll(), &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
 			QJsonObject rot = docment.object();
 			qDebug() << rot << '\n';
@@ -559,23 +533,22 @@ void Login::on_finshedQRC_check(QNetworkReply* reply) {
 					//从新请求登录二维码
 					QDateTime _time = QDateTime::currentDateTime();
 					QString Qrc_Key{
-						QString("http://cloud-music.pl-fe.cn/login/qr/key?time=%1")
+						QString("http://localhost:3000/login/qr/key?time=%1")
 							.arg(_time.toTime_t()) };
-					NetQRC_key->get(QNetworkRequest(Qrc_Key));
-					reply->deleteLater();
+					NetQRC_key = manger->get(QNetworkRequest(Qrc_Key));
 					return;
 				}
 			}
 
 			if (801 == code) {
 				// fprintf(stdout, "Waiting for sweeping code\n");
-				reply->deleteLater();
+
 				return;
 			}
 
 			if (802 == code) {
 				// fprintf(stdout, "扫码待确认\n");
-				reply->deleteLater();
+
 				return;
 			}
 
@@ -589,9 +562,10 @@ void Login::on_finshedQRC_check(QNetworkReply* reply) {
 				config->endGroup();
 
 				//获取账号信息,带上cookie
-				NetRequest->setUrl(QUrl("http://cloud-music.pl-fe.cn/user/account?cookie=" + cookie));
-				NetUserMsg->get(*NetRequest);
-
+				NetRequest->setUrl(QUrl("http://localhost:3000/user/account?cookie=" + cookie));
+				NetUserMsg = manger->get(*NetRequest);
+				connect(NetUserMsg, &QNetworkReply::finished, this,
+					&Login::on_finshedUserMsg);
 				time->stop();
 				fprintf(stdout, "login ok\n");
 				ui->stackedWidget->setCurrentIndex(0);
@@ -602,14 +576,16 @@ void Login::on_finshedQRC_check(QNetworkReply* reply) {
 			fprintf(stdout, "json解析失败\n");
 		}
 	}
-	reply->deleteLater();
 }
 
 
 void Login::on_pushButton_clicked() {
-	QString checkUrl{ QString("http://cloud-music.pl-fe.cn/login/qr/check?key=%1")
+	QString checkUrl{ QString("http://localhost:3000/login/qr/check?key=%1")
 						 .arg(QRC_KEY) };
-	NetQRC_check->get(QNetworkRequest(checkUrl));
+	NetQRC_check = manger->get(QNetworkRequest(checkUrl));
+
+	connect(NetQRC_check, &QNetworkReply::finished, this,
+		&Login::on_finshedQRC_check);
 }
 
 void Login::on_QRCexpired() {
@@ -627,9 +603,9 @@ void Login::on_QRCexpired() {
 			//获取当前时间
 			qint64 time = QDateTime::currentMSecsSinceEpoch();
 			QString Qrc_Key{
-				QString("http://cloud-music.pl-fe.cn/login/qr/key?time=%1")
+				QString("http://localhost:3000/login/qr/key?time=%1")
 					.arg(time) };
-			NetQRC_key->get(QNetworkRequest(Qrc_Key));
+			NetQRC_key = manger->get(QNetworkRequest(Qrc_Key));
 		}
 		else {
 			//不处理
@@ -639,21 +615,23 @@ void Login::on_QRCexpired() {
 		//还没有扫码，持续检测
 		qint64 timestamp = QDateTime::currentMSecsSinceEpoch();
 		QString checkUrl{
-			QString("http://cloud-music.pl-fe.cn/login/qr/check?key=%1&timerstamp=%2")
+			QString("http://localhost:3000/login/qr/check?key=%1&timerstamp=%2")
 				.arg(QRC_KEY)
 				.arg(timestamp) };
 		qDebug() << timestamp << '\n';
 		// 1643116209085  13位
-		NetQRC_check->get(QNetworkRequest(checkUrl));
+		NetQRC_check = manger->get(QNetworkRequest(checkUrl));
+		connect(NetQRC_check, &QNetworkReply::finished, this,
+			&Login::on_finshedQRC_check);
 		++n;
 		fprintf(stdout, "coming cheach = %d\n", n);
 	}
 }
 
 
-void Login::on_finshedUserMsg(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
-		QByteArray byt{ reply->readAll() };
+void Login::on_finshedUserMsg() {
+	if (NetUserMsg->error() == QNetworkReply::NoError) {
+		QByteArray byt{ NetUserMsg->readAll() };
 		QJsonParseError err_t{};
 		QJsonDocument deocument = QJsonDocument::fromJson(byt, &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
@@ -663,22 +641,23 @@ void Login::on_finshedUserMsg(QNetworkReply* reply) {
 			GetUserInfo(userId);
 		}
 	}
-	reply->deleteLater();
 }
 
 
 
 void Login::GetUserInfo(const int& UserId)
 {
-	QString Url{ "http://cloud-music.pl-fe.cn/user/detail?uid=" + UserId };
-	NetUserInfo->get(QNetworkRequest(Url));
+	QString Url{ QString("http://localhost:3000/user/detail?uid=%1").arg( + UserId)};
+	NetUserInfo = manger->get(QNetworkRequest(Url));
+	connect(NetUserInfo, &QNetworkReply::finished, this,
+		&Login::on_finshedNetUserInfo);
 }
 
-void Login::on_finshedNetUserInfo(QNetworkReply* reply)
+void Login::on_finshedNetUserInfo()
 {
-	if (reply->error() == QNetworkReply::NoError) {
+	if (NetUserInfo->error() == QNetworkReply::NoError) {
 		QJsonParseError err_t{};
-		QJsonDocument deocument = QJsonDocument::fromJson(reply->readAll(), &err_t);
+		QJsonDocument deocument = QJsonDocument::fromJson(NetUserInfo->readAll(), &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
 			QJsonObject rot = deocument.object();
 			ParseJson(rot);
@@ -687,5 +666,4 @@ void Login::on_finshedNetUserInfo(QNetworkReply* reply)
 			emit LoginSucces();
 		}
 	};
-	reply->deleteLater();
 }

@@ -25,11 +25,13 @@ NewMusicSudi::NewMusicSudi(QWidget* parent) :
 	ui(new Ui::NewMusicSudi)
 {
 	ui->setupUi(this);
+
+	manger = new QNetworkAccessManager(this);
+
 	initTableView();
 	NewMusicAll_Model = new QStandardItemModel(this);
 	//新碟上架，全部新碟
 	DiscAllGrid = new QGridLayout(ui->DiscTabwidget->widget(0));
-	Netgetpic = new QNetworkAccessManager(this);
 }
 
 NewMusicSudi::~NewMusicSudi()
@@ -52,9 +54,9 @@ void NewMusicSudi::on_NewMusicTabwidget_tabBarClicked(int index)
 	{
 	case 0:
 		if (DiscAll.isEmpty()) {
-			QString URL{ QString("http://cloud-music.pl-fe.cn/top/song?type=0") };
-			NetNewMusic.get(QNetworkRequest(URL));
-			connect(&NetNewMusic, &QNetworkAccessManager::finished, this, &NewMusicSudi::on_finshedNewNewMusic);
+			QString URL{ QString("http://localhost:3000/top/song?type=0") };
+			NetNewMusic = manger->get(QNetworkRequest(URL));
+			connect(NetNewMusic, &QNetworkReply::finished, this, &NewMusicSudi::on_finshedNewNewMusic);
 		}
 		break;
 	case 1: break;
@@ -78,9 +80,9 @@ void NewMusicSudi::on_btn_newMusic_clicked() {
 	static bool frist = true;
 	if (true == frist) {
 		ui->stackedWidget->setCurrentIndex(0);
-		QString URL{ QString("http://cloud-music.pl-fe.cn/top/song?type=0") };
-		NetNewMusic.get(QNetworkRequest(URL));
-		connect(&NetNewMusic, &QNetworkAccessManager::finished, this, &NewMusicSudi::on_finshedNewNewMusic);
+		QString URL{ QString("http://localhost:3000/top/song?type=0") };
+		NetNewMusic= manger->get(QNetworkRequest(URL));
+		connect(NetNewMusic, &QNetworkReply::finished, this, &NewMusicSudi::on_finshedNewNewMusic);
 	}
 }
 
@@ -94,24 +96,24 @@ void NewMusicSudi::on_btn_disc_clicked()
 	static bool disc_frist = true;
 	if (true == disc_frist) {
 		ui->stackedWidget->setCurrentIndex(1);
-		NetDisc = new QNetworkAccessManager(this);
-		QString URL{ QString("http://cloud-music.pl-fe.cn/album/new?area=ALL&limit=20") };
-		NetDisc->get(QNetworkRequest(URL));
-		connect(NetDisc, &QNetworkAccessManager::finished, this, &NewMusicSudi::on_finshedNetDisc);
+
+		QString URL{ QString("http://localhost:3000/album/new?area=ALL&limit=20") };
+		NetDisc =manger-> get(QNetworkRequest(URL));
+		connect(NetDisc, &QNetworkReply::finished, this, &NewMusicSudi::on_finshedNetDisc);
 	}
 }
 
-void NewMusicSudi::on_finshedNewNewMusic(QNetworkReply* reply)
+void NewMusicSudi::on_finshedNewNewMusic()
 {
-	if (reply->error() == QNetworkReply::NoError) {
+	if (NetNewMusic->error() == QNetworkReply::NoError) {
 		QJsonParseError err_t{};
-		QJsonDocument doc = QJsonDocument::fromJson(reply->readAll(), &err_t);
+		QJsonDocument doc = QJsonDocument::fromJson(NetNewMusic->readAll(), &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
 			QJsonObject obj = doc.object();
 			parseNewMusicJson(obj, "data", All);
 		}
 	}
-	reply->deleteLater();
+	NetNewMusic->deleteLater();
 }
 
 void NewMusicSudi::parseNewMusicJson(const QJsonObject& obj, const QString& str, QList<NewMusic>& lhs)
@@ -154,18 +156,18 @@ void NewMusicSudi::parseNewMusicJson(const QJsonObject& obj, const QString& str,
 	}
 }
 
-void NewMusicSudi::on_finshedNetDisc(QNetworkReply* reply)
+void NewMusicSudi::on_finshedNetDisc()
 {
-	if (reply->error() == QNetworkReply::NoError) {
+	if (NetDisc->error() == QNetworkReply::NoError) {
 		QJsonParseError err_t{};
-		QJsonDocument doc = QJsonDocument::fromJson(reply->readAll(), &err_t);
+		QJsonDocument doc = QJsonDocument::fromJson(NetDisc->readAll(), &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
 			QJsonObject obj = doc.object();
 			parseDiscJson(obj, "albums", DiscAll);
 			getDiscBtnPic(ui->DiscTabwidget->widget(0), DiscAll);
 		}
 	}
-	reply->deleteLater();
+	NetDisc->deleteLater();
 }
 
 void NewMusicSudi::parseDiscJson(const QJsonObject& obj, const QString& str, QList<NewDisc>& _Disc)
@@ -208,20 +210,20 @@ void NewMusicSudi::getNewMusicPic(QListView* wid, QList<NewMusic>& rhs)
 	//connect(&pic, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
 	foreach(const NewMusic & lhs, rhs) {
-		pic.get(QNetworkRequest(lhs.picUrl));
+		pic = manger->get(QNetworkRequest(lhs.picUrl));
 		//loop.exec();
 	}
-	connect(&pic, &QNetworkAccessManager::finished, this, [&](QNetworkReply* reply) {
-		if (reply->error() == QNetworkReply::NoError) {
+	connect(pic, &QNetworkReply::finished, this, [&]() {
+		if (pic->error() == QNetworkReply::NoError) {
 			QPixmap pix;
-			pix.loadFromData(reply->readAll());
+			pix.loadFromData(pic->readAll());
 			QStandardItem* item = new QStandardItem();
 			item->setData(rhs.at(1).name);
 			NewMusicAll_Model->appendRow(item);
 			wid->setModel(NewMusicAll_Model);
 			qDebug() << "进入getNewMusicPic()\n";
 		}
-		reply->deleteLater();
+		pic->deleteLater();
 		}, Qt::QueuedConnection);
 	
 	//loadNewMusicAllData(wid, rhs, pixlist);
@@ -286,15 +288,15 @@ void NewMusicSudi::getDiscBtnPic(QWidget* wid, QList<NewDisc>& data)
 {
 	QEventLoop loop;
 	foreach(const NewDisc & rhs, data) {
-		Netgetpic->get(QNetworkRequest(rhs.picUrl));
-		connect(Netgetpic, &QNetworkAccessManager::finished, this, [&](QNetworkReply* reply) {
-			if (reply->error() == QNetworkReply::NoError) {
+		Netgetpic = manger->get(QNetworkRequest(rhs.picUrl));
+		connect(Netgetpic, &QNetworkReply::finished, this, [&]() {
+			if (Netgetpic->error() == QNetworkReply::NoError) {
 				QPixmap pix;
-				pix.loadFromData(reply->readAll());
+				pix.loadFromData(Netgetpic->readAll());
 				loadDiscAllData(wid, data, pix);
 				qDebug() << "on_finshedNetgetpic*********";
 			}
-			reply->deleteLater();
+			Netgetpic->deleteLater();
 			}, Qt::QueuedConnection);
 		loop.exec();
 	}

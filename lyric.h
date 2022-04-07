@@ -62,7 +62,8 @@ public:
   //自动向下滑动
   void slidingDown( int index);
 private slots:
-  void on_ReplyFinished(QNetworkReply *reply);
+  void on_ReplyFinished();
+  void on_ReadLyric();
 signals:
   void lyricChanged();
 
@@ -77,8 +78,9 @@ private:
   //储存所有歌词
   QList<LyricLine> lines{};
   QVBoxLayout *scrollVertical;
-  QNetworkAccessManager *Netmanger;
-  QNetworkAccessManager *Netmangelyric;
+  QNetworkAccessManager* manger;
+  QNetworkReply *NetLyric;
+  QNetworkReply*Netmangelyric;
   QScrollBar *vScrollbar;
   Ui::lyric *ui;
 };

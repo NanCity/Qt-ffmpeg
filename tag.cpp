@@ -95,17 +95,17 @@ void M_Tag::GetDetailsSong(const int id) {
 	//歌曲详情，(首先需要拿到歌曲ID)
 	CheekState(id);
 	Request->setUrl(
-		QString("http://cloud-music.pl-fe.cn/song/detail?ids=%1").arg(id));
+		QString("http://localhost:3000/song/detail?ids=%1").arg(id));
 	NetPase->get(*Request);
 
 }
 
-//http://cloud-music.pl-fe.cn/like?id=411214279&like=false
+//http://localhost:3000/like?id=411214279&like=false
 //like = false 取消喜欢
 void M_Tag::likeMusic(const int ID, const bool like)
 {
 	QNetworkRequest* request{ conf.setCookies() };
-	request->setUrl(QString("http://cloud-music.pl-fe.cn/like?id=%1&like=%2").arg(ID).arg(like));
+	request->setUrl(QString("http://localhost:3000/like?id=%1&like=%2").arg(ID).arg(like));
 	Netlike->get(*request);
 }
 
@@ -170,7 +170,7 @@ bool M_Tag::ParseDetailsSong(QJsonObject& root, const QString& objname) {
 
 void M_Tag::CheekState(const int index) {
 	Request->setUrl(
-		QString("http://cloud-music.pl-fe.cn/check/music?id=%1").arg(index));
+		QString("http://localhost:3000/check/music?id=%1").arg(index));
 	SetRequestHeader(Request);
 	NetCheek->get(*Request);
 }

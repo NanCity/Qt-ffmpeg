@@ -1,7 +1,10 @@
 ﻿#ifndef NEWMUSICSUDI_H
 #define NEWMUSICSUDI_H
 
+//最新音乐
+
 #include <QWidget>
+#include <QNetworkReply>
 #include <QNetworkAccessManager>
 //class QNetworkAccessManager;
 class QNetworkReply;
@@ -77,8 +80,8 @@ protected slots:
 	void on_DiscTabwidget_tabBarClicked(int index);
 	void on_btn_newMusic_clicked();
 	void on_btn_disc_clicked();
-	void on_finshedNewNewMusic(QNetworkReply*);
-	void on_finshedNetDisc(QNetworkReply*);
+	void on_finshedNewNewMusic();
+	void on_finshedNetDisc();
 private:
 	Ui::NewMusicSudi* ui;
 	//新歌速递部分
@@ -90,12 +93,13 @@ private:
 	QList<NewDisc> DiscAll{};
 	QGridLayout* DiscAllGrid;
 	QNetworkAccessManager *manger;
-	QNetworkAccessManager NetNewMusic{};
 
-	QNetworkAccessManager* NetDisc;
-	QNetworkAccessManager* Netgetpic;
+	QNetworkReply* NetNewMusic{};
 
-	QNetworkAccessManager pic{};
+	QNetworkReply* NetDisc{};
+	QNetworkReply* Netgetpic{};
+
+	QNetworkReply* pic{};
 };
 
 #endif // NEWMUSICSUDI_H

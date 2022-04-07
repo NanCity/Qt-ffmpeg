@@ -78,7 +78,7 @@ void Signup::on_btn_signin_clicked() {
   //发送验证码
 
   QString captcha_url{
-      QString("http://cloud-music.pl-fe.cn/captcha/sent?phone=%1").arg(phone)};
+      QString("http://localhost:3000/captcha/sent?phone=%1").arg(phone)};
   Sentcaptcha->get(QNetworkRequest(captcha_url));
 }
 
@@ -129,7 +129,7 @@ void Signup::on_finshedCaptcha(QNetworkReply *reply) {
          * captcha    验证码
          */
         QString cap = ui->line_captcha->text();
-        QString url{QString("http://cloud-music.pl-fe.cn/register/"
+        QString url{QString("http://localhost:3000/register/"
                             "cellphone?phone=%1&password=%2&captcha=%3")
                         .arg(phone)
                         .arg(pwd)

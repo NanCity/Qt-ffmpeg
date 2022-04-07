@@ -24,7 +24,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -55,7 +55,7 @@
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
           <horstretch>0</horstretch>
-          <verstretch>100</verstretch>
+          <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="minimumSize">
@@ -66,7 +66,7 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>190</width>
+          <width>192</width>
           <height>16777215</height>
          </size>
         </property>
@@ -210,7 +210,7 @@
          <enum>Qt::ScrollBarAsNeeded</enum>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QAbstractScrollArea::AdjustToContents</enum>
+         <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
         </property>
         <property name="widgetResizable">
          <bool>false</bool>
@@ -227,11 +227,11 @@
            <x>0</x>
            <y>0</y>
            <width>180</width>
-           <height>636</height>
+           <height>620</height>
           </rect>
          </property>
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -262,7 +262,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <property name="sizeConstraint">
-           <enum>QLayout::SetMinimumSize</enum>
+           <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <property name="leftMargin">
            <number>0</number>
@@ -296,7 +296,7 @@
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>180</height>
              </size>
             </property>
             <property name="styleSheet">
@@ -304,14 +304,20 @@
  background-color: transparent;
 </string>
             </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
             <property name="sizeAdjustPolicy">
-             <enum>QAbstractScrollArea::AdjustToContents</enum>
+             <enum>QAbstractScrollArea::AdjustIgnored</enum>
             </property>
             <property name="defaultDropAction">
              <enum>Qt::CopyAction</enum>
             </property>
             <property name="selectionMode">
              <enum>QAbstractItemView::ExtendedSelection</enum>
+            </property>
+            <property name="verticalScrollMode">
+             <enum>QAbstractItemView::ScrollPerItem</enum>
             </property>
             <property name="resizeMode">
              <enum>QListView::Adjust</enum>
@@ -370,13 +376,16 @@
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>160</height>
              </size>
             </property>
             <property name="styleSheet">
              <string notr="true"> border: none;
  background-color: transparent;
 </string>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
             </property>
             <property name="sizeAdjustPolicy">
              <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -386,6 +395,9 @@
             </property>
             <property name="selectionMode">
              <enum>QAbstractItemView::ExtendedSelection</enum>
+            </property>
+            <property name="verticalScrollMode">
+             <enum>QAbstractItemView::ScrollPerItem</enum>
             </property>
             <property name="resizeMode">
              <enum>QListView::Adjust</enum>
@@ -469,7 +481,7 @@ text-align: left;</string>
           <item row="3" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout">
             <property name="sizeConstraint">
-             <enum>QLayout::SetFixedSize</enum>
+             <enum>QLayout::SetMinimumSize</enum>
             </property>
             <item>
              <widget class="QPushButton" name="btn_SongMenu">
@@ -583,8 +595,14 @@ border-image: url(:/images/btn_right_1_n.png);
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
             <property name="sizeAdjustPolicy">
              <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+            <property name="verticalScrollMode">
+             <enum>QAbstractItemView::ScrollPerItem</enum>
             </property>
            </widget>
           </item>
@@ -596,8 +614,14 @@ border-image: url(:/images/btn_right_1_n.png);
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
             <property name="sizeAdjustPolicy">
              <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+            <property name="verticalScrollMode">
+             <enum>QAbstractItemView::ScrollPerItem</enum>
             </property>
            </widget>
           </item>
@@ -757,7 +781,7 @@ border-image: url(:/images/btn_right_1_n.png);
             </size>
            </property>
            <property name="text">
-            <string>喜欢</string>
+            <string>。。</string>
            </property>
           </widget>
          </item>

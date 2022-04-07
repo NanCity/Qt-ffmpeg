@@ -71,11 +71,11 @@ void SingerDetails::setmesg(Singer singer)
 void SingerDetails::setID(const int id)
 {
 	singerID = id;
-	QString Url{ QString("http://cloud-music.pl-fe.cn/artist/detail?id=%1").arg(id) };
+	QString Url{ QString("http://localhost:3000/artist/detail?id=%1").arg(id) };
 	NetSingerDet->get(QNetworkRequest(Url));
 
 	//歌手top50首
-	QString topUrl{ QString("http://cloud-music.pl-fe.cn/artist/top/song?id=%1").arg(id) };
+	QString topUrl{ QString("http://localhost:3000/artist/top/song?id=%1").arg(id) };
 	NetTop50->get(QNetworkRequest(topUrl));
 }
 
@@ -164,7 +164,7 @@ void SingerDetails::on_tabWidget_tabBarClicked(int index)
 		/*
 		* id = 歌手ID
 		*/
-		QString MVURL{ QString("http://cloud-music.pl-fe.cn/artist/mv?id=%1").arg(singerID) };
+		QString MVURL{ QString("http://localhost:3000/artist/mv?id=%1").arg(singerID) };
 		NetMV->get(QNetworkRequest(MVURL));
 	}
 	break;

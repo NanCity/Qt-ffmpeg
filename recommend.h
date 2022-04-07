@@ -33,6 +33,7 @@ struct RecPlaylist
 	int trackCount{};
 	long long id{};
 	long long playCount{};
+	QString picUrl{};
 };
 
 
@@ -69,20 +70,20 @@ protected slots:
 	void on_btn_rec_9_clicked();
 	void on_btn_rec_10_clicked();
 
-
 	void on_FinshedNewSong(QNetworkReply*);
-	void on_FinshedNewDisc(QNetworkReply*);
-	void on_FinshedGetAlubPic(QNetworkReply*);
-	void on_FinshedNetRecommend(QNetworkReply*);
+	void on_FinshedNewDisc();
+	void on_FinshedGetAlubPic();
+	void on_FinshedNetRecommend();
 	//首页推荐歌单
-	void on_FinishedNetRecPlaylist(QNetworkReply*);
+	void on_FinishedNetRecPlaylist();
+	//首页9个推荐歌单图片
+	void on_FinshedNetpic();
+
 
 	//void on_FinshedNetMyLikeMusicId(QNetworkReply*);
 
 private:
 	unsigned int index{};
-	//保存的图片顺序
-	int Num;
 	Ui::Recommend* ui;
 	Config* config;
 	M_Tag* m_tag;
@@ -94,26 +95,27 @@ private:
 	RecommendedDaily* recDaily;
 	//歌单UI
 	SongMenu* songmuen;
-	QQueue<QNetworkReply*> queue;
 	QList<QPixmap> pixmap{};
-	QList<QLabel*> lablist{};
-	QList<QLabel*> lab_title{};
+	//播放量
+	QList<QLabel*> lab_PlayCount{};
+	//标签
+	QList<QLabel*>	lab_title;
 	QList<QPushButton*> btn_recAll{};
-	QList<QLabel*>	lab_recAll;
+
 	//保存歌单ID和歌曲数量
 	QList<RecPlaylist>RecList;
 	QNetworkRequest* request;
-
-	QNetworkAccessManager* NetNewSong;
-	QNetworkAccessManager* NetNewDisc;
+	QNetworkAccessManager * manger;
+	QNetworkReply* NetNewSong{};
+	QNetworkReply* NetNewDisc{};
 	//专辑封面
-	QNetworkAccessManager* NetAlbumPic;
+	QNetworkReply* NetAlbumPic{};
 	//推荐单曲列表
-	QNetworkAccessManager* NetRecommend;
+	QNetworkReply* NetRecommend{};
 	//每日首页推荐歌单
-	QNetworkAccessManager* NetRecPlaylist;
+	QNetworkReply* NetRecPlaylist{};
 	//个性推荐UI 9张图片
-	QNetworkAccessManager* Netpic;
+	QNetworkReply* Netpic{};
 	//我喜欢的音乐 -- ID
 	//QNetworkAccessManager* NetMyLikeMusicId;
 };

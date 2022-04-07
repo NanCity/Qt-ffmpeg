@@ -76,18 +76,18 @@ private slots:
 	//扫码登录
 	void on_btn_QRC_clicked();
 
-	void on_replyFinished(QNetworkReply*);
-	void on_FinshedPic(QNetworkReply*);
+	void on_replyFinished();
+	void on_FinshedPic();
 	bool checkInput(QString str, const QRegExp regx, const int n);
-	void on_finshedGrade(QNetworkReply* reply);
-	void on_finshedVip(QNetworkReply* reply);
-	void on_finshedUserMsg(QNetworkReply* reply);
-	void on_finshedCountriesList(QNetworkReply* reply);
-	void on_finshedNetUserInfo(QNetworkReply* reply);
+	void on_finshedGrade();
+	void on_finshedVip();
+	void on_finshedUserMsg();
+	void on_finshedCountriesList();
+	void on_finshedNetUserInfo();
 	//处理二维码登录
-	void on_finshedQRC_key(QNetworkReply* reply);
-	void on_finshedQRC_create(QNetworkReply* reply);
-	void on_finshedQRC_check(QNetworkReply* reply);
+	void on_finshedQRC_key();
+	void on_finshedQRC_create();
+	void on_finshedQRC_check();
 
 	void on_pushButton_clicked();
 	//二维码过期
@@ -110,18 +110,19 @@ private:
 	QString QRC_KEY;
 	QListWidget* countrieslist;
 	QNetworkRequest* NetRequest;
+	QNetworkAccessManager* manger;
 	//发送网络请求和接受应答
-	QNetworkAccessManager* NetManager;
-	QNetworkAccessManager* NetUserPic;
-	QNetworkAccessManager* Netgrade;
-	QNetworkAccessManager* NetVip;
-	QNetworkAccessManager* NetUserMsg;
-	QNetworkAccessManager* NetCountries;
-	QNetworkAccessManager* NetUserInfo;
+	QNetworkReply* NetManager{};
+	QNetworkReply* NetUserPic{};
+	QNetworkReply* Netgrade{};
+	QNetworkReply* NetVip{};
+	QNetworkReply* NetUserMsg{};
+	QNetworkReply* NetCountries{};
+	QNetworkReply* NetUserInfo{};
 	//二维码登录
-	QNetworkAccessManager* NetQRC_key;
-	QNetworkAccessManager* NetQRC_create;
-	QNetworkAccessManager* NetQRC_check;
+	QNetworkReply* NetQRC_key{};
+	QNetworkReply* NetQRC_create{};
+	QNetworkReply* NetQRC_check{};
 };
 
 #endif // LOGIN_H

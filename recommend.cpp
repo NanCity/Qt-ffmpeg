@@ -29,6 +29,7 @@
 #include "photowall/photowall.h"
 Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 	ui->setupUi(this);
+	qDebug() << "OpenSSL支持情况:" << QSslSocket::supportsSsl();
 	//照片墙
 	photowall = new PhotoWall(this);
 	/*添加到布局*/
@@ -46,40 +47,17 @@ Recommend::Recommend(QWidget* parent) : QWidget(parent), ui(new Ui::Recommend) {
 	addBtn_rec_();
 	addLab_rec_();
 
-	NetNewDisc = new QNetworkAccessManager(this);
-	NetNewSong = new QNetworkAccessManager(this);
-	NetAlbumPic = new QNetworkAccessManager(this);
-	NetRecPlaylist = new QNetworkAccessManager(this);
-	NetRecommend = new QNetworkAccessManager(this);
-	Netpic = new QNetworkAccessManager(this);
+	manger = new QNetworkAccessManager(this);
+
 	//每日推荐歌单
-	QString RecPlaylistUrl{ "http://cloud-music.pl-fe.cn/personalized?limit=9" };
+//s /recommend/resource
+	//QString RecPlaylistUrl{ "http://localhost:3000/personalized?limit=9" };
+	QString RecPlaylistUrl{ "http://localhost:3000/recommend/resource" };
 	request = config->setCookies();
 	request->setUrl(RecPlaylistUrl);
-	NetRecPlaylist->get(*request);
+	NetRecPlaylist = manger->get(*request);
+	connect(NetRecPlaylist, &QNetworkReply::finished, this, &Recommend::on_FinishedNetRecPlaylist);
 
-	connect(NetNewDisc, &QNetworkAccessManager::finished, this,
-		&Recommend::on_FinshedNewDisc);
-
-	connect(NetAlbumPic, &QNetworkAccessManager::finished, this,
-		&Recommend::on_FinshedGetAlubPic);
-
-	connect(NetRecommend, &QNetworkAccessManager::finished, this,
-		&Recommend::on_FinshedNetRecommend);
-
-	connect(NetRecPlaylist, &QNetworkAccessManager::finished, this, &Recommend::on_FinishedNetRecPlaylist);
-
-	connect(Netpic, &QNetworkAccessManager::finished, this, [&](QNetworkReply* reply) {
-		if (reply->error() == QNetworkReply::NoError && !queue.isEmpty()) {
-			QPixmap pix;
-			pix.loadFromData(reply->readAll());
-			btn_recAll.at(index)->setIconSize(QSize(195, 195));
-			btn_recAll.at(index)->setIcon(QIcon(pix));
-			++index;
-			//queue.pop_back();
-		}
-		reply->deleteLater();
-		});
 }
 
 Recommend::~Recommend() {
@@ -103,10 +81,12 @@ void Recommend::on_btn_rec_1_clicked() {
 		return;
 	}
 	else {
-		QString Url{ "http://cloud-music.pl-fe.cn/recommend/songs" };
+		QString Url{ "http://localhost:3000/recommend/songs" };
 		request = config->setCookies();
 		request->setUrl(Url);
-		NetRecommend->get(*request);
+		NetRecommend = manger->get(*request);
+		connect(NetRecommend, &QNetworkReply::finished, this,
+			&Recommend::on_FinshedNetRecommend);
 	}
 }
 
@@ -181,18 +161,19 @@ void Recommend::addBtn_rec_()
 			QPushButton* btn = widget->findChild<QPushButton*>(QString("btn_rec_" + QString::number(i)));
 			btn_recAll.push_back(btn);
 		}
+
 		for (int x = 0; x != 9; ++x) {
 			QLabel* lab = new QLabel("0万", btn_recAll.at(x));
 			lab->setMaximumSize(65, 25);
-			lab->setStyleSheet("color:#fbfbfc");
+			lab->setStyleSheet("color:white;background-color:transparent");
 			lab->setFont(QFont("QFont::Bold"));
 			lab->setAlignment(Qt::AlignRight);
 
 			//拿到所在位置
 			QRect rect = btn_recAll.at(x)->geometry();
 			//设置lab的显示位置
-			lab->setGeometry(rect.x() + 125, rect.y(), 65, 25);
-			lab_title.push_back(lab);
+			lab->setGeometry(rect.right() - 70, rect.y(), 65, 25);
+			lab_PlayCount.push_back(lab);
 		}
 	}
 
@@ -207,7 +188,7 @@ void Recommend::addLab_rec_()
 			QLabel* lab = widget->findChild<QLabel*>("lab_rec_" + QString::number(i));
 			//文字太多，自动换行
 			lab->setWordWrap(true);
-			lab_recAll.push_back(lab);
+			lab_title.push_back(lab);
 		}
 	}
 }
@@ -230,12 +211,14 @@ bool Recommend::eventFilter(QObject* obj, QEvent* event) {
 	//					"新碟首发")) {
 	//					fprintf(stdout, "enter Disc\n");
 	//					NetNewDisc->get(
-	//						QNetworkRequest(QString("http://cloud-music.pl-fe.cn/album?id=%1")
+	//						QNetworkRequest(QString("http://localhost:3000/album?id=%1")
 	//							.arg(targetlist.at(index - 1).targetId)));
+	// 	connect(NetNewDisc, &QNetworkReply::finished, this,
+	//& Recommend::on_FinshedNewDisc);
 	//				}
 	//				else {
 	//					NetNewSong->get(QNetworkRequest(
-	//						QString("http://cloud-music.pl-fe.cn/song/detail?ids=%1")
+	//						QString("http://localhost:3000/song/detail?ids=%1")
 	//						.arg(targetlist.at(index).targetId)));
 	//				}
 	//			}
@@ -259,22 +242,21 @@ RecommendedDaily* Recommend::getRecDailyUi() { return recDaily; }
 //发布的新歌
 void Recommend::on_FinshedNewSong(QNetworkReply* reply) {}
 
-void Recommend::on_FinshedGetAlubPic(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
+void Recommend::on_FinshedGetAlubPic() {
+	if (NetAlbumPic->error() == QNetworkReply::NoError) {
 		QPixmap pixmap;
-		pixmap.loadFromData(reply->readAll());
+		pixmap.loadFromData(NetAlbumPic->readAll());
 		//设置专辑封面
 		soloalbum->setlab_AlubPic(pixmap);
 	}
-	reply->deleteLater();
 }
 
 //每日推荐单曲
-void Recommend::on_FinshedNetRecommend(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
+void Recommend::on_FinshedNetRecommend() {
+	if (NetRecommend->error() == QNetworkReply::NoError) {
 		QJsonParseError error_t{};
 		QJsonDocument doucment =
-			QJsonDocument::fromJson(reply->readAll(), &error_t);
+			QJsonDocument::fromJson(NetRecommend->readAll(), &error_t);
 		if (error_t.error == QJsonParseError::NoError) {
 			QJsonObject rot = doucment.object();
 			QJsonObject datarot = rot.value("data").toObject();
@@ -285,65 +267,99 @@ void Recommend::on_FinshedNetRecommend(QNetworkReply* reply) {
 			}
 		}
 	}
-	reply->deleteLater();
+}
+
+void Recommend::on_FinshedNetpic()
+{
+	if (Netpic->error() == QNetworkReply::NoError) {
+		QPixmap pix;
+		pix.loadFromData(Netpic->readAll());
+		btn_recAll.at(index)->setIconSize(QSize(195, 195));
+		btn_recAll.at(index)->setIcon(QIcon(pix));
+		++index;
+	}
 }
 
 
-void Recommend::on_FinishedNetRecPlaylist(QNetworkReply* reply)
+void Recommend::on_FinishedNetRecPlaylist()
 {
-	if (reply->error() == QNetworkReply::NoError) {
+	if (NetRecPlaylist->error() == QNetworkReply::NoError) {
 		QJsonParseError err_t{};
-		QJsonDocument doucment = QJsonDocument::fromJson(reply->readAll(), &err_t);
-		int index = 0;
+		QJsonDocument doucment = QJsonDocument::fromJson(NetRecPlaylist->readAll(), &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
 			QJsonObject rot = doucment.object();
-			QJsonValue value = rot.value("result");
+			QJsonValue value = rot.value("recommend");
 			if (value.isArray()) {
+				int _index = 0;
 				RecList.clear();
 				RecPlaylist recplay;
 				QJsonArray resAry = value.toArray();
-				foreach(const QJsonValue & rhs, resAry) {
-					static int n = 0;
-					if (rhs.isObject()) {
-						QJsonObject obj = rhs.toObject();
+				for (int x = 1; x != 10; ++x) {
+					if (resAry.at(x).isObject()) {
+						QJsonObject obj = resAry.at(x).toObject();
 						recplay.id = obj.value("id").toVariant().toLongLong();
+						QString name = obj.value("name").toString();
+						lab_title.at(_index)->setText(name);
 
-						lab_recAll.at(index)->setText(obj.value("name").toString());
 						QString picUrl = obj.value("picUrl").toString();
-
-						//用队列来获取图片
-
-						queue.push_back(Netpic->get(QNetworkRequest(picUrl)));
-						qDebug() << "push_back";
-						recplay.playCount = obj.value("playCount").toVariant().toLongLong();
+						recplay.picUrl = picUrl;
+						recplay.playCount = obj.value("playcount").toVariant().toLongLong();
 						recplay.trackCount = obj.value("trackCount").toVariant().toLongLong();
-						lab_title.at(index)->setText(QString::number(recplay.playCount));
+						lab_PlayCount.at(_index)->setText(QString::number(recplay.playCount));
 
 						if (obj.value("canDislike").toBool() == false) {
 							QLabel* lab = new QLabel(this);
 							lab->setPixmap(QPixmap(":/images/lab_cloud.png"));
-							QRect rect = lab_recAll.at(index)->geometry();
+							QRect rect = lab_title.at(_index)->geometry();
 							lab->setGeometry(rect.x(), rect.y(), 20, 20);
 						}
 						//保存歌单ID和歌曲数量
 						RecList.push_back(recplay);
+						++_index;
 					}
-					++index;
-
-					++n;
 				}
 			}
 		}
+		//foreach(const QJsonValue & rhs, resAry) {
+		//	if (rhs.isObject()) {
+		//		QJsonObject obj = rhs.toObject();
+		//		recplay.id = obj.value("id").toVariant().toLongLong();
+		//		lab_recAll.at(_index)->setText(obj.value("name").toString());
+		//		QString picUrl = obj.value("picUrl").toString();
+		//		recplay.picUrl = picUrl;
+		//		recplay.playCount = obj.value("playcount").toVariant().toLongLong();
+		//		recplay.trackCount = obj.value("trackCount").toVariant().toLongLong();
+		//		lab_title.at(_index)->setText(QString::number(recplay.playCount));
+		//		if (obj.value("canDislike").toBool() == false) {
+		//			QLabel* lab = new QLabel(this);
+		//			lab->setPixmap(QPixmap(":/images/lab_cloud.png"));
+		//			QRect rect = lab_recAll.at(_index)->geometry();
+		//			lab->setGeometry(rect.x(), rect.y(), 20, 20);
+		//		}
+		//		//保存歌单ID和歌曲数量
+		//		RecList.push_back(recplay);			
+		//		qDebug() << "index = " << ++_index;
+		//	}
+		//}
+
 	}
-	index = 0;
-	queue.pop_back();
-	reply->deleteLater();
+
+	int x = 0;	index = 0;
+	QEventLoop loop;
+	for (const auto& i : RecList) {
+		Netpic = manger->get(QNetworkRequest(RecList.at(x).picUrl));
+		connect(Netpic, &QNetworkReply::finished, this, &Recommend::on_FinshedNetpic);
+		connect(Netpic, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+		loop.exec();
+		++x;
+	}
+
 }
 
 //专辑
-void Recommend::on_FinshedNewDisc(QNetworkReply* reply) {
-	if (reply->error() == QNetworkReply::NoError) {
-		QByteArray byt = reply->readAll();
+void Recommend::on_FinshedNewDisc() {
+	if (NetNewDisc->error() == QNetworkReply::NoError) {
+		QByteArray byt = NetNewDisc->readAll();
 		QJsonParseError error_t{};
 		Albumtag tag;
 		QJsonDocument docm = QJsonDocument::fromJson(byt, &error_t);
@@ -400,8 +416,9 @@ void Recommend::on_FinshedNewDisc(QNetworkReply* reply) {
 				//设置歌手
 				soloalbum->setlab_title(albobj.value("name").toString());
 				QString url = albobj.value("picUrl").toString();
-				NetAlbumPic->get(QNetworkRequest(url));
-
+				NetAlbumPic = manger->get(QNetworkRequest(url));
+				connect(NetAlbumPic, &QNetworkReply::finished, this,
+					&Recommend::on_FinshedGetAlubPic);
 				//获取该专辑的歌手
 				QJsonValue art = albobj.value("artists");
 				if (art.isArray()) {
@@ -418,5 +435,4 @@ void Recommend::on_FinshedNewDisc(QNetworkReply* reply) {
 			soloalbum->LoadData();
 		}
 	}
-	reply->deleteLater();
 }

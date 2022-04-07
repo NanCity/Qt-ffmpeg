@@ -91,7 +91,7 @@ void CloudMusic::InitMenu() {
 
 void CloudMusic::RequestResources(QNetworkAccessManager *manger) {
   //请求地址
-  QString url = "http://cloud-music.pl-fe.cn/user/cloud?limit=100";
+  QString url = "http://localhost:3000/user/cloud?limit=100";
   request = config->setCookies();
   request->setUrl(url);
   manger->get(*request);
@@ -188,7 +188,7 @@ void CloudMusic::DeleteSong() {
   //获取云盘音乐的ID，之后进行删除
   int deId = clist.at(currentrow).songid;
   request->setUrl(
-      QString("http://cloud-music.pl-fe.cn/user/cloud/del?id=%1").arg(deId));
+      QString("http://localhost:3000/user/cloud/del?id=%1").arg(deId));
   RequestResources(Delmang);
   ui->tableWidget->removeRow(currentrow);
 }

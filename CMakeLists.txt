@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.5)
-
 #set project Name
 set (PRO_NAME Music)
 PROJECT(${PRO_NAME})
@@ -42,7 +41,9 @@ message("*********************** begin **************************")
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/ffmpeg/include)
 file(GLOB libs_path ${PROJECT_SOURCE_DIR}/ffmpeg/lib/*.lib)
 
-message(${libs_path})
+#file(GLOB OpenSSLx86 ${PROJECT_SOURCE_DIR}/OpenSSL/Win_x86/lib/*.lib)
+#message(${OpenSSLx86})
+#message(${libs_path})
 message("*********************** end **************************")
 
 #set Qt PATH  windows下无法调试，解决方案：将qt的的qmake配置成环境变量
@@ -54,7 +55,6 @@ aux_source_directory(. DIR_SRCS)
 file(GLOB USER_UI_PATH ./*.ui)
 # 寻找Qt5的库
 find_package(Qt5 COMPONENTS Widgets Multimedia Network REQUIRED)
-
 #添加Qt的资源文件，必须放在find_package之后，不然无法识别qt5_add_resources函数
 #set(QRC_SOURCE_FILES resource.qrc)
 #qt_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
@@ -64,10 +64,21 @@ add_subdirectory(RecommendPlaylist)
 add_subdirectory(NewMusicSudi)
 
 qt5_add_resources(QRC_SOURCE_FILES resource.qrc)
-#设置可执行文件 
-add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH} )
 
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/OpenSSL/Win_x64/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/OpenSSL/Win_x86/include)
+file(GLOB SSL_x64 ${PROJECT_SOURCE_DIR}/OpenSSL/Win_x64/lib/*.lib)
+file(GLOB SSL_x86 ${PROJECT_SOURCE_DIR}/OpenSSL/Win_x64/lib/*.lib)
+message("x64 = " ${SSL_x64})
+message("x86= " ${SSL_x86})
+add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH})
 # 链接Qt5的库
-target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network photowall Recommend_playlist NewMusicSudi ${libs_path})
+target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network photowall Recommend_playlist 
+NewMusicSudi ${libs_path} 
+${SSL_x64} ${SSL_x86}
+)
+ 
+
 #动态库 target_link_libraries(${PRO_NAME}  PRIVATE ${libs_path}   Qt5::Multimedia Qt5::Sql  Qt5::Widgets Qt5::Network )
 
+#设置可执行文件
