@@ -124,6 +124,8 @@ public:
 	void PersonFormConnect();
 	void RecommendedDailyConnect();
 	void SingerDetailsConnect();
+	void SongMenuConnect();
+
 signals:
 	void updateSongLrc(int sec);
 

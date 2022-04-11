@@ -117,7 +117,7 @@ void SongMenu::getSongMenuID(const size_t ID, const int limit)
 
 void SongMenu::CreatorSongMuen(const QString& str)
 {
-	if (str.isEmpty())return;
+	if (str.isEmpty())	return;
 	QString URL{ QString("http://localhost:3000/playlist/create?name=%1").arg(str) };
 	QNetworkRequest* req{ config.setCookies() };
 	QNetworkAccessManager* Creat = new QNetworkAccessManager(this);
@@ -241,6 +241,7 @@ void SongMenu::on_finshedNetSongMenu(QNetworkReply* reply)
 							SongMenu.trackCount = obj.value("trackCount").toInt();
 							SongMenu.name = obj.value("name").toString();
 							SongMenu.id = obj.take("id").toVariant().toLongLong();
+
 							SongMenu.coverImgUrl = obj.value("coverImgUrl").toString();
 							long long t = obj.value("createTime").toVariant().toLongLong();
 							QDateTime Time = QDateTime::fromMSecsSinceEpoch(t);
@@ -286,18 +287,23 @@ void SongMenu::on_finsedNetAllSong(QNetworkReply* reply)
 			if (!tag.ParseDetailsSong(rot, "songs")) {
 				base->closeMovie();
 			};
-
+			SongID.clear();
 			taglsit = tag.getTag();
-
+			for (int x = 0; x != taglsit->length(); x++) {
+				//保存歌曲ID
+				SongID.push_back(QString::number(taglsit->at(x).Songid));
+			}
 			curtableindex = 0;
 			loadData();
 		}
 	}
 	reply->deleteLater();
 }
+
 void SongMenu::on_finshedNetDetail(QNetworkReply* reply) {
 	if (reply->error() == QNetworkReply::NoError) {
 		QJsonParseError err_t{};
+
 		QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &err_t);
 		if (err_t.error == QJsonParseError::NoError) {
 			QJsonObject rot = document.object();
@@ -305,8 +311,8 @@ void SongMenu::on_finshedNetDetail(QNetworkReply* reply) {
 			tempMuenInfo.coverImgUrl = playlistobj.value("coverImgUrl").toString();
 			NetPic->get(QNetworkRequest(tempMuenInfo.coverImgUrl));
 
-
 			tempMuenInfo.id = playlistobj.value("id").toVariant().toULongLong();
+
 			tempMuenInfo.name = playlistobj.value("name").toString();
 			ui->lab_title->setText(tempMuenInfo.name);
 
@@ -372,4 +378,11 @@ void SongMenu::on_finsedNetPic(QNetworkReply* reply)
 		ui->lab_pic->setPixmap(pix);
 	}
 	reply->deleteLater();
+}
+
+
+
+void SongMenu::on_btn_playAll_clicked() {
+	emit SongMenu_playAll(this);
+	qDebug() << "全部播放被点击";
 }

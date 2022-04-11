@@ -15,7 +15,10 @@ Dicovermusic::Dicovermusic(QWidget* parent) {
 	newMusic = new NewMusicSudi(this);
 
 	connect(this, &QTabWidget::tabBarClicked, this, &Dicovermusic::on_tabBarClicked);
-	connect(RecPlayList, &RecommendPlaylist::getSongMenu, recommend->getSoungMenu(), &SongMenu::getSongMenuID);
+	connect(RecPlayList, &RecommendPlaylist::getSongMenu, 
+		recommend->getSoungMenu(), &SongMenu::getSongMenuID);
+
+
 	InitTabWidget();
 }
 Dicovermusic::~Dicovermusic() {}

@@ -61,12 +61,17 @@ public:
 	//创建歌单
 	void CreatorSongMuen(const QString& name);
 	void DelereSongMuenu(const int ID);
+
+	QStringList GetPlayList() { return SongID; }
 signals:
 	//加载歌单列表
 	void DataLoading();
 	void CreatorSongMenuOk();
 	void DeleteOk();
+	void SongMenu_playAll(SongMenu*);
 protected slots:
+	void on_btn_playAll_clicked();
+
 	void on_finshedNetSongMenu(QNetworkReply*);
 	void on_finsedNetAllSong(QNetworkReply*);
 	void on_finshedNetDetail(QNetworkReply*);
@@ -84,7 +89,7 @@ private:
 
 	M_Tag tag{};
 	QList<Temptag>* taglsit;
-
+	QStringList SongID{};
 	QNetworkAccessManager* NetSongMenu;
 	QNetworkAccessManager* NetAllSong;
 	//拿到歌单的描述之类的

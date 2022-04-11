@@ -1,14 +1,16 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.21.2)
+
+set(CMAKE_CXX_COMPILER "g++")
 #set project Name
 set (PRO_NAME Music)
-PROJECT(${PRO_NAME})
-
-#创建构建目录
-file(MAKE_DIRECTORY bin lyric photowall Userpix)
+PROJECT(${PRO_NAME} LANGUAGES CXX)
 #设置编译器
-set(CMAKE_CXX_COMPILE "g++")
-# ADD_COMPILE_OPTIONS(-Wall -std=c++11 -g )
-
+#set(CMAKE_C_COMPILER "D:/Qt6/Tools/mingw900_64/bin/gcc")
+#set(CMAKE_CXX_COMPILER "D:/Qt6/Tools/mingw900_64/bin/g++")
+#创建构建目录
+file(MAKE_DIRECTORY bin lyric  Userpix)
+set (CMAKE_PREFIX_PATH "D:/Qt5.14.2/5.14.2/msvc2017_64")
+ADD_COMPILE_OPTIONS(-Wall -std=c++11 -g )
 # 从Qt设计师文件列表中创建代码
 set(CMAKE_AUTOUIC ON)
 # 设置CMake在需要时自动运行moc
@@ -18,14 +20,13 @@ set(CMAKE_CXX_STANDARD 14)
 # 在相应的构建目录中查找头文件
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+set(CMAKE_CXX_COMPILER "g++")
 #设置构建类型，及相应的编译选项
 IF(NOT CMAKE_BUILD_TYPE)
 #设置为Release模式
 #SET(CMAKE_BUILD_TYPE Release)
 # Release模式下的编译指令
 #SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
-
 #设置为Debug模式
 SET(CMAKE_BUILD_TYPE "Debug")
 #Debug模式下的编译指令
@@ -47,7 +48,7 @@ file(GLOB libs_path ${PROJECT_SOURCE_DIR}/ffmpeg/lib/*.lib)
 message("*********************** end **************************")
 
 #set Qt PATH  windows下无法调试，解决方案：将qt的的qmake配置成环境变量
-set (CMAKE_PREFIX_PATH D:/Qt6/6.2.2/msvc2019_64)
+#set (CMAKE_PREFIX_PATH "D:/Qt6/6.2.2/msvc2019_64")
 
 # 搜索当前目录下的源文件
 aux_source_directory(. DIR_SRCS)
@@ -63,15 +64,16 @@ add_subdirectory(photowall)
 add_subdirectory(RecommendPlaylist)
 add_subdirectory(NewMusicSudi)
 
-qt5_add_resources(QRC_SOURCE_FILES resource.qrc)
+#Qt5.15以后才支持
+#qt5_add_resources(QRC_SOURCE_FILES resource.qrc)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/OpenSSL/Win_x64/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/OpenSSL/Win_x86/include)
 file(GLOB SSL_x64 ${PROJECT_SOURCE_DIR}/OpenSSL/Win_x64/lib/*.lib)
-file(GLOB SSL_x86 ${PROJECT_SOURCE_DIR}/OpenSSL/Win_x64/lib/*.lib)
+file(GLOB SSL_x86 ${PROJECT_SOURCE_DIR}/OpenSSL/Win_x86/lib/*.lib)
 message("x64 = " ${SSL_x64})
 message("x86= " ${SSL_x86})
-add_executable(${PRO_NAME} ${DIR_SRCS} ${QRC_SOURCE_FILES} ${USER_UI_PATH})
+add_executable(${PRO_NAME} ${DIR_SRCS} resource.qrc ${USER_UI_PATH})
 # 链接Qt5的库
 target_link_libraries(${PRO_NAME} PRIVATE  Qt5::Multimedia Qt5::Widgets Qt5::Network photowall Recommend_playlist 
 NewMusicSudi ${libs_path} 
@@ -80,5 +82,3 @@ ${SSL_x64} ${SSL_x86}
  
 
 #动态库 target_link_libraries(${PRO_NAME}  PRIVATE ${libs_path}   Qt5::Multimedia Qt5::Sql  Qt5::Widgets Qt5::Network )
-
-#设置可执行文件

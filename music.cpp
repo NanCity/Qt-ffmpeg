@@ -93,6 +93,7 @@ Music::Music(QWidget* parent)
 	PersonFormConnect();
 	RecommendedDailyConnect();
 	SingerDetailsConnect();
+	SongMenuConnect();
 	//默认打开首页
 	ui->stackedWidget->setCurrentIndex(0);
 }
@@ -290,6 +291,15 @@ void Music::SingerDetailsConnect()
 		this->On_NetplayAll(rhs);
 		});
 
+}
+
+//专辑UI信号
+void Music::SongMenuConnect()
+{
+	connect(DicMusic->getSongMuen(), &SongMenu::SongMenu_playAll, this, [&](SongMenu *rhs) {
+		qDebug() << "调用专辑UI信号";
+		On_NetplayAll(rhs);
+		});
 }
 
 void Music::InstallEventFilter() {

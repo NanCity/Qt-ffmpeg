@@ -9,8 +9,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set Qt PATH  windows下无法调试，解决方案：将qt的的qmake配置成环境变量
-set (CMAKE_PREFIX_PATH D:/Qt6/6.2.2/msvc2019_64)
-find_package(Qt5 COMPONENTS Widgets  REQUIRED)
+#set (CMAKE_PREFIX_PATH "D:/Qt6/6.2.2/msvc2019_64")
+set (CMAKE_PREFIX_PATH "D:/Qt5.14.2/5.14.2/msvc2017_64")
+find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
 include_directories(
 	${Qt5Widgets_INCLUDE_DIRS}
 	${Qt5Network_INCLUDE_DIRS}
@@ -21,4 +22,6 @@ aux_source_directory(. DIR_LIB_SRCS)
 file(GLOB USER_UI_PATH *.ui)
 message("UiPath = " ${USER_UI_PATH})
 message(${DIR_LIB_SRCS})
+
 add_library(photowall ${DIR_LIB_SRCS} ${USER_UI_PATH}	)
+target_link_libraries(photowall Qt5::Widgets Qt5::Network )

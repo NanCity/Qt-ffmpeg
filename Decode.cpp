@@ -323,7 +323,8 @@ QStringList AudioDeCode::DeCodeTag(const char* filename) {
 	qDebug() << "Curmp3: " << filename << '\n';
 	M_Format = avformat_alloc_context();
 	if (avformat_open_input(&M_Format, filename, NULL, NULL) != 0) {
-		ERROR("Can't open file.\n");
+		qDebug()<<"Can't open file.";
+		return QStringList();
 	}
 
 	// 查找流信息，把它存入AVFormatContext中

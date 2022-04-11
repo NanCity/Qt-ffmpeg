@@ -275,21 +275,19 @@ void SingerDetails::on_mvBtnClicked()
 void SingerDetails::loadData()
 {
 	Config config("../config/MyLikeMusicId.ini");
-	QList<int>* likeID = &config.GetLikeMusicId();
-	int len = taglist->length();
+    auto likeID = config.GetLikeMusicId();
+    int len = taglist->length();
 	int i = 0;
 	while (i != len)
 	{
 		ui->top50_list->insertRow(i);
-		if (likeID->at(i) == taglist->at(i).Songid) {
-			ui->top50_list->setCellWidget(i, 0, base->setItemWidget(1));
-		}
-		else
-		{
-			ui->top50_list->setCellWidget(i, 0, base->setItemWidget(0));
-		}
+        if (likeID.at(i) == taglist->at(i).Songid) {
+            ui->top50_list->setCellWidget(i, 0, base->setItemWidget(1));
+        } else {
+            ui->top50_list->setCellWidget(i, 0, base->setItemWidget(0));
+        }
 
-		QTableWidgetItem* item = new QTableWidgetItem(taglist->at(i).Title);
+        QTableWidgetItem* item = new QTableWidgetItem(taglist->at(i).Title);
 		QTableWidgetItem* item2 = new QTableWidgetItem(taglist->at(i).Duration);
 		ui->top50_list->setItem(i, 1, item);
 		ui->top50_list->setItem(i, 2, item2);
